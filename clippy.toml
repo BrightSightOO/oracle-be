@@ -1,0 +1,4 @@
+disallowed-macros = [
+  # `log!()` macro produces better code than `msg!()`.
+  { path = "solana_program::msg", reason = "Use `log!` instead" },
+]

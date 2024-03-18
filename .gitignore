@@ -1,0 +1,25 @@
+# Misc environment and editor files.
+*.swp
+*~
+.DS_Store
+.idea
+
+# Dependencies/Build.
+node_modules/
+build/
+target/
+.amman/
+.bin/
+.crates/
+
+# Rust.
+*.rs.bk
+
+# Logs.
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Non-Pnpm Lockfiles.
+package-lock.json
+yarn.lock

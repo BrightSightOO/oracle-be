@@ -1,0 +1,38 @@
+[package]
+name = "oracle"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+no-entrypoint = []
+test-sbf = []
+
+[dependencies]
+common = { workspace = true }
+
+solana-program = { workspace = true }
+
+spl-token = { workspace = true }
+spl-token-2022 = { workspace = true }
+spl-associated-token-account = { workspace = true }
+
+shank = "0.3.0"
+borsh = { workspace = true }
+bytemuck = { workspace = true }
+
+thiserror = { workspace = true }
+num-traits = { workspace = true }
+num-derive = { workspace = true }
+
+[dev-dependencies]
+common-test = { workspace = true }
+
+# solana-sdk = { workspace = true }
+solana-program-test = { workspace = true }
+
+async-trait = { workspace = true }
+log = { workspace = true }

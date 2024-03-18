@@ -1,0 +1,35 @@
+{
+  "editor.rulers": [100],
+
+  "[typescript][javascript][json][jsonc]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "files.exclude": {
+    "node_modules": true,
+    "build": true,
+    "target": true,
+    ".amman": true,
+    ".bin": true,
+    ".crates": true
+  },
+  "files.readonlyInclude": {
+    "node_modules/**": true,
+    "build/**": true,
+    "target/**": true,
+    ".amman/**": true,
+    ".bin/**": true,
+    ".crates/**": true,
+
+    "clients/*/src/generated/**": true,
+    "idls/**": true,
+
+    "Cargo.lock": true,
+    "pnpm-lock.yaml": true
+  },
+
+  "rust-analyzer.cargo.features": ["test-sbf"]
+}
