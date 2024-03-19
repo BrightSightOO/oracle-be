@@ -60,5 +60,6 @@ macro_rules! pdas {
 pdas! {
     "Oracle": oracle();
     "Request": request(index: u64);
-    "Reward": reward(request: Pubkey, mint: Pubkey);
+    "Reward": reward(request: Pubkey);
+    "Bond": bond(request: Pubkey, bonder: Pubkey);
 }

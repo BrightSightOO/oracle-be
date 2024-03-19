@@ -5,6 +5,7 @@ use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 
 mod oracle;
+mod request;
 
 pub fn process_instruction<'a>(
     program_id: &'a Pubkey,
@@ -19,5 +20,6 @@ pub fn process_instruction<'a>(
 
     match instruction {
         I::CreateOracle(args) => oracle::create(program_id, accounts, args),
+        I::CreateRequest(args) => request::create(program_id, accounts, args),
     }
 }

@@ -44,7 +44,7 @@ macro_rules! increment {
     ($value:expr, $amount:expr $(,)?) => {
         match ($value).checked_add($amount) {
             Some(value) => Ok(value),
-            None => Err($crate::error::AuctionError::ArithmeticOverflow),
+            None => Err($crate::error::OracleError::ArithmeticOverflow),
         }
     };
     ($value:expr) => {
