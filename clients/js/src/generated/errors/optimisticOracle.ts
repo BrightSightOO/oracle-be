@@ -57,7 +57,7 @@ nameToErrorMap.set("InsufficientBond", InsufficientBondError);
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  */
-export function getOracleErrorFromCode(
+export function getOptimisticOracleErrorFromCode(
   code: number,
   program: Program,
   cause?: Error,
@@ -70,7 +70,7 @@ export function getOracleErrorFromCode(
  * Attempts to resolve a custom program error from the provided error name, i.e. 'Unauthorized'.
  * @category Errors
  */
-export function getOracleErrorFromName(
+export function getOptimisticOracleErrorFromName(
   name: string,
   program: Program,
   cause?: Error,

@@ -1,4 +1,4 @@
-//@ts-check
+// @ts-check
 
 import { execFile } from "child_process";
 import path from "path";
@@ -25,25 +25,101 @@ console.log("generating client code...");
 
 const kinobi = k.createFromIdls([path.join(idlDir, "oracle.json")]);
 
+kinobi.update(
+  k.updateProgramsVisitor({
+    oracle: {
+      name: "optimisticOracle",
+    },
+  }),
+);
+
+kinobi.update(k.defaultVisitor());
+
 // Update accounts.
 kinobi.update(
   k.updateAccountsVisitor({
-    // TODO: PDAs
+    oracle: {
+      seeds: [k.constantPdaSeedNodeFromString("oracle")],
+    },
+    request: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("request"),
+        k.variablePdaSeedNode(
+          "index",
+          k.numberTypeNode("u64"),
+          "The next request index in the oracle.",
+        ),
+      ],
+    },
+    assertion: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("assertion"),
+        k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
+      ],
+    },
   }),
+);
+
+const ataPdaDefault = (mint = "mint", owner = "owner") =>
+  k.pdaValueNode(k.pdaLinkNode("associatedToken", "mplToolbox"), [
+    k.pdaSeedValueNode("mint", k.accountValueNode(mint)),
+    k.pdaSeedValueNode("owner", k.accountValueNode(owner)),
+  ]);
+
+// Set default values for instruction accounts.
+kinobi.update(
+  k.setInstructionAccountDefaultValuesVisitor([
+    {
+      account: "oracle",
+      ignoreIfOptional: true,
+      defaultValue: k.pdaValueNode("oracle"),
+    },
+    {
+      account: "assertion",
+      ignoreIfOptional: true,
+      defaultValue: k.pdaValueNode("assertion", [
+        k.pdaSeedValueNode("request", k.accountValueNode("request")),
+      ]),
+    },
+  ]),
 );
 
 // Update instructions.
 kinobi.update(
   k.updateInstructionsVisitor({
-    // TODO: ...
+    createRequest: {
+      accounts: {
+        // TODO: Default rewardMint to SOL/USDC?
+        rewardSource: {
+          defaultValue: ataPdaDefault("rewardMint", "creator"),
+        },
+        rewardEscrow: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("reward", "hooked"), [
+            k.pdaSeedValueNode("request", k.accountValueNode("request")),
+          ]),
+        },
+        creator: {
+          defaultValue: k.identityValueNode(),
+        },
+      },
+    },
+    createAssertion: {
+      accounts: {
+        // TODO: Default bondMint to SOL/USDC?
+        bondSource: {
+          defaultValue: ataPdaDefault("bondMint", "asserter"),
+        },
+        bondEscrow: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond", "hooked"), [
+            k.pdaSeedValueNode("request", k.accountValueNode("request")),
+          ]),
+        },
+        asserter: {
+          defaultValue: k.identityValueNode(),
+        },
+      },
+    },
   }),
-);
-
-// Set default values for instruction accounts.
-kinobi.update(
-  k.setInstructionAccountDefaultValuesVisitor([
-    // TODO: Default addresses for accounts
-  ]),
 );
 
 /** @param {string} name */

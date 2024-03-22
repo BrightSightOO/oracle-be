@@ -9,7 +9,7 @@ use num_derive::FromPrimitive;
 use thiserror::Error;
 
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
-pub enum OracleError {
+pub enum OptimisticOracleError {
     /// 0 (0x0) - Program arithmetic overflowed
     #[error("Program arithmetic overflowed")]
     ArithmeticOverflow,
@@ -21,7 +21,7 @@ pub enum OracleError {
     InsufficientBond,
 }
 
-impl solana_program::program_error::PrintProgramError for OracleError {
+impl solana_program::program_error::PrintProgramError for OptimisticOracleError {
     fn print<E>(&self) {
         solana_program::msg!(&self.to_string());
     }

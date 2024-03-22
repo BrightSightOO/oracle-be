@@ -28,6 +28,7 @@ import {
   i64,
   mapSerializer,
   publicKey as publicKeySerializer,
+  string,
   struct,
   u64,
 } from "@metaplex-foundation/umi/serializers";
@@ -142,7 +143,7 @@ export async function safeFetchAllAssertion(
 
 export function getAssertionGpaBuilder(context: Pick<Context, "rpc" | "programs">) {
   const programId = context.programs.getPublicKey(
-    "oracle",
+    "optimisticOracle",
     "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
   return gpaBuilder(context, programId)
@@ -177,4 +178,37 @@ export function getAssertionGpaBuilder(context: Pick<Context, "rpc" | "programs"
 
 export function getAssertionSize(): number {
   return 177;
+}
+
+export function findAssertionPda(
+  context: Pick<Context, "eddsa" | "programs">,
+  seeds: {
+    /** The address of the request. */
+    request: PublicKey;
+  },
+): Pda {
+  const programId = context.programs.getPublicKey(
+    "optimisticOracle",
+    "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
+  );
+  return context.eddsa.findPda(programId, [
+    string({ size: "variable" }).serialize("assertion"),
+    publicKeySerializer().serialize(seeds.request),
+  ]);
+}
+
+export async function fetchAssertionFromSeeds(
+  context: Pick<Context, "eddsa" | "programs" | "rpc">,
+  seeds: Parameters<typeof findAssertionPda>[1],
+  options?: RpcGetAccountOptions,
+): Promise<Assertion> {
+  return fetchAssertion(context, findAssertionPda(context, seeds), options);
+}
+
+export async function safeFetchAssertionFromSeeds(
+  context: Pick<Context, "eddsa" | "programs" | "rpc">,
+  seeds: Parameters<typeof findAssertionPda>[1],
+  options?: RpcGetAccountOptions,
+): Promise<Assertion | null> {
+  return safeFetchAssertion(context, findAssertionPda(context, seeds), options);
 }

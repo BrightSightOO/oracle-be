@@ -26,6 +26,31 @@ pub struct Request {
 }
 
 impl Request {
+    /// Prefix values used to generate a PDA for this account.
+    ///
+    /// Values are positional and appear in the following order:
+    ///
+    ///   0. `Request::PREFIX`
+    ///   1. index (`u64`)
+    pub const PREFIX: &'static [u8] = "request".as_bytes();
+
+    pub fn create_pda(
+        index: u64,
+        bump: u8,
+    ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
+        solana_program::pubkey::Pubkey::create_program_address(
+            &["request".as_bytes(), index.to_string().as_ref(), &[bump]],
+            &crate::OPTIMISTIC_ORACLE_ID,
+        )
+    }
+
+    pub fn find_pda(index: u64) -> (solana_program::pubkey::Pubkey, u8) {
+        solana_program::pubkey::Pubkey::find_program_address(
+            &["request".as_bytes(), index.to_string().as_ref()],
+            &crate::OPTIMISTIC_ORACLE_ID,
+        )
+    }
+
     #[inline(always)]
     pub fn from_bytes(data: &[u8]) -> Result<Self, std::io::Error> {
         let mut data = data;

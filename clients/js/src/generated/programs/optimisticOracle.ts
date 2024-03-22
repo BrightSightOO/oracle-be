@@ -8,20 +8,20 @@
 
 import type { ClusterFilter, Context, Program, PublicKey } from "@metaplex-foundation/umi";
 
-import { getOracleErrorFromCode, getOracleErrorFromName } from "../errors";
+import { getOptimisticOracleErrorFromCode, getOptimisticOracleErrorFromName } from "../errors";
 
-export const ORACLE_PROGRAM_ID =
+export const OPTIMISTIC_ORACLE_PROGRAM_ID =
   "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg" as PublicKey<"DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg">;
 
-export function createOracleProgram(): Program {
+export function createOptimisticOracleProgram(): Program {
   return {
-    name: "oracle",
-    publicKey: ORACLE_PROGRAM_ID,
+    name: "optimisticOracle",
+    publicKey: OPTIMISTIC_ORACLE_PROGRAM_ID,
     getErrorFromCode(code: number, cause?: Error) {
-      return getOracleErrorFromCode(code, this, cause);
+      return getOptimisticOracleErrorFromCode(code, this, cause);
     },
     getErrorFromName(name: string, cause?: Error) {
-      return getOracleErrorFromName(name, this, cause);
+      return getOptimisticOracleErrorFromName(name, this, cause);
     },
     isOnCluster() {
       return true;
@@ -29,16 +29,20 @@ export function createOracleProgram(): Program {
   };
 }
 
-export function getOracleProgram<T extends Program = Program>(
+export function getOptimisticOracleProgram<T extends Program = Program>(
   context: Pick<Context, "programs">,
   clusterFilter?: ClusterFilter,
 ): T {
-  return context.programs.get<T>("oracle", clusterFilter);
+  return context.programs.get<T>("optimisticOracle", clusterFilter);
 }
 
-export function getOracleProgramId(
+export function getOptimisticOracleProgramId(
   context: Pick<Context, "programs">,
   clusterFilter?: ClusterFilter,
 ): PublicKey {
-  return context.programs.getPublicKey("oracle", ORACLE_PROGRAM_ID, clusterFilter);
+  return context.programs.getPublicKey(
+    "optimisticOracle",
+    OPTIMISTIC_ORACLE_PROGRAM_ID,
+    clusterFilter,
+  );
 }

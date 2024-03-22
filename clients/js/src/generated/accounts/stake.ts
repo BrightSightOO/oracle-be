@@ -124,7 +124,7 @@ export async function safeFetchAllStake(
 
 export function getStakeGpaBuilder(context: Pick<Context, "rpc" | "programs">) {
   const programId = context.programs.getPublicKey(
-    "oracle",
+    "optimisticOracle",
     "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
   return gpaBuilder(context, programId)

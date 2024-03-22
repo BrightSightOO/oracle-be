@@ -11,26 +11,29 @@ import type { CreateRequestArgs, CreateRequestArgsArgs } from "../types";
 import type { Context, Pda, PublicKey, Signer, TransactionBuilder } from "@metaplex-foundation/umi";
 import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
+import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { getAccountMetasAndSigners } from "../shared";
+import { findRewardPda } from "../../hooked";
+import { findOraclePda } from "../accounts";
+import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 import { getCreateRequestArgsSerializer } from "../types";
 
 // Accounts.
 export type CreateRequestInstructionAccounts = {
   /** Program oracle account */
-  oracle: PublicKey | Pda;
+  oracle?: PublicKey | Pda;
   /** Request */
   request: PublicKey | Pda;
   /** Reward mint */
   rewardMint: PublicKey | Pda;
   /** Reward source token account */
-  rewardSource: PublicKey | Pda;
+  rewardSource?: PublicKey | Pda;
   /** Reward escrow token account */
-  rewardEscrow: PublicKey | Pda;
+  rewardEscrow?: PublicKey | Pda;
   /** Creator */
-  creator: Signer;
+  creator?: Signer;
   /** Payer */
   payer?: Signer;
   /** SPL token program */
@@ -70,12 +73,12 @@ export type CreateRequestInstructionArgs = CreateRequestInstructionDataArgs;
 
 // Instruction.
 export function createRequest(
-  context: Pick<Context, "payer" | "programs">,
+  context: Pick<Context, "eddsa" | "identity" | "payer" | "programs">,
   input: CreateRequestInstructionAccounts & CreateRequestInstructionArgs,
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
-    "oracle",
+    "optimisticOracle",
     "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
 
@@ -132,6 +135,23 @@ export function createRequest(
   const resolvedArgs: CreateRequestInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.oracle.value) {
+    resolvedAccounts.oracle.value = findOraclePda(context);
+  }
+  if (!resolvedAccounts.creator.value) {
+    resolvedAccounts.creator.value = context.identity;
+  }
+  if (!resolvedAccounts.rewardSource.value) {
+    resolvedAccounts.rewardSource.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.rewardMint.value),
+      owner: expectPublicKey(resolvedAccounts.creator.value),
+    });
+  }
+  if (!resolvedAccounts.rewardEscrow.value) {
+    resolvedAccounts.rewardEscrow.value = findRewardPda(context, {
+      request: expectPublicKey(resolvedAccounts.request.value),
+    });
+  }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
   }

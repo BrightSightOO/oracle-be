@@ -14,13 +14,14 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
+import { findOraclePda } from "../accounts";
 import { getAccountMetasAndSigners } from "../shared";
 import { getCreateOracleArgsSerializer } from "../types";
 
 // Accounts.
 export type CreateOracleInstructionAccounts = {
   /** Program oracle account */
-  oracle: PublicKey | Pda;
+  oracle?: PublicKey | Pda;
   /** Payer */
   payer?: Signer;
   /** System program */
@@ -58,12 +59,12 @@ export type CreateOracleInstructionArgs = CreateOracleInstructionDataArgs;
 
 // Instruction.
 export function createOracle(
-  context: Pick<Context, "payer" | "programs">,
+  context: Pick<Context, "eddsa" | "payer" | "programs">,
   input: CreateOracleInstructionAccounts & CreateOracleInstructionArgs,
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
-    "oracle",
+    "optimisticOracle",
     "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
 
@@ -90,6 +91,9 @@ export function createOracle(
   const resolvedArgs: CreateOracleInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.oracle.value) {
+    resolvedAccounts.oracle.value = findOraclePda(context);
+  }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
   }

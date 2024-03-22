@@ -27,6 +27,7 @@ import {
 import {
   mapSerializer,
   publicKey as publicKeySerializer,
+  string,
   struct,
   u64,
 } from "@metaplex-foundation/umi/serializers";
@@ -117,7 +118,7 @@ export async function safeFetchAllOracle(
 
 export function getOracleGpaBuilder(context: Pick<Context, "rpc" | "programs">) {
   const programId = context.programs.getPublicKey(
-    "oracle",
+    "optimisticOracle",
     "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
   return gpaBuilder(context, programId)
@@ -136,4 +137,26 @@ export function getOracleGpaBuilder(context: Pick<Context, "rpc" | "programs">) 
 
 export function getOracleSize(): number {
   return 41;
+}
+
+export function findOraclePda(context: Pick<Context, "eddsa" | "programs">): Pda {
+  const programId = context.programs.getPublicKey(
+    "optimisticOracle",
+    "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
+  );
+  return context.eddsa.findPda(programId, [string({ size: "variable" }).serialize("oracle")]);
+}
+
+export async function fetchOracleFromSeeds(
+  context: Pick<Context, "eddsa" | "programs" | "rpc">,
+  options?: RpcGetAccountOptions,
+): Promise<Oracle> {
+  return fetchOracle(context, findOraclePda(context), options);
+}
+
+export async function safeFetchOracleFromSeeds(
+  context: Pick<Context, "eddsa" | "programs" | "rpc">,
+  options?: RpcGetAccountOptions,
+): Promise<Oracle | null> {
+  return safeFetchOracle(context, findOraclePda(context), options);
 }

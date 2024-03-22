@@ -65,7 +65,11 @@ impl CreateRequest {
         let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
-        solana_program::instruction::Instruction { program_id: crate::ORACLE_ID, accounts, data }
+        solana_program::instruction::Instruction {
+            program_id: crate::OPTIMISTIC_ORACLE_ID,
+            accounts,
+            data,
+        }
     }
 }
 
@@ -352,7 +356,7 @@ impl<'a, 'b> CreateRequestCpi<'a, 'b> {
         data.append(&mut args);
 
         let instruction = solana_program::instruction::Instruction {
-            program_id: crate::ORACLE_ID,
+            program_id: crate::OPTIMISTIC_ORACLE_ID,
             accounts,
             data,
         };

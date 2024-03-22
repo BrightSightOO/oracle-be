@@ -32,6 +32,31 @@ pub struct Assertion {
 impl Assertion {
     pub const LEN: usize = 177;
 
+    /// Prefix values used to generate a PDA for this account.
+    ///
+    /// Values are positional and appear in the following order:
+    ///
+    ///   0. `Assertion::PREFIX`
+    ///   1. request (`Pubkey`)
+    pub const PREFIX: &'static [u8] = "assertion".as_bytes();
+
+    pub fn create_pda(
+        request: Pubkey,
+        bump: u8,
+    ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
+        solana_program::pubkey::Pubkey::create_program_address(
+            &["assertion".as_bytes(), request.as_ref(), &[bump]],
+            &crate::OPTIMISTIC_ORACLE_ID,
+        )
+    }
+
+    pub fn find_pda(request: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
+        solana_program::pubkey::Pubkey::find_program_address(
+            &["assertion".as_bytes(), request.as_ref()],
+            &crate::OPTIMISTIC_ORACLE_ID,
+        )
+    }
+
     #[inline(always)]
     pub fn from_bytes(data: &[u8]) -> Result<Self, std::io::Error> {
         let mut data = data;

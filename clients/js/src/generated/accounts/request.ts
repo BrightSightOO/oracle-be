@@ -34,6 +34,7 @@ import {
   i64,
   mapSerializer,
   publicKey as publicKeySerializer,
+  string,
   struct,
   u64,
 } from "@metaplex-foundation/umi/serializers";
@@ -147,7 +148,7 @@ export async function safeFetchAllRequest(
 
 export function getRequestGpaBuilder(context: Pick<Context, "rpc" | "programs">) {
   const programId = context.programs.getPublicKey(
-    "oracle",
+    "optimisticOracle",
     "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
   return gpaBuilder(context, programId)
@@ -174,4 +175,37 @@ export function getRequestGpaBuilder(context: Pick<Context, "rpc" | "programs">)
     })
     .deserializeUsing<Request>((account) => deserializeRequest(account))
     .whereField("accountType", AccountType.Request);
+}
+
+export function findRequestPda(
+  context: Pick<Context, "eddsa" | "programs">,
+  seeds: {
+    /** The next request index in the oracle. */
+    index: number | bigint;
+  },
+): Pda {
+  const programId = context.programs.getPublicKey(
+    "optimisticOracle",
+    "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
+  );
+  return context.eddsa.findPda(programId, [
+    string({ size: "variable" }).serialize("request"),
+    u64().serialize(seeds.index),
+  ]);
+}
+
+export async function fetchRequestFromSeeds(
+  context: Pick<Context, "eddsa" | "programs" | "rpc">,
+  seeds: Parameters<typeof findRequestPda>[1],
+  options?: RpcGetAccountOptions,
+): Promise<Request> {
+  return fetchRequest(context, findRequestPda(context, seeds), options);
+}
+
+export async function safeFetchRequestFromSeeds(
+  context: Pick<Context, "eddsa" | "programs" | "rpc">,
+  seeds: Parameters<typeof findRequestPda>[1],
+  options?: RpcGetAccountOptions,
+): Promise<Request | null> {
+  return safeFetchRequest(context, findRequestPda(context, seeds), options);
 }

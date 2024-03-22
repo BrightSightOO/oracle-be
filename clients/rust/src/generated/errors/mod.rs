@@ -5,6 +5,6 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-pub(crate) mod oracle;
+pub(crate) mod optimistic_oracle;
 
-pub use self::oracle::OracleError;
+pub use self::optimistic_oracle::OptimisticOracleError;

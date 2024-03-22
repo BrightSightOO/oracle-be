@@ -11,26 +11,29 @@ import type { CreateAssertionArgs, CreateAssertionArgsArgs } from "../types";
 import type { Context, Pda, PublicKey, Signer, TransactionBuilder } from "@metaplex-foundation/umi";
 import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
+import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { getAccountMetasAndSigners } from "../shared";
+import { findAssertBondPda } from "../../hooked";
+import { findAssertionPda, findOraclePda } from "../accounts";
+import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 import { getCreateAssertionArgsSerializer } from "../types";
 
 // Accounts.
 export type CreateAssertionInstructionAccounts = {
   /** Program oracle account */
-  oracle: PublicKey | Pda;
+  oracle?: PublicKey | Pda;
   /** Request */
   request: PublicKey | Pda;
   /** Assertion */
-  assertion: PublicKey | Pda;
+  assertion?: PublicKey | Pda;
   /** Bond mint */
   bondMint: PublicKey | Pda;
   /** Bond source token account */
-  bondSource: PublicKey | Pda;
+  bondSource?: PublicKey | Pda;
   /** Bond escrow token account */
-  bondEscrow: PublicKey | Pda;
+  bondEscrow?: PublicKey | Pda;
   /** Governance mint */
   governanceMint: PublicKey | Pda;
   /** Governance source token account */
@@ -38,7 +41,7 @@ export type CreateAssertionInstructionAccounts = {
   /** Governance escrow token account */
   governanceEscrow: PublicKey | Pda;
   /** Asserter */
-  asserter: Signer;
+  asserter?: Signer;
   /** Payer */
   payer?: Signer;
   /** SPL token program */
@@ -78,12 +81,12 @@ export type CreateAssertionInstructionArgs = CreateAssertionInstructionDataArgs;
 
 // Instruction.
 export function createAssertion(
-  context: Pick<Context, "payer" | "programs">,
+  context: Pick<Context, "eddsa" | "identity" | "payer" | "programs">,
   input: CreateAssertionInstructionAccounts & CreateAssertionInstructionArgs,
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
-    "oracle",
+    "optimisticOracle",
     "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
 
@@ -160,6 +163,28 @@ export function createAssertion(
   const resolvedArgs: CreateAssertionInstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.oracle.value) {
+    resolvedAccounts.oracle.value = findOraclePda(context);
+  }
+  if (!resolvedAccounts.assertion.value) {
+    resolvedAccounts.assertion.value = findAssertionPda(context, {
+      request: expectPublicKey(resolvedAccounts.request.value),
+    });
+  }
+  if (!resolvedAccounts.asserter.value) {
+    resolvedAccounts.asserter.value = context.identity;
+  }
+  if (!resolvedAccounts.bondSource.value) {
+    resolvedAccounts.bondSource.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.bondMint.value),
+      owner: expectPublicKey(resolvedAccounts.asserter.value),
+    });
+  }
+  if (!resolvedAccounts.bondEscrow.value) {
+    resolvedAccounts.bondEscrow.value = findAssertBondPda(context, {
+      request: expectPublicKey(resolvedAccounts.request.value),
+    });
+  }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;
   }

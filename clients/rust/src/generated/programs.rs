@@ -8,5 +8,5 @@
 use solana_program::pubkey;
 use solana_program::pubkey::Pubkey;
 
-/// `oracle` program ID.
-pub const ORACLE_ID: Pubkey = pubkey!("DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg");
+/// `optimistic_oracle` program ID.
+pub const OPTIMISTIC_ORACLE_ID: Pubkey = pubkey!("DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg");
