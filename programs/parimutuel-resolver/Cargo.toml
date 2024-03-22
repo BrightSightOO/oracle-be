@@ -1,5 +1,5 @@
 [package]
-name = "oracle"
+name = "parimutuel-resolver"
 version = "0.0.0"
 edition = "2021"
 publish = false
@@ -16,10 +16,6 @@ common = { workspace = true }
 
 solana-program = { workspace = true }
 
-spl-token = { workspace = true }
-spl-token-2022 = { workspace = true }
-spl-associated-token-account = { workspace = true }
-
 shank = "0.4.2"
 borsh = { workspace = true }
 bytemuck = { workspace = true }
@@ -27,6 +23,8 @@ bytemuck = { workspace = true }
 thiserror = { workspace = true }
 num-traits = { workspace = true }
 num-derive = { workspace = true }
+
+oracle = { path = "../oracle", features = ["no-entrypoint"] }
 
 [dev-dependencies]
 common-test = { workspace = true }

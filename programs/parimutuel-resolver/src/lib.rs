@@ -13,7 +13,4 @@ pub mod pda;
 pub mod processor;
 pub mod state;
 
-pub const MIN_BOND: u64 = 1_000_000_000;
-pub const GOVERNANCE_BOND: u64 = 1_000_000_000;
-
-solana_program::declare_id!("DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg");
+solana_program::declare_id!("RS1njPGQsykXyyPGUiAC9dvPyoqw73vtMFPJhipibj1");
