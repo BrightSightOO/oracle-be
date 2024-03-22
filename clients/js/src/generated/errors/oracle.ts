@@ -27,6 +27,32 @@ export class ArithmeticOverflowError extends ProgramError {
 codeToErrorMap.set(0x0, ArithmeticOverflowError);
 nameToErrorMap.set("ArithmeticOverflow", ArithmeticOverflowError);
 
+/** AlreadyAsserted: Request already has an assertion */
+export class AlreadyAssertedError extends ProgramError {
+  override readonly name: string = "AlreadyAsserted";
+
+  readonly code: number = 0x1; // 1
+
+  constructor(program: Program, cause?: Error) {
+    super("Request already has an assertion", program, cause);
+  }
+}
+codeToErrorMap.set(0x1, AlreadyAssertedError);
+nameToErrorMap.set("AlreadyAsserted", AlreadyAssertedError);
+
+/** InsufficientBond: Insufficient bond */
+export class InsufficientBondError extends ProgramError {
+  override readonly name: string = "InsufficientBond";
+
+  readonly code: number = 0x2; // 2
+
+  constructor(program: Program, cause?: Error) {
+    super("Insufficient bond", program, cause);
+  }
+}
+codeToErrorMap.set(0x2, InsufficientBondError);
+nameToErrorMap.set("InsufficientBond", InsufficientBondError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

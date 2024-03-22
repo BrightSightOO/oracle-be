@@ -39,25 +39,27 @@ export type Assertion = Account<AssertionAccountData>;
 export type AssertionAccountData = {
   accountType: AccountType;
   request: PublicKey;
+  governance: bigint;
   bond: bigint;
   bondMint: PublicKey;
   assertionTimestamp: bigint;
   expirationTimestamp: bigint;
   asserter: PublicKey;
   disputer: PublicKey;
-  proposedValue: bigint;
+  assertedValue: bigint;
   resolvedValue: bigint;
 };
 
 export type AssertionAccountDataArgs = {
   request: PublicKey;
+  governance: number | bigint;
   bond: number | bigint;
   bondMint: PublicKey;
   assertionTimestamp: number | bigint;
   expirationTimestamp: number | bigint;
   asserter: PublicKey;
   disputer: PublicKey;
-  proposedValue: number | bigint;
+  assertedValue: number | bigint;
   resolvedValue: number | bigint;
 };
 
@@ -70,13 +72,14 @@ export function getAssertionAccountDataSerializer(): Serializer<
       [
         ["accountType", getAccountTypeSerializer()],
         ["request", publicKeySerializer()],
+        ["governance", u64()],
         ["bond", u64()],
         ["bondMint", publicKeySerializer()],
         ["assertionTimestamp", i64()],
         ["expirationTimestamp", i64()],
         ["asserter", publicKeySerializer()],
         ["disputer", publicKeySerializer()],
-        ["proposedValue", u64()],
+        ["assertedValue", u64()],
         ["resolvedValue", u64()],
       ],
       { description: "AssertionAccountData" },
@@ -140,36 +143,38 @@ export async function safeFetchAllAssertion(
 export function getAssertionGpaBuilder(context: Pick<Context, "rpc" | "programs">) {
   const programId = context.programs.getPublicKey(
     "oracle",
-    "AUCTiKuGUpoZXgbJguiq32uaL2uEViJg85VmSU2UMQHy",
+    "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
   return gpaBuilder(context, programId)
     .registerFields<{
       accountType: AccountTypeArgs;
       request: PublicKey;
+      governance: number | bigint;
       bond: number | bigint;
       bondMint: PublicKey;
       assertionTimestamp: number | bigint;
       expirationTimestamp: number | bigint;
       asserter: PublicKey;
       disputer: PublicKey;
-      proposedValue: number | bigint;
+      assertedValue: number | bigint;
       resolvedValue: number | bigint;
     }>({
       accountType: [0, getAccountTypeSerializer()],
       request: [1, publicKeySerializer()],
-      bond: [33, u64()],
-      bondMint: [41, publicKeySerializer()],
-      assertionTimestamp: [73, i64()],
-      expirationTimestamp: [81, i64()],
-      asserter: [89, publicKeySerializer()],
-      disputer: [121, publicKeySerializer()],
-      proposedValue: [153, u64()],
-      resolvedValue: [161, u64()],
+      governance: [33, u64()],
+      bond: [41, u64()],
+      bondMint: [49, publicKeySerializer()],
+      assertionTimestamp: [81, i64()],
+      expirationTimestamp: [89, i64()],
+      asserter: [97, publicKeySerializer()],
+      disputer: [129, publicKeySerializer()],
+      assertedValue: [161, u64()],
+      resolvedValue: [169, u64()],
     })
     .deserializeUsing<Assertion>((account) => deserializeAssertion(account))
     .whereField("accountType", AccountType.Assertion);
 }
 
 export function getAssertionSize(): number {
-  return 169;
+  return 177;
 }

@@ -42,6 +42,216 @@
         "type": "u8",
         "value": 0
       }
+    },
+    {
+      "name": "CreateRequest",
+      "accounts": [
+        {
+          "name": "oracle",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Program oracle account"
+          ]
+        },
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Request"
+          ]
+        },
+        {
+          "name": "rewardMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Reward mint"
+          ]
+        },
+        {
+          "name": "rewardSource",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reward source token account"
+          ]
+        },
+        {
+          "name": "rewardEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reward escrow token account"
+          ]
+        },
+        {
+          "name": "creator",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Creator"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Payer"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL token program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "createRequestArgs",
+          "type": {
+            "defined": "CreateRequestArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 1
+      }
+    },
+    {
+      "name": "CreateAssertion",
+      "accounts": [
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Program oracle account"
+          ]
+        },
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Request"
+          ]
+        },
+        {
+          "name": "assertion",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Assertion"
+          ]
+        },
+        {
+          "name": "bondMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bond mint"
+          ]
+        },
+        {
+          "name": "bondSource",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bond source token account"
+          ]
+        },
+        {
+          "name": "bondEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bond escrow token account"
+          ]
+        },
+        {
+          "name": "governanceMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Governance mint"
+          ]
+        },
+        {
+          "name": "governanceSource",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Governance source token account"
+          ]
+        },
+        {
+          "name": "governanceEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Governance escrow token account"
+          ]
+        },
+        {
+          "name": "asserter",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Asserter"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Payer"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL token program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "createAssertionArgs",
+          "type": {
+            "defined": "CreateAssertionArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 2
+      }
     }
   ],
   "accounts": [
@@ -59,6 +269,10 @@
           {
             "name": "request",
             "type": "publicKey"
+          },
+          {
+            "name": "governance",
+            "type": "u64"
           },
           {
             "name": "bond",
@@ -85,7 +299,7 @@
             "type": "publicKey"
           },
           {
-            "name": "proposedValue",
+            "name": "assertedValue",
             "type": "u64"
           },
           {
@@ -217,6 +431,65 @@
       }
     },
     {
+      "name": "CreateRequestArgs",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "V1",
+            "fields": [
+              {
+                "name": "reward",
+                "type": "u64"
+              },
+              {
+                "name": "timestamp",
+                "type": "i64"
+              },
+              {
+                "name": "data",
+                "type": {
+                  "defined": "RequestData"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateAssertionArgs",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "V1",
+            "fields": [
+              {
+                "name": "bond",
+                "type": "u64"
+              },
+              {
+                "name": "value",
+                "type": "u64"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ResolveRequestArgs",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "V1"
+          }
+        ]
+      }
+    },
+    {
       "name": "AccountType",
       "type": {
         "kind": "enum",
@@ -282,12 +555,22 @@
       "code": 0,
       "name": "ArithmeticOverflow",
       "msg": "Program arithmetic overflowed"
+    },
+    {
+      "code": 1,
+      "name": "AlreadyAsserted",
+      "msg": "Request already has an assertion"
+    },
+    {
+      "code": 2,
+      "name": "InsufficientBond",
+      "msg": "Insufficient bond"
     }
   ],
   "metadata": {
     "origin": "shank",
-    "address": "AUCTiKuGUpoZXgbJguiq32uaL2uEViJg85VmSU2UMQHy",
-    "binaryVersion": "0.3.0",
-    "libVersion": "0.3.0"
+    "address": "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
+    "binaryVersion": "0.4.2",
+    "libVersion": "0.4.2"
   }
 }

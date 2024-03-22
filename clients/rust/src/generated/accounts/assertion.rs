@@ -15,6 +15,7 @@ pub struct Assertion {
     pub account_type: AccountType,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub request: Pubkey,
+    pub governance: u64,
     pub bond: u64,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub bond_mint: Pubkey,
@@ -24,12 +25,12 @@ pub struct Assertion {
     pub asserter: Pubkey,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub disputer: Pubkey,
-    pub proposed_value: u64,
+    pub asserted_value: u64,
     pub resolved_value: u64,
 }
 
 impl Assertion {
-    pub const LEN: usize = 169;
+    pub const LEN: usize = 177;
 
     #[inline(always)]
     pub fn from_bytes(data: &[u8]) -> Result<Self, std::io::Error> {

@@ -2607,25 +2607,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
-name = "parimutuel-resolver"
-version = "0.0.0"
-dependencies = [
- "async-trait",
- "borsh 0.10.3",
- "bytemuck",
- "common",
- "common-test",
- "log",
- "num-derive 0.4.2",
- "num-traits",
- "oracle",
- "shank",
- "solana-program",
- "solana-program-test",
- "thiserror",
-]
-
-[[package]]
 name = "parking_lot"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

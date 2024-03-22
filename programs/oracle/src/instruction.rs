@@ -87,3 +87,8 @@ pub enum CreateAssertionArgs {
         value: u64,
     },
 }
+
+#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+pub enum ResolveRequestArgs {
+    V1 {},
+}

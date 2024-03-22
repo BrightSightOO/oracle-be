@@ -118,7 +118,7 @@ export async function safeFetchAllOracle(
 export function getOracleGpaBuilder(context: Pick<Context, "rpc" | "programs">) {
   const programId = context.programs.getPublicKey(
     "oracle",
-    "AUCTiKuGUpoZXgbJguiq32uaL2uEViJg85VmSU2UMQHy",
+    "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
   return gpaBuilder(context, programId)
     .registerFields<{

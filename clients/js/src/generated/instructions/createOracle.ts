@@ -64,7 +64,7 @@ export function createOracle(
   // Program ID.
   const programId = context.programs.getPublicKey(
     "oracle",
-    "AUCTiKuGUpoZXgbJguiq32uaL2uEViJg85VmSU2UMQHy",
+    "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
   );
 
   // Accounts.

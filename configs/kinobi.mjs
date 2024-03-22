@@ -23,7 +23,7 @@ const start = Date.now();
 
 console.log("generating client code...");
 
-const kinobi = k.createFromIdls([path.join(idlDir, `oracle.json`)]);
+const kinobi = k.createFromIdls([path.join(idlDir, "oracle.json")]);
 
 // Update accounts.
 kinobi.update(

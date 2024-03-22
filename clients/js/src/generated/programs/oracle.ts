@@ -11,7 +11,7 @@ import type { ClusterFilter, Context, Program, PublicKey } from "@metaplex-found
 import { getOracleErrorFromCode, getOracleErrorFromName } from "../errors";
 
 export const ORACLE_PROGRAM_ID =
-  "AUCTiKuGUpoZXgbJguiq32uaL2uEViJg85VmSU2UMQHy" as PublicKey<"AUCTiKuGUpoZXgbJguiq32uaL2uEViJg85VmSU2UMQHy">;
+  "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg" as PublicKey<"DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg">;
 
 export function createOracleProgram(): Program {
   return {

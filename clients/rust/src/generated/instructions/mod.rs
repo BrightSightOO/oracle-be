@@ -5,6 +5,10 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+pub(crate) mod r#create_assertion;
 pub(crate) mod r#create_oracle;
+pub(crate) mod r#create_request;
 
+pub use self::r#create_assertion::*;
 pub use self::r#create_oracle::*;
+pub use self::r#create_request::*;

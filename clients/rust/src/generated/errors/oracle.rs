@@ -13,6 +13,12 @@ pub enum OracleError {
     /// 0 (0x0) - Program arithmetic overflowed
     #[error("Program arithmetic overflowed")]
     ArithmeticOverflow,
+    /// 1 (0x1) - Request already has an assertion
+    #[error("Request already has an assertion")]
+    AlreadyAsserted,
+    /// 2 (0x2) - Insufficient bond
+    #[error("Insufficient bond")]
+    InsufficientBond,
 }
 
 impl solana_program::program_error::PrintProgramError for OracleError {

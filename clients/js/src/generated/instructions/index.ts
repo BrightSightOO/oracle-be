@@ -6,4 +6,6 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+export * from "./createAssertion";
 export * from "./createOracle";
+export * from "./createRequest";
