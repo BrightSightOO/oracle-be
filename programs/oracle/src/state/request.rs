@@ -1,11 +1,13 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::BorshSize;
 use shank::ShankAccount;
+use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 
 use crate::error::OracleError;
+use crate::pda;
 
-use super::{Account, AccountType};
+use super::{Account, AccountSized, AccountType};
 
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize, ShankAccount)]
 pub struct Request {
@@ -71,10 +73,26 @@ impl Request {
         + RequestState::SIZE    // state
         + u64::SIZE             // value
         ;
+
+    pub fn assert_pda(&self, address: &Pubkey) -> ProgramResult {
+        pda::request::assert_pda(address, &self.index)?;
+        Ok(())
+    }
+
+    pub fn assert_requested(&self) -> Result<(), OracleError> {
+        match self.state {
+            RequestState::Requested => Ok(()),
+            _ => Err(OracleError::AlreadyAsserted),
+        }
+    }
+}
+
+impl Account for Request {
+    const TYPE: AccountType = AccountType::Request;
 }
 
 impl RequestData {
-    fn size(&self) -> Option<usize> {
+    fn serialized_size(&self) -> Option<usize> {
         let variant_size = match self {
             Self::YesNo { question } => 4usize.checked_add(question.len())?,
         };
@@ -82,8 +100,12 @@ impl RequestData {
     }
 }
 
-impl Account for Request {
-    const TYPE: AccountType = AccountType::Request;
+impl AccountSized for Request {
+    const IS_FIXED_SIZE: bool = false;
+
+    fn serialized_size(&self) -> Option<usize> {
+        self.data.serialized_size()?.checked_add(Self::BASE_SIZE)
+    }
 }
 
 impl TryFrom<InitRequest> for (Request, usize) {
@@ -92,25 +114,21 @@ impl TryFrom<InitRequest> for (Request, usize) {
     fn try_from(params: InitRequest) -> Result<(Request, usize), Self::Error> {
         let InitRequest { index, creator, reward, reward_mint, timestamp, data } = params;
 
-        let space = data
-            .size()
-            .and_then(|s| s.checked_add(Request::BASE_SIZE))
-            .ok_or(OracleError::ArithmeticOverflow)?;
+        let request = Request {
+            account_type: Request::TYPE,
+            index,
+            creator,
+            reward,
+            reward_mint,
+            timestamp,
+            state: RequestState::Requested,
+            value: 0,
+            data,
+        };
 
-        Ok((
-            Request {
-                account_type: Request::TYPE,
-                index,
-                creator,
-                reward,
-                reward_mint,
-                timestamp,
-                state: RequestState::Requested,
-                value: 0,
-                data,
-            },
-            space,
-        ))
+        let space = request.serialized_size().ok_or(OracleError::ArithmeticOverflow)?;
+
+        Ok((request, space))
     }
 }
 
@@ -134,7 +152,7 @@ mod tests {
     fn request_data_size() {
         let data = RequestData::YesNo { question: "example question?".to_owned() };
 
-        let expected = data.size().unwrap();
+        let expected = data.serialized_size().unwrap();
         let actual = common_test::serialized_len(&data).unwrap();
 
         assert_eq!(expected, actual);

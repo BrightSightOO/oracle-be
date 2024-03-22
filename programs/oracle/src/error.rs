@@ -5,8 +5,17 @@ use thiserror::Error;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Error, FromPrimitive)]
 pub enum OracleError {
+    /// 0 - Arithmetic overflow.
     #[error("Program arithmetic overflowed")]
     ArithmeticOverflow,
+
+    /// 1 - Already asserted.
+    #[error("Request already has an assertion")]
+    AlreadyAsserted,
+
+    /// 2 - Insufficient bond.
+    #[error("Insufficient bond")]
+    InsufficientBond,
 }
 
 impl PrintProgramError for OracleError {

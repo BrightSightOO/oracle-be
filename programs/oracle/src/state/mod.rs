@@ -11,6 +11,7 @@ use solana_program::entrypoint::ProgramResult;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
+use crate::error::OracleError;
 use crate::utils;
 
 mod assertion;
@@ -18,6 +19,7 @@ mod oracle;
 mod request;
 mod stake;
 
+pub use self::assertion::*;
 pub use self::oracle::*;
 pub use self::request::*;
 pub use self::stake::*;
@@ -105,6 +107,10 @@ pub(crate) trait Account: BorshDeserialize + BorshSerialize {
 }
 
 pub(crate) trait AccountSized: Account {
+    const IS_FIXED_SIZE: bool;
+
+    fn serialized_size(&self) -> Option<usize>;
+
     fn from_account_info_mut<'a>(
         info: &'a AccountInfo<'a>,
     ) -> Result<AccountSizedMut<'a, Self>, ProgramError> {
@@ -117,7 +123,13 @@ pub(crate) trait AccountSized: Account {
     }
 }
 
-impl<T: Account + BorshSize> AccountSized for T {}
+impl<T: Account + BorshSize> AccountSized for T {
+    const IS_FIXED_SIZE: bool = true;
+
+    fn serialized_size(&self) -> Option<usize> {
+        Some(<T as BorshSize>::SIZE)
+    }
+}
 
 #[must_use = "Must call `.save()` to save account"]
 pub(crate) struct AccountSizedMut<'a, T> {
@@ -127,6 +139,12 @@ pub(crate) struct AccountSizedMut<'a, T> {
 
 impl<'a, T: AccountSized> AccountSizedMut<'a, T> {
     pub fn save(mut self) -> ProgramResult {
+        if !T::IS_FIXED_SIZE
+            && self.serialized_size().ok_or(OracleError::ArithmeticOverflow)? > self.data.len()
+        {
+            err!("Account cannot be saved as it overflows allocation");
+            return Err(ProgramError::InvalidAccountData);
+        }
         BorshSerialize::serialize(&self.account, &mut *self.data)?;
         Ok(())
     }

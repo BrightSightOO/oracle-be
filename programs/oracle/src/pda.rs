@@ -60,6 +60,10 @@ macro_rules! pdas {
 pdas! {
     "Oracle": oracle();
     "Request": request(index: u64);
+    "Assertion": assertion(request: Pubkey);
     "Reward": reward(request: Pubkey);
-    "Bond": bond(request: Pubkey, bonder: Pubkey);
+    "Assert bond": assert_bond(request: Pubkey);
+    "Assert governance bond": assert_governance(request: Pubkey);
+    "Dispute bond": dispute_bond(request: Pubkey);
+    "Dispute governance bond": dispute_governance(request: Pubkey);
 }
