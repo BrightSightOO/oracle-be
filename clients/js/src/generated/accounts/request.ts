@@ -54,7 +54,8 @@ export type RequestAccountData = {
   creator: PublicKey;
   reward: bigint;
   rewardMint: PublicKey;
-  timestamp: bigint;
+  assertionTimestamp: bigint;
+  resolveTimestamp: bigint;
   state: RequestState;
   value: bigint;
   data: RequestData;
@@ -65,7 +66,8 @@ export type RequestAccountDataArgs = {
   creator: PublicKey;
   reward: number | bigint;
   rewardMint: PublicKey;
-  timestamp: number | bigint;
+  assertionTimestamp: number | bigint;
+  resolveTimestamp: number | bigint;
   state: RequestStateArgs;
   value: number | bigint;
   data: RequestDataArgs;
@@ -83,7 +85,8 @@ export function getRequestAccountDataSerializer(): Serializer<
         ["creator", publicKeySerializer()],
         ["reward", u64()],
         ["rewardMint", publicKeySerializer()],
-        ["timestamp", i64()],
+        ["assertionTimestamp", i64()],
+        ["resolveTimestamp", i64()],
         ["state", getRequestStateSerializer()],
         ["value", u64()],
         ["data", getRequestDataSerializer()],
@@ -158,7 +161,8 @@ export function getRequestGpaBuilder(context: Pick<Context, "rpc" | "programs">)
       creator: PublicKey;
       reward: number | bigint;
       rewardMint: PublicKey;
-      timestamp: number | bigint;
+      assertionTimestamp: number | bigint;
+      resolveTimestamp: number | bigint;
       state: RequestStateArgs;
       value: number | bigint;
       data: RequestDataArgs;
@@ -168,10 +172,11 @@ export function getRequestGpaBuilder(context: Pick<Context, "rpc" | "programs">)
       creator: [9, publicKeySerializer()],
       reward: [41, u64()],
       rewardMint: [49, publicKeySerializer()],
-      timestamp: [81, i64()],
-      state: [89, getRequestStateSerializer()],
-      value: [90, u64()],
-      data: [98, getRequestDataSerializer()],
+      assertionTimestamp: [81, i64()],
+      resolveTimestamp: [89, i64()],
+      state: [97, getRequestStateSerializer()],
+      value: [98, u64()],
+      data: [106, getRequestDataSerializer()],
     })
     .deserializeUsing<Request>((account) => deserializeRequest(account))
     .whereField("accountType", AccountType.Request);

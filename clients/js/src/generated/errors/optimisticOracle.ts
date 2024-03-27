@@ -27,31 +27,96 @@ export class ArithmeticOverflowError extends ProgramError {
 codeToErrorMap.set(0x0, ArithmeticOverflowError);
 nameToErrorMap.set("ArithmeticOverflow", ArithmeticOverflowError);
 
-/** AlreadyAsserted: Request already has an assertion */
-export class AlreadyAssertedError extends ProgramError {
-  override readonly name: string = "AlreadyAsserted";
-
-  readonly code: number = 0x1; // 1
-
-  constructor(program: Program, cause?: Error) {
-    super("Request already has an assertion", program, cause);
-  }
-}
-codeToErrorMap.set(0x1, AlreadyAssertedError);
-nameToErrorMap.set("AlreadyAsserted", AlreadyAssertedError);
-
 /** InsufficientBond: Insufficient bond */
 export class InsufficientBondError extends ProgramError {
   override readonly name: string = "InsufficientBond";
 
-  readonly code: number = 0x2; // 2
+  readonly code: number = 0x1; // 1
 
   constructor(program: Program, cause?: Error) {
     super("Insufficient bond", program, cause);
   }
 }
-codeToErrorMap.set(0x2, InsufficientBondError);
+codeToErrorMap.set(0x1, InsufficientBondError);
 nameToErrorMap.set("InsufficientBond", InsufficientBondError);
+
+/** NotAsserted: Request does not have an assertion */
+export class NotAssertedError extends ProgramError {
+  override readonly name: string = "NotAsserted";
+
+  readonly code: number = 0x2; // 2
+
+  constructor(program: Program, cause?: Error) {
+    super("Request does not have an assertion", program, cause);
+  }
+}
+codeToErrorMap.set(0x2, NotAssertedError);
+nameToErrorMap.set("NotAsserted", NotAssertedError);
+
+/** AlreadyAsserted: Request already has an assertion */
+export class AlreadyAssertedError extends ProgramError {
+  override readonly name: string = "AlreadyAsserted";
+
+  readonly code: number = 0x3; // 3
+
+  constructor(program: Program, cause?: Error) {
+    super("Request already has an assertion", program, cause);
+  }
+}
+codeToErrorMap.set(0x3, AlreadyAssertedError);
+nameToErrorMap.set("AlreadyAsserted", AlreadyAssertedError);
+
+/** AlreadyDisputed: Assertion has already been disputed */
+export class AlreadyDisputedError extends ProgramError {
+  override readonly name: string = "AlreadyDisputed";
+
+  readonly code: number = 0x4; // 4
+
+  constructor(program: Program, cause?: Error) {
+    super("Assertion has already been disputed", program, cause);
+  }
+}
+codeToErrorMap.set(0x4, AlreadyDisputedError);
+nameToErrorMap.set("AlreadyDisputed", AlreadyDisputedError);
+
+/** AlreadyResolved: Request has already been resolved */
+export class AlreadyResolvedError extends ProgramError {
+  override readonly name: string = "AlreadyResolved";
+
+  readonly code: number = 0x5; // 5
+
+  constructor(program: Program, cause?: Error) {
+    super("Request has already been resolved", program, cause);
+  }
+}
+codeToErrorMap.set(0x5, AlreadyResolvedError);
+nameToErrorMap.set("AlreadyResolved", AlreadyResolvedError);
+
+/** AssertionTooEarly: Request is not accepting assertion yet */
+export class AssertionTooEarlyError extends ProgramError {
+  override readonly name: string = "AssertionTooEarly";
+
+  readonly code: number = 0x6; // 6
+
+  constructor(program: Program, cause?: Error) {
+    super("Request is not accepting assertion yet", program, cause);
+  }
+}
+codeToErrorMap.set(0x6, AssertionTooEarlyError);
+nameToErrorMap.set("AssertionTooEarly", AssertionTooEarlyError);
+
+/** DisputeExpireTooEarly: Assertion dispute window has not expired */
+export class DisputeExpireTooEarlyError extends ProgramError {
+  override readonly name: string = "DisputeExpireTooEarly";
+
+  readonly code: number = 0x7; // 7
+
+  constructor(program: Program, cause?: Error) {
+    super("Assertion dispute window has not expired", program, cause);
+  }
+}
+codeToErrorMap.set(0x7, DisputeExpireTooEarlyError);
+nameToErrorMap.set("DisputeExpireTooEarly", DisputeExpireTooEarlyError);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

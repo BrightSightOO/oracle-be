@@ -13,12 +13,27 @@ pub enum OptimisticOracleError {
     /// 0 (0x0) - Program arithmetic overflowed
     #[error("Program arithmetic overflowed")]
     ArithmeticOverflow,
-    /// 1 (0x1) - Request already has an assertion
-    #[error("Request already has an assertion")]
-    AlreadyAsserted,
-    /// 2 (0x2) - Insufficient bond
+    /// 1 (0x1) - Insufficient bond
     #[error("Insufficient bond")]
     InsufficientBond,
+    /// 2 (0x2) - Request does not have an assertion
+    #[error("Request does not have an assertion")]
+    NotAsserted,
+    /// 3 (0x3) - Request already has an assertion
+    #[error("Request already has an assertion")]
+    AlreadyAsserted,
+    /// 4 (0x4) - Assertion has already been disputed
+    #[error("Assertion has already been disputed")]
+    AlreadyDisputed,
+    /// 5 (0x5) - Request has already been resolved
+    #[error("Request has already been resolved")]
+    AlreadyResolved,
+    /// 6 (0x6) - Request is not accepting assertion yet
+    #[error("Request is not accepting assertion yet")]
+    AssertionTooEarly,
+    /// 7 (0x7) - Assertion dispute window has not expired
+    #[error("Assertion dispute window has not expired")]
+    DisputeExpireTooEarly,
 }
 
 impl solana_program::program_error::PrintProgramError for OptimisticOracleError {

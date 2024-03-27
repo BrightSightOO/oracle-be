@@ -252,6 +252,39 @@
         "type": "u8",
         "value": 2
       }
+    },
+    {
+      "name": "ExpireAssertion",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Request"
+          ]
+        },
+        {
+          "name": "assertion",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Assertion"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "expireAssertionArgs",
+          "type": {
+            "defined": "ExpireAssertionArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
     }
   ],
   "accounts": [
@@ -359,7 +392,11 @@
             "type": "publicKey"
           },
           {
-            "name": "timestamp",
+            "name": "assertionTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "resolveTimestamp",
             "type": "i64"
           },
           {
@@ -479,7 +516,7 @@
       }
     },
     {
-      "name": "ResolveRequestArgs",
+      "name": "ExpireAssertionArgs",
       "type": {
         "kind": "enum",
         "variants": [
@@ -558,13 +595,38 @@
     },
     {
       "code": 1,
+      "name": "InsufficientBond",
+      "msg": "Insufficient bond"
+    },
+    {
+      "code": 2,
+      "name": "NotAsserted",
+      "msg": "Request does not have an assertion"
+    },
+    {
+      "code": 3,
       "name": "AlreadyAsserted",
       "msg": "Request already has an assertion"
     },
     {
-      "code": 2,
-      "name": "InsufficientBond",
-      "msg": "Insufficient bond"
+      "code": 4,
+      "name": "AlreadyDisputed",
+      "msg": "Assertion has already been disputed"
+    },
+    {
+      "code": 5,
+      "name": "AlreadyResolved",
+      "msg": "Request has already been resolved"
+    },
+    {
+      "code": 6,
+      "name": "AssertionTooEarly",
+      "msg": "Request is not accepting assertion yet"
+    },
+    {
+      "code": 7,
+      "name": "DisputeExpireTooEarly",
+      "msg": "Assertion dispute window has not expired"
     }
   ],
   "metadata": {

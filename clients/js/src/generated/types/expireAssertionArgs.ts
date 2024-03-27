@@ -10,17 +10,17 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
 import { scalarEnum } from "@metaplex-foundation/umi/serializers";
 
-export enum ResolveRequestArgs {
+export enum ExpireAssertionArgs {
   V1,
 }
 
-export type ResolveRequestArgsArgs = ResolveRequestArgs;
+export type ExpireAssertionArgsArgs = ExpireAssertionArgs;
 
-export function getResolveRequestArgsSerializer(): Serializer<
-  ResolveRequestArgsArgs,
-  ResolveRequestArgs
+export function getExpireAssertionArgsSerializer(): Serializer<
+  ExpireAssertionArgsArgs,
+  ExpireAssertionArgs
 > {
-  return scalarEnum<ResolveRequestArgs>(ResolveRequestArgs, {
-    description: "ResolveRequestArgs",
-  }) as Serializer<ResolveRequestArgsArgs, ResolveRequestArgs>;
+  return scalarEnum<ExpireAssertionArgs>(ExpireAssertionArgs, {
+    description: "ExpireAssertionArgs",
+  }) as Serializer<ExpireAssertionArgsArgs, ExpireAssertionArgs>;
 }
