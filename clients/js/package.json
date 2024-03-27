@@ -5,9 +5,9 @@
     "@metaplex-foundation/mpl-toolbox": "^0.9.4"
   },
   "peerDependencies": {
-    "@metaplex-foundation/umi": "^0.8.10"
+    "@metaplex-foundation/umi": "^0.9.1"
   },
   "devDependencies": {
-    "@metaplex-foundation/umi": "^0.8.10"
+    "@metaplex-foundation/umi": "^0.9.1"
   }
 }
