@@ -25,7 +25,9 @@ pub struct Request {
     pub reward_mint: Pubkey,
 
     /// Unix timestamp after which a value can be asserted.
-    pub timestamp: i64,
+    pub assertion_timestamp: i64,
+    /// Unix timestamp at which the request was resolved.
+    pub resolve_timestamp: i64,
 
     /// Request state.
     pub state: RequestState,
@@ -69,7 +71,8 @@ impl Request {
         + Pubkey::SIZE          // creator
         + u64::SIZE             // reward
         + Pubkey::SIZE          // reward_mint
-        + i64::SIZE             // timestamp
+        + i64::SIZE             // assertion_timestamp
+        + i64::SIZE             // resolve_timestamp
         + RequestState::SIZE    // state
         + u64::SIZE             // value
         ;
@@ -120,7 +123,8 @@ impl TryFrom<InitRequest> for (Request, usize) {
             creator,
             reward,
             reward_mint,
-            timestamp,
+            assertion_timestamp: timestamp,
+            resolve_timestamp: 0,
             state: RequestState::Requested,
             value: 0,
             data,

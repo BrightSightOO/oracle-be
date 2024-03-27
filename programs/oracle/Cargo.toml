@@ -18,7 +18,6 @@ solana-program = { workspace = true }
 
 spl-token = { workspace = true }
 spl-token-2022 = { workspace = true }
-spl-associated-token-account = { workspace = true }
 
 shank = "0.4.2"
 borsh = { workspace = true }

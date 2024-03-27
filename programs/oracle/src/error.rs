@@ -9,13 +9,33 @@ pub enum OracleError {
     #[error("Program arithmetic overflowed")]
     ArithmeticOverflow,
 
-    /// 1 - Already asserted.
+    /// 1 - Insufficient bond.
+    #[error("Insufficient bond")]
+    InsufficientBond,
+
+    /// 2 - Not asserted.
+    #[error("Request does not have an assertion")]
+    NotAsserted,
+
+    /// 3 - Already asserted.
     #[error("Request already has an assertion")]
     AlreadyAsserted,
 
-    /// 2 - Insufficient bond.
-    #[error("Insufficient bond")]
-    InsufficientBond,
+    /// 4 - Already disputed.
+    #[error("Assertion has already been disputed")]
+    AlreadyDisputed,
+
+    /// 5 - Already resolved.
+    #[error("Request has already been resolved")]
+    AlreadyResolved,
+
+    /// 6 - Dispute window not expired.
+    #[error("Request is not accepting assertion yet")]
+    AssertionTooEarly,
+
+    /// 6 - Dispute window not expired.
+    #[error("Assertion dispute window has not expired")]
+    DisputeExpireTooEarly,
 }
 
 impl PrintProgramError for OracleError {

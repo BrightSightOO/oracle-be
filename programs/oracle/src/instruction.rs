@@ -56,6 +56,13 @@ pub enum OracleInstruction {
     #[account(11, name = "token_program", desc = "SPL token program")]
     #[account(12, name = "system_program", desc = "System program")]
     CreateAssertion(CreateAssertionArgs),
+
+    /// Resolves an [`Assertion`] after the expiration timestamp.
+    ///
+    /// [`Assertion`]: crate::state::Assertion
+    #[account(0, writable, name = "request", desc = "Request")]
+    #[account(1, writable, name = "assertion", desc = "Assertion")]
+    ExpireAssertion(ExpireAssertionArgs),
 }
 
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
@@ -89,6 +96,6 @@ pub enum CreateAssertionArgs {
 }
 
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
-pub enum ResolveRequestArgs {
+pub enum ExpireAssertionArgs {
     V1 {},
 }

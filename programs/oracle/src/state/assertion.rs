@@ -25,11 +25,13 @@ pub struct Assertion {
 
     /// Unix timestamp of the assertion.
     pub assertion_timestamp: i64,
-    /// Unix timestamp at which the assertion is considered resolved.
+    /// Unix timestamp at which the dispute window expires and the assertion
+    /// can be resolved.
     ///
-    /// Defaults to `assertion_timestamp` + the resolution period,
-    /// however if the assertion is disputed and later resolved this will be
-    /// the time at which it was resolved.
+    /// This should be [`assertion_timestamp`] + [`DISPUTE_WINDOW`].
+    ///
+    /// [`assertion_timestamp`]: Assertion::assertion_timestamp
+    /// [`DISPUTE_WINDOW`]: crate::DISPUTE_WINDOW
     pub expiration_timestamp: i64,
 
     /// Asserter address.

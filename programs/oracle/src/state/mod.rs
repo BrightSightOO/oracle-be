@@ -96,14 +96,14 @@ pub(crate) trait Account: BorshDeserialize + BorshSerialize {
         Self::from_bytes(data)
     }
 
-    fn from_account_info(info: &AccountInfo) -> Result<Self, ProgramError> {
-        let data = info.try_borrow_data()?;
-        let account = Self::safe_deserialize(*data)?;
+    // fn from_account_info(info: &AccountInfo) -> Result<Self, ProgramError> {
+    //     let data = info.try_borrow_data()?;
+    //     let account = Self::safe_deserialize(*data)?;
 
-        Self::check_account_owner(info.owner)?;
+    //     Self::check_account_owner(info.owner)?;
 
-        Ok(account)
-    }
+    //     Ok(account)
+    // }
 }
 
 pub(crate) trait AccountSized: Account {

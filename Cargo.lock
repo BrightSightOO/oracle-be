@@ -2565,7 +2565,6 @@ dependencies = [
  "shank",
  "solana-program",
  "solana-program-test",
- "spl-associated-token-account",
  "spl-token",
  "spl-token-2022 2.0.1",
  "thiserror",

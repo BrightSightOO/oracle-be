@@ -155,23 +155,6 @@ pub struct CloseAccount<'a, 'info> {
     pub token_program: &'a AccountInfo<'info>,
 }
 
-pub struct BurnChecked<'a, 'info> {
-    pub account: &'a AccountInfo<'info>,
-    pub mint: &'a AccountInfo<'info>,
-    pub authority: &'a AccountInfo<'info>,
-    pub token_program: &'a AccountInfo<'info>,
-}
-
-pub struct CreateAssociatedTokenAccount<'a, 'info> {
-    pub account: &'a AccountInfo<'info>,
-    pub wallet: &'a AccountInfo<'info>,
-    pub mint: &'a AccountInfo<'info>,
-    pub payer: &'a AccountInfo<'info>,
-    pub ata_program: &'a AccountInfo<'info>,
-    pub token_program: &'a AccountInfo<'info>,
-    pub system_program: &'a AccountInfo<'info>,
-}
-
 /// Creates a new token account.
 pub fn create_token_account(
     owner: &Pubkey,
@@ -246,64 +229,6 @@ pub fn close_account(accounts: CloseAccount, signer_seeds: &[&[&[u8]]]) -> Progr
         )?,
         &[account.clone(), destination.clone(), authority.clone()],
         signer_seeds,
-    )?;
-
-    Ok(())
-}
-
-/// Burns tokens in an account.
-pub fn burn_checked(
-    amount: u64,
-    decimals: u8,
-    accounts: BurnChecked,
-    signer_seeds: &[&[&[u8]]],
-) -> ProgramResult {
-    let BurnChecked { account, mint, authority, token_program } = accounts;
-
-    invoke_signed(
-        &spl_token_2022::instruction::burn_checked(
-            token_program.key,
-            account.key,
-            mint.key,
-            authority.key,
-            &[],
-            amount,
-            decimals,
-        )?,
-        &[account.clone(), mint.clone(), authority.clone()],
-        signer_seeds,
-    )?;
-
-    Ok(())
-}
-
-/// Creates a new token account.
-pub fn create_associated_token_account(accounts: CreateAssociatedTokenAccount) -> ProgramResult {
-    let CreateAssociatedTokenAccount {
-        account,
-        wallet,
-        mint,
-        payer,
-        ata_program: _,
-        token_program,
-        system_program,
-    } = accounts;
-
-    invoke(
-        &spl_associated_token_account::instruction::create_associated_token_account_idempotent(
-            payer.key,
-            wallet.key,
-            mint.key,
-            token_program.key,
-        ),
-        &[
-            payer.clone(),
-            account.clone(),
-            wallet.clone(),
-            mint.clone(),
-            system_program.clone(),
-            token_program.clone(),
-        ],
     )?;
 
     Ok(())

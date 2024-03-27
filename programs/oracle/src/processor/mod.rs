@@ -23,5 +23,6 @@ pub fn process_instruction<'a>(
         I::CreateOracle(args) => oracle::create(program_id, accounts, args),
         I::CreateRequest(args) => request::create(program_id, accounts, args),
         I::CreateAssertion(args) => assertion::create(program_id, accounts, args),
+        I::ExpireAssertion(args) => assertion::expire(program_id, accounts, args),
     }
 }

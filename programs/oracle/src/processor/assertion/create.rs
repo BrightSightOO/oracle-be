@@ -74,9 +74,18 @@ fn create_v1(
         request.assert_pda(request_address)?;
         request.assert_requested()?;
 
+        let now = Clock::get()?;
+
+        if now.unix_timestamp < request.assertion_timestamp {
+            return Err(OracleError::AssertionTooEarly.into());
+        }
+
         request.state = RequestState::Asserted;
+
         request.save()?;
     }
+
+    // TODO: Check value is valid for the request type.
 
     // Step 2: Initialize `assertion` account.
     {
