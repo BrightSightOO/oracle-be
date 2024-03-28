@@ -58,10 +58,6 @@ fn create_v1(
 
     pda::oracle::assert_pda(oracle.key)?;
 
-    if bond < crate::MIN_BOND {
-        return Err(OracleError::InsufficientBond.into());
-    }
-
     // TODO: Use marker accounts to check valid bond mints.
     // TODO: Check governance mint address.
 

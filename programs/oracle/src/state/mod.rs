@@ -15,6 +15,7 @@ use crate::error::OracleError;
 use crate::utils;
 
 mod assertion;
+mod currency;
 mod oracle;
 mod request;
 mod stake;
@@ -49,6 +50,8 @@ pub enum AccountType {
     Request,
     /// Account containing [`Assertion`] state.
     Assertion,
+    /// Account containing [`Currency`] state.
+    Currency,
 }
 
 pub(crate) trait Account: BorshDeserialize + BorshSerialize {
