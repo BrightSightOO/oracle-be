@@ -61,6 +61,8 @@ fn create_v1(
     // TODO: Use marker accounts to check valid bond mints.
     // TODO: Check governance mint address.
 
+    let now = Clock::get()?;
+
     // Step 1: Update request state.
     {
         let request_address = request.key;
@@ -70,18 +72,16 @@ fn create_v1(
         request.assert_pda(request_address)?;
         request.assert_requested()?;
 
-        let now = Clock::get()?;
-
         if now.unix_timestamp < request.assertion_timestamp {
             return Err(OracleError::AssertionTooEarly.into());
         }
 
-        request.state = RequestState::Asserted;
+        // Check the asserted value is valid for the request type.
+        request.data.assert_valid_value(value)?;
 
+        request.state = RequestState::Asserted;
         request.save()?;
     }
-
-    // TODO: Check value is valid for the request type.
 
     // Step 2: Initialize `assertion` account.
     {
@@ -93,7 +93,7 @@ fn create_v1(
             governance: crate::GOVERNANCE_BOND,
             bond,
             bond_mint: *bond_mint.key,
-            assertion_timestamp: Clock::get()?.unix_timestamp,
+            assertion_timestamp: now.unix_timestamp,
             asserter: *asserter.key,
             asserted_value: value,
         })?

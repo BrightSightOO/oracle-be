@@ -95,6 +95,13 @@ impl Account for Request {
 }
 
 impl RequestData {
+    pub fn assert_valid_value(&self, value: u64) -> Result<(), OracleError> {
+        let valid = match self {
+            Self::YesNo { .. } => matches!(value, 0 | 1),
+        };
+        if valid { Ok(()) } else { Err(OracleError::InvalidValue) }
+    }
+
     fn serialized_size(&self) -> Option<usize> {
         let variant_size = match self {
             Self::YesNo { question } => 4usize.checked_add(question.len())?,

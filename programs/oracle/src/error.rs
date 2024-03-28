@@ -36,6 +36,10 @@ pub enum OracleError {
     /// 6 - Dispute window not expired.
     #[error("Assertion dispute window has not expired")]
     DisputeExpireTooEarly,
+
+    /// 7 - Invalid value.
+    #[error("Asserted value is not valid for the request")]
+    InvalidValue,
 }
 
 impl PrintProgramError for OracleError {

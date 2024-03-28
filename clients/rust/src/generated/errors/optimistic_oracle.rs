@@ -34,6 +34,9 @@ pub enum OptimisticOracleError {
     /// 7 (0x7) - Assertion dispute window has not expired
     #[error("Assertion dispute window has not expired")]
     DisputeExpireTooEarly,
+    /// 8 (0x8) - Asserted value is not valid for the request
+    #[error("Asserted value is not valid for the request")]
+    InvalidValue,
 }
 
 impl solana_program::program_error::PrintProgramError for OptimisticOracleError {

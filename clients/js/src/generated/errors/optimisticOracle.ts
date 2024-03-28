@@ -118,6 +118,19 @@ export class DisputeExpireTooEarlyError extends ProgramError {
 codeToErrorMap.set(0x7, DisputeExpireTooEarlyError);
 nameToErrorMap.set("DisputeExpireTooEarly", DisputeExpireTooEarlyError);
 
+/** InvalidValue: Asserted value is not valid for the request */
+export class InvalidValueError extends ProgramError {
+  override readonly name: string = "InvalidValue";
+
+  readonly code: number = 0x8; // 8
+
+  constructor(program: Program, cause?: Error) {
+    super("Asserted value is not valid for the request", program, cause);
+  }
+}
+codeToErrorMap.set(0x8, InvalidValueError);
+nameToErrorMap.set("InvalidValue", InvalidValueError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

@@ -648,6 +648,11 @@
       "code": 7,
       "name": "DisputeExpireTooEarly",
       "msg": "Assertion dispute window has not expired"
+    },
+    {
+      "code": 8,
+      "name": "InvalidValue",
+      "msg": "Asserted value is not valid for the request"
     }
   ],
   "metadata": {
