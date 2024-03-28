@@ -15,4 +15,5 @@ pub enum AccountType {
     Stake,
     Request,
     Assertion,
+    Currency,
 }

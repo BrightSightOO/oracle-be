@@ -41,6 +41,12 @@ kinobi.update(
     oracle: {
       seeds: [k.constantPdaSeedNodeFromString("oracle")],
     },
+    currency: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("currency"),
+        k.variablePdaSeedNode("mint", k.publicKeyTypeNode(), "The address of the currency mint."),
+      ],
+    },
     request: {
       seeds: [
         k.constantPdaSeedNodeFromString("request"),
@@ -105,12 +111,19 @@ kinobi.update(
     },
     createAssertion: {
       accounts: {
-        // TODO: Default bondMint to SOL/USDC?
         bondSource: {
           defaultValue: ataPdaDefault("bondMint", "asserter"),
         },
         bondEscrow: {
           defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond", "hooked"), [
+            k.pdaSeedValueNode("request", k.accountValueNode("request")),
+          ]),
+        },
+        governanceSource: {
+          defaultValue: ataPdaDefault("governanceMint", "asserter"),
+        },
+        governanceEscrow: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertGovernanceBond", "hooked"), [
             k.pdaSeedValueNode("request", k.accountValueNode("request")),
           ]),
         },
@@ -135,6 +148,7 @@ kinobi.update(
     Stake: accountType("Stake"),
     Request: accountType("Request"),
     Assertion: accountType("Assertion"),
+    Currency: accountType("Currency"),
   }),
 );
 

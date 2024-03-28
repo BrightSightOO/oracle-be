@@ -343,6 +343,24 @@
       }
     },
     {
+      "name": "Currency",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "accountType",
+            "type": {
+              "defined": "AccountType"
+            }
+          },
+          {
+            "name": "minimumBond",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "Oracle",
       "type": {
         "kind": "struct",
@@ -545,6 +563,9 @@
           },
           {
             "name": "Assertion"
+          },
+          {
+            "name": "Currency"
           }
         ]
       }

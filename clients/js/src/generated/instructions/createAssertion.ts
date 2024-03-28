@@ -15,7 +15,7 @@ import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { findAssertBondPda } from "../../hooked";
+import { findAssertBondPda, findAssertGovernanceBondPda } from "../../hooked";
 import { findAssertionPda, findOraclePda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 import { getCreateAssertionArgsSerializer } from "../types";
@@ -37,9 +37,9 @@ export type CreateAssertionInstructionAccounts = {
   /** Governance mint */
   governanceMint: PublicKey | Pda;
   /** Governance source token account */
-  governanceSource: PublicKey | Pda;
+  governanceSource?: PublicKey | Pda;
   /** Governance escrow token account */
-  governanceEscrow: PublicKey | Pda;
+  governanceEscrow?: PublicKey | Pda;
   /** Asserter */
   asserter?: Signer;
   /** Payer */
@@ -182,6 +182,17 @@ export function createAssertion(
   }
   if (!resolvedAccounts.bondEscrow.value) {
     resolvedAccounts.bondEscrow.value = findAssertBondPda(context, {
+      request: expectPublicKey(resolvedAccounts.request.value),
+    });
+  }
+  if (!resolvedAccounts.governanceSource.value) {
+    resolvedAccounts.governanceSource.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.governanceMint.value),
+      owner: expectPublicKey(resolvedAccounts.asserter.value),
+    });
+  }
+  if (!resolvedAccounts.governanceEscrow.value) {
+    resolvedAccounts.governanceEscrow.value = findAssertGovernanceBondPda(context, {
       request: expectPublicKey(resolvedAccounts.request.value),
     });
   }

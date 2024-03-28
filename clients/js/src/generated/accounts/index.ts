@@ -7,6 +7,7 @@
  */
 
 export * from "./assertion";
+export * from "./currency";
 export * from "./oracle";
 export * from "./request";
 export * from "./stake";

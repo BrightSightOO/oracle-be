@@ -6,11 +6,13 @@
 //!
 
 pub(crate) mod r#assertion;
+pub(crate) mod r#currency;
 pub(crate) mod r#oracle;
 pub(crate) mod r#request;
 pub(crate) mod r#stake;
 
 pub use self::r#assertion::*;
+pub use self::r#currency::*;
 pub use self::r#oracle::*;
 pub use self::r#request::*;
 pub use self::r#stake::*;
