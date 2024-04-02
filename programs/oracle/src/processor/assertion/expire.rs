@@ -8,7 +8,7 @@ use crate::error::OracleError;
 use crate::instruction::accounts::{Context, ExpireAssertionAccounts};
 use crate::instruction::ExpireAssertionArgs;
 use crate::pda;
-use crate::state::{AccountSized, Assertion, Request, RequestState};
+use crate::state::{Account, AccountSized, Assertion, Request, RequestState};
 
 pub fn expire<'a>(
     program_id: &'a Pubkey,
@@ -33,34 +33,35 @@ fn expire_v1(
 
     let mut request = Request::from_account_info_mut(request_info)?;
 
-    request.assert_pda(request_info.key)?;
+    // Step 1: Check request state.
+    {
+        request.assert_pda(request_info.key)?;
 
+        match request.state {
+            RequestState::Asserted => {}
+            RequestState::Requested => return Err(OracleError::NotAsserted.into()),
+            RequestState::Disputed => return Err(OracleError::AlreadyDisputed.into()),
+            RequestState::Resolved => return Err(OracleError::AlreadyResolved.into()),
+        }
+    }
+
+    // Step 2: Check assertion address.
     pda::assertion::assert_pda(assertion.key, request_info.key)?;
 
-    match request.state {
-        RequestState::Asserted => {}
-        RequestState::Requested => return Err(OracleError::NotAsserted.into()),
-        RequestState::Disputed => return Err(OracleError::AlreadyDisputed.into()),
-        RequestState::Resolved => return Err(OracleError::AlreadyResolved.into()),
-    }
-
-    let mut assertion = Assertion::from_account_info_mut(assertion)?;
-
+    let assertion = Assertion::from_account_info(assertion)?;
     let now = Clock::get()?;
 
-    if now.unix_timestamp < assertion.expiration_timestamp {
-        return Err(OracleError::DisputeExpireTooEarly.into());
+    // Step 3: Check expiration timestamp.
+    assertion.validate_expiration_timestamp(now.unix_timestamp)?;
+
+    // Step 4: Update request.
+    {
+        request.value = assertion.asserted_value;
+        request.resolve_timestamp = now.unix_timestamp;
+        request.state = RequestState::Resolved;
+
+        request.save()?;
     }
-
-    let value = assertion.asserted_value;
-
-    request.value = value;
-    request.resolve_timestamp = now.unix_timestamp;
-    request.state = RequestState::Resolved;
-    request.save()?;
-
-    assertion.resolved_value = value;
-    assertion.save()?;
 
     // TODO: Emit an event?
 

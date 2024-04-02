@@ -31,18 +31,14 @@ fn create_v1(
     ctx: Context<CreateAssertionAccounts>,
     args: CreateAssertionArgs,
 ) -> ProgramResult {
-    let CreateAssertionArgs::V1 { bond, value } = args;
+    let CreateAssertionArgs::V1 { value } = args;
 
     let CreateAssertionAccounts {
-        oracle,
         request,
         assertion,
         bond_mint,
         bond_source,
         bond_escrow,
-        governance_mint,
-        governance_source,
-        governance_escrow,
         asserter,
         payer,
         token_program,
@@ -56,10 +52,7 @@ fn create_v1(
     utils::assert_token_program(token_program.key)?;
     utils::assert_system_program(system_program.key)?;
 
-    pda::oracle::assert_pda(oracle.key)?;
-
-    // TODO: Use marker accounts to check valid bond mints.
-    // TODO: Check governance mint address.
+    let bond: u64;
 
     let now = Clock::get()?;
 
@@ -70,14 +63,17 @@ fn create_v1(
         let mut request = Request::from_account_info_mut(request)?;
 
         request.assert_pda(request_address)?;
-        request.assert_requested()?;
 
-        if now.unix_timestamp < request.assertion_timestamp {
-            return Err(OracleError::AssertionTooEarly.into());
+        if request.state != RequestState::Requested {
+            return Err(OracleError::AlreadyAsserted.into());
         }
 
-        // Check the asserted value is valid for the request type.
-        request.data.assert_valid_value(value)?;
+        request.validate_bond_mint(bond_mint.key)?;
+        request.validate_assertion_timestamp(now.unix_timestamp)?;
+
+        request.data.validate_value(value)?;
+
+        bond = request.bond;
 
         request.state = RequestState::Asserted;
         request.save()?;
@@ -90,9 +86,6 @@ fn create_v1(
 
         Assertion::try_init(InitAssertion {
             request: *request.key,
-            governance: crate::GOVERNANCE_BOND,
-            bond,
-            bond_mint: *bond_mint.key,
             assertion_timestamp: now.unix_timestamp,
             asserter: *asserter.key,
             asserted_value: value,
@@ -143,46 +136,7 @@ fn create_v1(
         )?;
     }
 
-    // Step 4: Transfer governance to escrow.
-    {
-        let mint_decimals = cpi::spl::get_decimals(governance_mint)?;
-
-        // Step 3.1: Initialize `governance_escrow` account.
-        {
-            let governance_bump =
-                pda::assert_governance::assert_pda(governance_escrow.key, request.key)?;
-            let signer_seeds =
-                pda::assert_governance::seeds_with_bump(request.key, &governance_bump);
-
-            cpi::spl::create_token_account(
-                request.key,
-                CreateTokenAccount {
-                    account: governance_escrow,
-                    mint: governance_mint,
-                    payer,
-                    token_program,
-                    system_program,
-                },
-                &[&signer_seeds],
-            )?;
-        }
-
-        // Step 3.2: Transfer governance from `governance_source` to `governance_escrow`.
-        cpi::spl::transfer_checked(
-            crate::GOVERNANCE_BOND,
-            mint_decimals,
-            TransferChecked {
-                source: governance_source,
-                destination: governance_escrow,
-                mint: governance_mint,
-                authority: asserter,
-                token_program,
-            },
-            &[],
-        )?;
-    }
-
-    // TODO: Emit an event for the request?
+    // TODO: Emit an event?
 
     Ok(())
 }

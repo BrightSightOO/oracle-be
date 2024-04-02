@@ -33,13 +33,29 @@ pub enum OracleError {
     #[error("Request is not accepting assertion yet")]
     AssertionTooEarly,
 
-    /// 6 - Dispute window not expired.
-    #[error("Assertion dispute window has not expired")]
-    DisputeExpireTooEarly,
+    /// 7 - Dispute window not expired.
+    #[error("Dispute window has not expired")]
+    DisputeWindowOpen,
 
-    /// 7 - Invalid value.
-    #[error("Asserted value is not valid for the request")]
+    /// 8 - Dispute window has expired.
+    #[error("Dispute window has expired")]
+    DisputeWindowExpired,
+
+    /// 9 - Invalid value.
+    #[error("Value is not valid for the request")]
     InvalidValue,
+
+    /// 10 - Invalid dispute.
+    #[error("Disputed value falls within range of acceptable deviation for asserted value")]
+    InvalidDispute,
+
+    /// 11 - Invalid disputer.
+    #[error("Disputer cannot be the same as the asserter")]
+    DisputerIsAsserter,
+
+    /// 11 - Bond mint mismatch.
+    #[error("Bond mint address does not match")]
+    BondMismatch,
 }
 
 impl PrintProgramError for OracleError {

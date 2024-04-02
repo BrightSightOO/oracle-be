@@ -24,6 +24,11 @@ pub struct Request {
     /// Reward mint.
     pub reward_mint: Pubkey,
 
+    /// Amount required to be bonded by asserter/disputer.
+    pub bond: u64,
+    /// Bond mint.
+    pub bond_mint: Pubkey,
+
     /// Unix timestamp after which a value can be asserted.
     pub assertion_timestamp: i64,
     /// Unix timestamp at which the request was resolved.
@@ -69,6 +74,8 @@ impl Request {
         AccountType::SIZE       // account_type
         + u64::SIZE             // index
         + Pubkey::SIZE          // creator
+        + u64::SIZE             // bond
+        + Pubkey::SIZE          // bond_mint
         + u64::SIZE             // reward
         + Pubkey::SIZE          // reward_mint
         + i64::SIZE             // assertion_timestamp
@@ -82,11 +89,18 @@ impl Request {
         Ok(())
     }
 
-    pub fn assert_requested(&self) -> Result<(), OracleError> {
-        match self.state {
-            RequestState::Requested => Ok(()),
-            _ => Err(OracleError::AlreadyAsserted),
+    pub fn validate_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(&self.bond_mint, mint) {
+            return Err(OracleError::BondMismatch);
         }
+        Ok(())
+    }
+
+    pub fn validate_assertion_timestamp(&self, timestamp: i64) -> Result<(), OracleError> {
+        if timestamp < self.assertion_timestamp {
+            return Err(OracleError::AssertionTooEarly);
+        }
+        Ok(())
     }
 }
 
@@ -95,11 +109,18 @@ impl Account for Request {
 }
 
 impl RequestData {
-    pub fn assert_valid_value(&self, value: u64) -> Result<(), OracleError> {
+    pub fn validate_value(&self, value: u64) -> Result<(), OracleError> {
         let valid = match self {
             Self::YesNo { .. } => matches!(value, 0 | 1),
         };
         if valid { Ok(()) } else { Err(OracleError::InvalidValue) }
+    }
+
+    pub fn validate_dispute(&self, asserted: u64, disputed: u64) -> Result<(), OracleError> {
+        let valid = match self {
+            Self::YesNo { .. } => asserted != disputed,
+        };
+        if valid { Ok(()) } else { Err(OracleError::InvalidDispute) }
     }
 
     fn serialized_size(&self) -> Option<usize> {
@@ -122,7 +143,8 @@ impl TryFrom<InitRequest> for (Request, usize) {
     type Error = OracleError;
 
     fn try_from(params: InitRequest) -> Result<(Request, usize), Self::Error> {
-        let InitRequest { index, creator, reward, reward_mint, timestamp, data } = params;
+        let InitRequest { index, creator, reward, reward_mint, bond, bond_mint, timestamp, data } =
+            params;
 
         let request = Request {
             account_type: Request::TYPE,
@@ -130,6 +152,8 @@ impl TryFrom<InitRequest> for (Request, usize) {
             creator,
             reward,
             reward_mint,
+            bond,
+            bond_mint,
             assertion_timestamp: timestamp,
             resolve_timestamp: 0,
             state: RequestState::Requested,
@@ -149,6 +173,9 @@ pub(crate) struct InitRequest {
 
     pub reward: u64,
     pub reward_mint: Pubkey,
+
+    pub bond: u64,
+    pub bond_mint: Pubkey,
 
     pub timestamp: i64,
     pub data: RequestData,
@@ -176,6 +203,8 @@ mod tests {
             index: 0,
             reward: 0,
             reward_mint: Pubkey::new_unique(),
+            bond: 0,
+            bond_mint: Pubkey::new_unique(),
             timestamp: 0,
             data: RequestData::YesNo { question: "another example question?".to_owned() },
         };

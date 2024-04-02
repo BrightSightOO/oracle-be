@@ -26,7 +26,7 @@ fn create_v1(
     ctx: Context<CreateRequestAccounts>,
     args: CreateRequestArgs,
 ) -> ProgramResult {
-    let CreateRequestArgs::V1 { reward, timestamp, data } = args;
+    let CreateRequestArgs::V1 { bond, reward, timestamp, data } = args;
 
     let CreateRequestAccounts {
         oracle,
@@ -34,6 +34,7 @@ fn create_v1(
         reward_mint,
         reward_source,
         reward_escrow,
+        bond_mint,
         creator,
         payer,
         token_program,
@@ -48,6 +49,8 @@ fn create_v1(
     utils::assert_system_program(system_program.key)?;
 
     pda::oracle::assert_pda(oracle.key)?;
+
+    // TODO: Use marker accounts to check valid bond mints.
 
     let request_index: u64;
 
@@ -71,6 +74,8 @@ fn create_v1(
             creator: *creator.key,
             reward,
             reward_mint: *reward_mint.key,
+            bond,
+            bond_mint: *bond_mint.key,
             timestamp,
             data,
         })?

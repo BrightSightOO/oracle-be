@@ -16,13 +16,6 @@ pub struct Assertion {
     /// [`Request`]: crate::state::Request
     pub request: Pubkey,
 
-    /// Amount of governance tokens that the asserter has bonded.
-    pub governance: u64,
-    /// Amount of bond tokens that the asserter has bonded.
-    pub bond: u64,
-    /// Bond token mint.
-    pub bond_mint: Pubkey,
-
     /// Unix timestamp of the assertion.
     pub assertion_timestamp: i64,
     /// Unix timestamp at which the dispute window expires and the assertion
@@ -41,8 +34,28 @@ pub struct Assertion {
 
     /// Value submitted by the asserter.
     pub asserted_value: u64,
-    /// Value of the resolved request.
-    pub resolved_value: u64,
+    /// Value submitted by the disputer.
+    pub disputed_value: u64,
+}
+
+impl Assertion {
+    pub fn in_dispute_window(&self, timestamp: i64) -> bool {
+        timestamp < self.expiration_timestamp
+    }
+
+    pub fn validate_expiration_timestamp(&self, timestamp: i64) -> Result<(), OracleError> {
+        if self.in_dispute_window(timestamp) {
+            return Err(OracleError::DisputeWindowOpen);
+        }
+        Ok(())
+    }
+
+    pub fn validate_dispute_timestamp(&self, timestamp: i64) -> Result<(), OracleError> {
+        if !self.in_dispute_window(timestamp) {
+            return Err(OracleError::DisputeWindowExpired);
+        }
+        Ok(())
+    }
 }
 
 impl Account for Assertion {
@@ -53,15 +66,7 @@ impl TryFrom<InitAssertion> for (Assertion, usize) {
     type Error = OracleError;
 
     fn try_from(params: InitAssertion) -> Result<(Assertion, usize), Self::Error> {
-        let InitAssertion {
-            request,
-            governance,
-            bond,
-            bond_mint,
-            assertion_timestamp,
-            asserter,
-            asserted_value,
-        } = params;
+        let InitAssertion { request, assertion_timestamp, asserter, asserted_value } = params;
 
         const DAY_SECS: i64 = 86_400;
 
@@ -72,15 +77,12 @@ impl TryFrom<InitAssertion> for (Assertion, usize) {
             Assertion {
                 account_type: Assertion::TYPE,
                 request,
-                governance,
-                bond,
-                bond_mint,
                 assertion_timestamp,
                 expiration_timestamp,
                 asserter,
                 disputer: Pubkey::default(),
                 asserted_value,
-                resolved_value: 0,
+                disputed_value: 0,
             },
             Assertion::SIZE,
         ))
@@ -89,10 +91,6 @@ impl TryFrom<InitAssertion> for (Assertion, usize) {
 
 pub(crate) struct InitAssertion {
     pub request: Pubkey,
-
-    pub governance: u64,
-    pub bond: u64,
-    pub bond_mint: Pubkey,
 
     pub assertion_timestamp: i64,
     pub asserter: Pubkey,
