@@ -19,6 +19,9 @@ pub struct Request {
     pub reward: u64,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub reward_mint: Pubkey,
+    pub bond: u64,
+    #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
+    pub bond_mint: Pubkey,
     pub assertion_timestamp: i64,
     pub resolve_timestamp: i64,
     pub state: RequestState,

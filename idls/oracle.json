@@ -87,6 +87,14 @@
           ]
         },
         {
+          "name": "bondMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bond mint"
+          ]
+        },
+        {
           "name": "creator",
           "isMut": false,
           "isSigner": true,
@@ -136,14 +144,6 @@
       "name": "CreateAssertion",
       "accounts": [
         {
-          "name": "oracle",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Program oracle account"
-          ]
-        },
-        {
           "name": "request",
           "isMut": true,
           "isSigner": false,
@@ -181,30 +181,6 @@
           "isSigner": false,
           "docs": [
             "Bond escrow token account"
-          ]
-        },
-        {
-          "name": "governanceMint",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "Governance mint"
-          ]
-        },
-        {
-          "name": "governanceSource",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "Governance source token account"
-          ]
-        },
-        {
-          "name": "governanceEscrow",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "Governance escrow token account"
           ]
         },
         {
@@ -285,6 +261,95 @@
         "type": "u8",
         "value": 3
       }
+    },
+    {
+      "name": "DisputeAssertion",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Request"
+          ]
+        },
+        {
+          "name": "assertion",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Assertion"
+          ]
+        },
+        {
+          "name": "bondMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bond mint"
+          ]
+        },
+        {
+          "name": "bondSource",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bond source token account"
+          ]
+        },
+        {
+          "name": "bondEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bond escrow token account"
+          ]
+        },
+        {
+          "name": "disputer",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Disputer"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Payer"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL token program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "disputeAssertionArgs",
+          "type": {
+            "defined": "DisputeAssertionArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 4
+      }
     }
   ],
   "accounts": [
@@ -301,18 +366,6 @@
           },
           {
             "name": "request",
-            "type": "publicKey"
-          },
-          {
-            "name": "governance",
-            "type": "u64"
-          },
-          {
-            "name": "bond",
-            "type": "u64"
-          },
-          {
-            "name": "bondMint",
             "type": "publicKey"
           },
           {
@@ -336,7 +389,7 @@
             "type": "u64"
           },
           {
-            "name": "resolvedValue",
+            "name": "disputedValue",
             "type": "u64"
           }
         ]
@@ -407,6 +460,14 @@
           },
           {
             "name": "rewardMint",
+            "type": "publicKey"
+          },
+          {
+            "name": "bond",
+            "type": "u64"
+          },
+          {
+            "name": "bondMint",
             "type": "publicKey"
           },
           {
@@ -498,6 +559,10 @@
                 "type": "u64"
               },
               {
+                "name": "bond",
+                "type": "u64"
+              },
+              {
                 "name": "timestamp",
                 "type": "i64"
               },
@@ -521,10 +586,6 @@
             "name": "V1",
             "fields": [
               {
-                "name": "bond",
-                "type": "u64"
-              },
-              {
                 "name": "value",
                 "type": "u64"
               }
@@ -540,6 +601,23 @@
         "variants": [
           {
             "name": "V1"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeAssertionArgs",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "V1",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u64"
+              }
+            ]
           }
         ]
       }
@@ -646,13 +724,33 @@
     },
     {
       "code": 7,
-      "name": "DisputeExpireTooEarly",
-      "msg": "Assertion dispute window has not expired"
+      "name": "DisputeWindowOpen",
+      "msg": "Dispute window has not expired"
     },
     {
       "code": 8,
+      "name": "DisputeWindowExpired",
+      "msg": "Dispute window has expired"
+    },
+    {
+      "code": 9,
       "name": "InvalidValue",
-      "msg": "Asserted value is not valid for the request"
+      "msg": "Value is not valid for the request"
+    },
+    {
+      "code": 10,
+      "name": "InvalidDispute",
+      "msg": "Disputed value falls within range of acceptable deviation for asserted value"
+    },
+    {
+      "code": 11,
+      "name": "DisputerIsAsserter",
+      "msg": "Disputer cannot be the same as the asserter"
+    },
+    {
+      "code": 12,
+      "name": "BondMismatch",
+      "msg": "Bond mint address does not match"
     }
   ],
   "metadata": {

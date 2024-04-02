@@ -31,12 +31,24 @@ pub enum OptimisticOracleError {
     /// 6 (0x6) - Request is not accepting assertion yet
     #[error("Request is not accepting assertion yet")]
     AssertionTooEarly,
-    /// 7 (0x7) - Assertion dispute window has not expired
-    #[error("Assertion dispute window has not expired")]
-    DisputeExpireTooEarly,
-    /// 8 (0x8) - Asserted value is not valid for the request
-    #[error("Asserted value is not valid for the request")]
+    /// 7 (0x7) - Dispute window has not expired
+    #[error("Dispute window has not expired")]
+    DisputeWindowOpen,
+    /// 8 (0x8) - Dispute window has expired
+    #[error("Dispute window has expired")]
+    DisputeWindowExpired,
+    /// 9 (0x9) - Value is not valid for the request
+    #[error("Value is not valid for the request")]
     InvalidValue,
+    /// 10 (0xA) - Disputed value falls within range of acceptable deviation for asserted value
+    #[error("Disputed value falls within range of acceptable deviation for asserted value")]
+    InvalidDispute,
+    /// 11 (0xB) - Disputer cannot be the same as the asserter
+    #[error("Disputer cannot be the same as the asserter")]
+    DisputerIsAsserter,
+    /// 12 (0xC) - Bond mint address does not match
+    #[error("Bond mint address does not match")]
+    BondMismatch,
 }
 
 impl solana_program::program_error::PrintProgramError for OptimisticOracleError {

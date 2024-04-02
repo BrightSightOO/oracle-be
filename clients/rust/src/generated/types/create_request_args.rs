@@ -11,5 +11,5 @@ use borsh::{BorshDeserialize, BorshSerialize};
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum CreateRequestArgs {
-    V1 { reward: u64, timestamp: i64, data: RequestData },
+    V1 { reward: u64, bond: u64, timestamp: i64, data: RequestData },
 }

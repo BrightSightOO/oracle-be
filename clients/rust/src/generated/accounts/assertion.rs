@@ -15,10 +15,6 @@ pub struct Assertion {
     pub account_type: AccountType,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub request: Pubkey,
-    pub governance: u64,
-    pub bond: u64,
-    #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
-    pub bond_mint: Pubkey,
     pub assertion_timestamp: i64,
     pub expiration_timestamp: i64,
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
@@ -26,11 +22,11 @@ pub struct Assertion {
     #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
     pub disputer: Pubkey,
     pub asserted_value: u64,
-    pub resolved_value: u64,
+    pub disputed_value: u64,
 }
 
 impl Assertion {
-    pub const LEN: usize = 177;
+    pub const LEN: usize = 129;
 
     /// Prefix values used to generate a PDA for this account.
     ///
