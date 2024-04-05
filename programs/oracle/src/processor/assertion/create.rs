@@ -91,7 +91,7 @@ fn create_v1(
             asserted_value: value,
         })?
         .save(InitContext {
-            account: request,
+            account: assertion,
             payer,
             system_program,
             program_id,
