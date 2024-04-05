@@ -68,10 +68,9 @@ impl TryFrom<InitAssertion> for (Assertion, usize) {
     fn try_from(params: InitAssertion) -> Result<(Assertion, usize), Self::Error> {
         let InitAssertion { request, assertion_timestamp, asserter, asserted_value } = params;
 
-        const DAY_SECS: i64 = 86_400;
-
-        let expiration_timestamp =
-            assertion_timestamp.checked_add(DAY_SECS).ok_or(OracleError::ArithmeticOverflow)?;
+        let expiration_timestamp = assertion_timestamp
+            .checked_add(crate::DISPUTE_WINDOW)
+            .ok_or(OracleError::ArithmeticOverflow)?;
 
         Ok((
             Assertion {
