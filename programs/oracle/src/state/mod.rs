@@ -10,20 +10,27 @@ use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
+use solana_program::rent::Rent;
+use solana_program::sysvar::Sysvar;
 
+use crate::cpi::sys::Transfer;
 use crate::error::OracleError;
-use crate::utils;
+use crate::{cpi, utils};
 
 mod assertion;
 mod currency;
 mod oracle;
 mod request;
 mod stake;
+mod vote;
+mod voting;
 
 pub use self::assertion::*;
 pub use self::oracle::*;
 pub use self::request::*;
 pub use self::stake::*;
+pub use self::vote::*;
+pub use self::voting::*;
 
 #[derive(
     Clone,
@@ -52,6 +59,10 @@ pub enum AccountType {
     Assertion,
     /// Account containing [`Currency`] state.
     Currency,
+    /// Account containing [`Voting`] state.
+    Voting,
+    /// Account containing [`Vote`] state.
+    Vote,
 }
 
 pub(crate) trait Account: BorshDeserialize + BorshSerialize {
@@ -114,15 +125,17 @@ pub(crate) trait AccountSized: Account {
 
     fn serialized_size(&self) -> Option<usize>;
 
-    fn from_account_info_mut<'a>(
-        info: &'a AccountInfo<'a>,
-    ) -> Result<AccountSizedMut<'a, Self>, ProgramError> {
+    fn from_account_info_mut<'a, 'info>(
+        info: &'a AccountInfo<'info>,
+    ) -> Result<AccountSizedMut<'a, 'info, Self>, ProgramError> {
         let data = info.try_borrow_mut_data()?;
-        let account = Self::safe_deserialize(*data)?;
+        let data = RefMut::map(data, |data| *data);
+
+        let account = Self::safe_deserialize(&data)?;
 
         Self::check_account_owner(info.owner)?;
 
-        Ok(AccountSizedMut { data, account })
+        Ok(AccountSizedMut { info, data, account })
     }
 }
 
@@ -135,12 +148,53 @@ impl<T: Account + BorshSize> AccountSized for T {
 }
 
 #[must_use = "Must call `.save()` to save account"]
-pub(crate) struct AccountSizedMut<'a, T> {
-    data: RefMut<'a, &'a mut [u8]>,
+pub(crate) struct AccountSizedMut<'a, 'info, T> {
+    info: &'a AccountInfo<'info>,
+    data: RefMut<'a, [u8]>,
     account: T,
 }
 
-impl<'a, T: AccountSized> AccountSizedMut<'a, T> {
+impl<'a, 'info, T: AccountSized> AccountSizedMut<'a, 'info, T> {
+    pub fn realloc(
+        &mut self,
+        payer: &'a AccountInfo<'info>,
+        system_program: &'a AccountInfo<'info>,
+    ) -> ProgramResult {
+        if T::IS_FIXED_SIZE {
+            return Ok(());
+        }
+
+        let new_size = self.account.serialized_size().ok_or(OracleError::ArithmeticOverflow)?;
+        let current_size = self.data.len();
+
+        if new_size <= current_size {
+            return Ok(());
+        }
+
+        let rent = Rent::get()?;
+
+        let current_rent = rent.minimum_balance(current_size);
+        let new_rent = rent.minimum_balance(new_size);
+
+        let rent_diff = new_rent.saturating_sub(current_rent);
+
+        log!("Reallocating account data");
+
+        // Reallocate the account and update the data reference.
+        self.data = utils::realloc_account_mut(self.info, new_size)?;
+
+        log!("Transferring {rent_diff} lamports for additional rent");
+
+        // Transfer the additional rent required.
+        cpi::sys::transfer(
+            rent_diff,
+            Transfer { source: payer, destination: self.info, system_program },
+            &[],
+        )?;
+
+        Ok(())
+    }
+
     pub fn save(mut self) -> ProgramResult {
         if !T::IS_FIXED_SIZE
             && self.serialized_size().ok_or(OracleError::ArithmeticOverflow)? > self.data.len()
@@ -148,12 +202,12 @@ impl<'a, T: AccountSized> AccountSizedMut<'a, T> {
             err!("Account cannot be saved as it overflows allocation");
             return Err(ProgramError::InvalidAccountData);
         }
-        BorshSerialize::serialize(&self.account, &mut *self.data)?;
+        BorshSerialize::serialize(&self.account, &mut &mut *self.data)?;
         Ok(())
     }
 }
 
-impl<T> Deref for AccountSizedMut<'_, T> {
+impl<T> Deref for AccountSizedMut<'_, '_, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -161,7 +215,7 @@ impl<T> Deref for AccountSizedMut<'_, T> {
     }
 }
 
-impl<T> DerefMut for AccountSizedMut<'_, T> {
+impl<T> DerefMut for AccountSizedMut<'_, '_, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.account
     }

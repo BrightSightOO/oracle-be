@@ -9,7 +9,9 @@ use crate::cpi::spl::{CreateTokenAccount, TransferChecked};
 use crate::error::OracleError;
 use crate::instruction::accounts::{Context, DisputeAssertionAccounts};
 use crate::instruction::DisputeAssertionArgs;
-use crate::state::{AccountSized, Assertion, Request, RequestState};
+use crate::state::{
+    AccountSized, Assertion, InitAccount, InitContext, InitVoting, Request, RequestState, Voting,
+};
 use crate::{cpi, pda, utils};
 
 pub fn dispute<'a>(
@@ -25,7 +27,7 @@ pub fn dispute<'a>(
 }
 
 fn dispute_v1(
-    _program_id: &Pubkey,
+    program_id: &Pubkey,
     ctx: Context<DisputeAssertionAccounts>,
     args: DisputeAssertionArgs,
 ) -> ProgramResult {
@@ -34,6 +36,7 @@ fn dispute_v1(
     let DisputeAssertionAccounts {
         request,
         assertion,
+        voting,
         bond_mint,
         bond_source,
         bond_escrow,
@@ -147,7 +150,23 @@ fn dispute_v1(
         )?;
     }
 
-    // FIXME: Initialize dispute account for voting.
+    // Step 3: Initialize `voting` account.
+    {
+        let voting_bump = pda::voting::assert_pda(voting.key, request.key)?;
+        let signer_seeds = pda::voting::seeds_with_bump(request.key, &voting_bump);
+
+        Voting::try_init(InitVoting {
+            request: *request.key,
+            start_timestamp: now.unix_timestamp,
+        })?
+        .save(InitContext {
+            account: voting,
+            payer,
+            system_program,
+            program_id,
+            signer_seeds: &[&signer_seeds],
+        })?;
+    }
 
     // TODO: Emit an event?
 

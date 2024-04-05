@@ -67,14 +67,28 @@ pub enum OracleInstruction {
     /// [`Request`]: crate::state::Request
     #[account(0, writable, name = "request", desc = "Request")]
     #[account(1, writable, name = "assertion", desc = "Assertion")]
-    #[account(2, name = "bond_mint", desc = "Bond mint")]
-    #[account(3, writable, name = "bond_source", desc = "Bond source token account")]
-    #[account(4, writable, name = "bond_escrow", desc = "Bond escrow token account")]
-    #[account(5, signer, name = "disputer", desc = "Disputer")]
-    #[account(6, signer, writable, name = "payer", desc = "Payer")]
-    #[account(7, name = "token_program", desc = "SPL token program")]
-    #[account(8, name = "system_program", desc = "System program")]
+    #[account(2, writable, name = "voting", desc = "Voting")]
+    #[account(3, name = "bond_mint", desc = "Bond mint")]
+    #[account(4, writable, name = "bond_source", desc = "Bond source token account")]
+    #[account(5, writable, name = "bond_escrow", desc = "Bond escrow token account")]
+    #[account(6, signer, name = "disputer", desc = "Disputer")]
+    #[account(7, signer, writable, name = "payer", desc = "Payer")]
+    #[account(8, name = "token_program", desc = "SPL token program")]
+    #[account(9, name = "system_program", desc = "System program")]
     DisputeAssertion(DisputeAssertionArgs),
+
+    /// Submits a [`Vote`] for [`Voting`].
+    ///
+    /// [`Vote`]: crate::state::Vote
+    /// [`Voting`]: crate::state::Voting
+    #[account(0, name = "request", desc = "Request")]
+    #[account(1, writable, name = "voting", desc = "Voting")]
+    #[account(2, writable, name = "vote", desc = "Vote")]
+    #[account(3, name = "stake", desc = "Stake")]
+    #[account(4, signer, name = "voter", desc = "Voter")]
+    #[account(5, signer, writable, name = "payer", desc = "Payer")]
+    #[account(6, name = "system_program", desc = "System program")]
+    SubmitVote(SubmitVoteArgs),
 }
 
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
@@ -116,6 +130,14 @@ pub enum ExpireAssertionArgs {
 pub enum DisputeAssertionArgs {
     V1 {
         /// Value to dispute assertion with.
+        value: u64,
+    },
+}
+
+#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+pub enum SubmitVoteArgs {
+    V1 {
+        /// Value to vote for.
         value: u64,
     },
 }

@@ -7,6 +7,7 @@ use solana_program::pubkey::Pubkey;
 mod assertion;
 mod oracle;
 mod request;
+mod voting;
 
 pub fn process_instruction<'a>(
     program_id: &'a Pubkey,
@@ -25,5 +26,6 @@ pub fn process_instruction<'a>(
         I::CreateAssertion(args) => assertion::create(program_id, accounts, args),
         I::ExpireAssertion(args) => assertion::expire(program_id, accounts, args),
         I::DisputeAssertion(args) => assertion::dispute(program_id, accounts, args),
+        I::SubmitVote(args) => voting::submit(program_id, accounts, args),
     }
 }

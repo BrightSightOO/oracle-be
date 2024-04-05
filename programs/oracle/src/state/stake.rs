@@ -18,9 +18,6 @@ pub struct Stake {
 
     /// The amount staked.
     pub amount: u64,
-
-    /// Unix timestamp at which this stake will allow withdrawal.
-    pub lockup: i64,
 }
 
 impl Account for Stake {

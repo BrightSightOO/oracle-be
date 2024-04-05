@@ -107,7 +107,7 @@ pub fn realloc_account_mut<'a>(
         return Err(ProgramError::InvalidRealloc);
     }
 
-    // realloc
+    // Reallocate.
     unsafe {
         let data_ptr = data.as_mut_ptr();
 

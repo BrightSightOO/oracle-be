@@ -64,7 +64,8 @@ pdas! {
     "Assertion": assertion(request: Pubkey);
     "Reward": reward(request: Pubkey);
     "Assert bond": assert_bond(request: Pubkey);
-    "Assert governance bond": assert_governance(request: Pubkey);
     "Dispute bond": dispute_bond(request: Pubkey);
-    "Dispute governance bond": dispute_governance(request: Pubkey);
+    "Stake": stake(wallet: Pubkey);
+    "Voting": voting(request: Pubkey);
+    "Vote": vote(voting: Pubkey, wallet: Pubkey);
 }
