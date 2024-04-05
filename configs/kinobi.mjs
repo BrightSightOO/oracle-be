@@ -63,6 +63,29 @@ kinobi.update(
         k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
       ],
     },
+    stake: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("stake"),
+        k.variablePdaSeedNode("wallet", k.publicKeyTypeNode(), "The address of the wallet."),
+      ],
+    },
+    voting: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("voting"),
+        k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
+      ],
+    },
+    vote: {
+      seeds: [
+        k.constantPdaSeedNodeFromString("vote"),
+        k.variablePdaSeedNode(
+          "voting",
+          k.publicKeyTypeNode(),
+          "The address of the voting account.",
+        ),
+        k.variablePdaSeedNode("stake", k.publicKeyTypeNode(), "The address of the stake account."),
+      ],
+    },
   }),
 );
 
@@ -85,6 +108,21 @@ kinobi.update(
       ignoreIfOptional: true,
       defaultValue: k.pdaValueNode("assertion", [
         k.pdaSeedValueNode("request", k.accountValueNode("request")),
+      ]),
+    },
+    {
+      account: "voting",
+      ignoreIfOptional: true,
+      defaultValue: k.pdaValueNode("voting", [
+        k.pdaSeedValueNode("request", k.accountValueNode("request")),
+      ]),
+    },
+    {
+      account: "vote",
+      ignoreIfOptional: true,
+      defaultValue: k.pdaValueNode("vote", [
+        k.pdaSeedValueNode("voting", k.accountValueNode("voting")),
+        k.pdaSeedValueNode("stake", k.accountValueNode("stake")),
       ]),
     },
   ]),
@@ -132,6 +170,15 @@ kinobi.update(
         },
       },
     },
+    submitVote: {
+      accounts: {
+        stake: {
+          defaultValue: k.pdaValueNode("stake", [
+            k.pdaSeedValueNode("wallet", k.accountValueNode("voter")),
+          ]),
+        },
+      },
+    },
   }),
 );
 
@@ -149,6 +196,8 @@ kinobi.update(
     Request: accountType("Request"),
     Assertion: accountType("Assertion"),
     Currency: accountType("Currency"),
+    Voting: accountType("Voting"),
+    Vote: accountType("Vote"),
   }),
 );
 

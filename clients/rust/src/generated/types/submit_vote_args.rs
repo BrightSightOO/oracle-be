@@ -7,15 +7,8 @@
 
 use borsh::{BorshDeserialize, BorshSerialize};
 
-#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq, PartialOrd, Hash)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum AccountType {
-    Uninitialized,
-    Oracle,
-    Stake,
-    Request,
-    Assertion,
-    Currency,
-    Voting,
-    Vote,
+pub enum SubmitVoteArgs {
+    V1 { value: u64 },
 }

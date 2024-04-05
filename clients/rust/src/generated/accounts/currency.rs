@@ -13,11 +13,13 @@ use solana_program::pubkey::Pubkey;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Currency {
     pub account_type: AccountType,
+    #[cfg_attr(feature = "serde", serde(with = "serde_with::As::<serde_with::DisplayFromStr>"))]
+    pub mint: Pubkey,
     pub minimum_bond: u64,
 }
 
 impl Currency {
-    pub const LEN: usize = 9;
+    pub const LEN: usize = 41;
 
     /// Prefix values used to generate a PDA for this account.
     ///

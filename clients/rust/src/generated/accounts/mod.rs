@@ -10,9 +10,13 @@ pub(crate) mod r#currency;
 pub(crate) mod r#oracle;
 pub(crate) mod r#request;
 pub(crate) mod r#stake;
+pub(crate) mod r#vote;
+pub(crate) mod r#voting;
 
 pub use self::r#assertion::*;
 pub use self::r#currency::*;
 pub use self::r#oracle::*;
 pub use self::r#request::*;
 pub use self::r#stake::*;
+pub use self::r#vote::*;
+pub use self::r#voting::*;

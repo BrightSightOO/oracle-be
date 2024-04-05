@@ -5,66 +5,53 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::DisputeAssertionArgs;
+use crate::generated::types::SubmitVoteArgs;
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
-pub struct DisputeAssertion {
+pub struct SubmitVote {
     /// Request
     pub request: solana_program::pubkey::Pubkey,
-    /// Assertion
-    pub assertion: solana_program::pubkey::Pubkey,
     /// Voting
     pub voting: solana_program::pubkey::Pubkey,
-    /// Bond mint
-    pub bond_mint: solana_program::pubkey::Pubkey,
-    /// Bond source token account
-    pub bond_source: solana_program::pubkey::Pubkey,
-    /// Bond escrow token account
-    pub bond_escrow: solana_program::pubkey::Pubkey,
-    /// Disputer
-    pub disputer: solana_program::pubkey::Pubkey,
+    /// Vote
+    pub vote: solana_program::pubkey::Pubkey,
+    /// Stake
+    pub stake: solana_program::pubkey::Pubkey,
+    /// Voter
+    pub voter: solana_program::pubkey::Pubkey,
     /// Payer
     pub payer: solana_program::pubkey::Pubkey,
-    /// SPL token program
-    pub token_program: solana_program::pubkey::Pubkey,
     /// System program
     pub system_program: solana_program::pubkey::Pubkey,
 }
 
-impl DisputeAssertion {
+impl SubmitVote {
     pub fn instruction(
         &self,
-        args: DisputeAssertionInstructionArgs,
+        args: SubmitVoteInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: DisputeAssertionInstructionArgs,
+        args: SubmitVoteInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
-        let mut accounts = Vec::with_capacity(10 + remaining_accounts.len());
-        accounts.push(solana_program::instruction::AccountMeta::new(self.request, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(self.assertion, false));
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.request, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.voting, false));
-        accounts
-            .push(solana_program::instruction::AccountMeta::new_readonly(self.bond_mint, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(self.bond_source, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(self.bond_escrow, false));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.disputer, true));
+        accounts.push(solana_program::instruction::AccountMeta::new(self.vote, false));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.stake, false));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.voter, true));
         accounts.push(solana_program::instruction::AccountMeta::new(self.payer, true));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            self.token_program,
-            false,
-        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.system_program,
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = DisputeAssertionInstructionData::new().try_to_vec().unwrap();
+        let mut data = SubmitVoteInstructionData::new().try_to_vec().unwrap();
         let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -77,53 +64,47 @@ impl DisputeAssertion {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct DisputeAssertionInstructionData {
+struct SubmitVoteInstructionData {
     discriminator: u8,
 }
 
-impl DisputeAssertionInstructionData {
+impl SubmitVoteInstructionData {
     fn new() -> Self {
-        Self { discriminator: 4 }
+        Self { discriminator: 5 }
     }
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DisputeAssertionInstructionArgs {
-    pub dispute_assertion_args: DisputeAssertionArgs,
+pub struct SubmitVoteInstructionArgs {
+    pub submit_vote_args: SubmitVoteArgs,
 }
 
-/// Instruction builder for `DisputeAssertion`.
+/// Instruction builder for `SubmitVote`.
 ///
 /// ### Accounts:
 ///
-///   0. `[writable]` request
-///   1. `[writable]` assertion
-///   2. `[writable]` voting
-///   3. `[]` bond_mint
-///   4. `[writable]` bond_source
-///   5. `[writable]` bond_escrow
-///   6. `[signer]` disputer
-///   7. `[writable, signer]` payer
-///   8. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
-///   9. `[optional]` system_program (default to `11111111111111111111111111111111`)
+///   0. `[]` request
+///   1. `[writable]` voting
+///   2. `[writable]` vote
+///   3. `[]` stake
+///   4. `[signer]` voter
+///   5. `[writable, signer]` payer
+///   6. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Default)]
-pub struct DisputeAssertionBuilder {
+pub struct SubmitVoteBuilder {
     request: Option<solana_program::pubkey::Pubkey>,
-    assertion: Option<solana_program::pubkey::Pubkey>,
     voting: Option<solana_program::pubkey::Pubkey>,
-    bond_mint: Option<solana_program::pubkey::Pubkey>,
-    bond_source: Option<solana_program::pubkey::Pubkey>,
-    bond_escrow: Option<solana_program::pubkey::Pubkey>,
-    disputer: Option<solana_program::pubkey::Pubkey>,
+    vote: Option<solana_program::pubkey::Pubkey>,
+    stake: Option<solana_program::pubkey::Pubkey>,
+    voter: Option<solana_program::pubkey::Pubkey>,
     payer: Option<solana_program::pubkey::Pubkey>,
-    token_program: Option<solana_program::pubkey::Pubkey>,
     system_program: Option<solana_program::pubkey::Pubkey>,
-    dispute_assertion_args: Option<DisputeAssertionArgs>,
+    submit_vote_args: Option<SubmitVoteArgs>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl DisputeAssertionBuilder {
+impl SubmitVoteBuilder {
     pub fn new() -> Self {
         Self::default()
     }
@@ -133,53 +114,34 @@ impl DisputeAssertionBuilder {
         self.request = Some(request);
         self
     }
-    /// Assertion
-    #[inline(always)]
-    pub fn assertion(&mut self, assertion: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.assertion = Some(assertion);
-        self
-    }
     /// Voting
     #[inline(always)]
     pub fn voting(&mut self, voting: solana_program::pubkey::Pubkey) -> &mut Self {
         self.voting = Some(voting);
         self
     }
-    /// Bond mint
+    /// Vote
     #[inline(always)]
-    pub fn bond_mint(&mut self, bond_mint: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.bond_mint = Some(bond_mint);
+    pub fn vote(&mut self, vote: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.vote = Some(vote);
         self
     }
-    /// Bond source token account
+    /// Stake
     #[inline(always)]
-    pub fn bond_source(&mut self, bond_source: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.bond_source = Some(bond_source);
+    pub fn stake(&mut self, stake: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.stake = Some(stake);
         self
     }
-    /// Bond escrow token account
+    /// Voter
     #[inline(always)]
-    pub fn bond_escrow(&mut self, bond_escrow: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.bond_escrow = Some(bond_escrow);
-        self
-    }
-    /// Disputer
-    #[inline(always)]
-    pub fn disputer(&mut self, disputer: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.disputer = Some(disputer);
+    pub fn voter(&mut self, voter: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.voter = Some(voter);
         self
     }
     /// Payer
     #[inline(always)]
     pub fn payer(&mut self, payer: solana_program::pubkey::Pubkey) -> &mut Self {
         self.payer = Some(payer);
-        self
-    }
-    /// `[optional account, default to 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA']`
-    /// SPL token program
-    #[inline(always)]
-    pub fn token_program(&mut self, token_program: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.token_program = Some(token_program);
         self
     }
     /// `[optional account, default to '11111111111111111111111111111111']`
@@ -190,11 +152,8 @@ impl DisputeAssertionBuilder {
         self
     }
     #[inline(always)]
-    pub fn dispute_assertion_args(
-        &mut self,
-        dispute_assertion_args: DisputeAssertionArgs,
-    ) -> &mut Self {
-        self.dispute_assertion_args = Some(dispute_assertion_args);
+    pub fn submit_vote_args(&mut self, submit_vote_args: SubmitVoteArgs) -> &mut Self {
+        self.submit_vote_args = Some(submit_vote_args);
         self
     }
     /// Add an aditional account to the instruction.
@@ -217,102 +176,79 @@ impl DisputeAssertionBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = DisputeAssertion {
+        let accounts = SubmitVote {
             request: self.request.expect("request is not set"),
-            assertion: self.assertion.expect("assertion is not set"),
             voting: self.voting.expect("voting is not set"),
-            bond_mint: self.bond_mint.expect("bond_mint is not set"),
-            bond_source: self.bond_source.expect("bond_source is not set"),
-            bond_escrow: self.bond_escrow.expect("bond_escrow is not set"),
-            disputer: self.disputer.expect("disputer is not set"),
+            vote: self.vote.expect("vote is not set"),
+            stake: self.stake.expect("stake is not set"),
+            voter: self.voter.expect("voter is not set"),
             payer: self.payer.expect("payer is not set"),
-            token_program: self
-                .token_program
-                .unwrap_or(solana_program::pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")),
             system_program: self
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
         };
-        let args = DisputeAssertionInstructionArgs {
-            dispute_assertion_args: self
-                .dispute_assertion_args
-                .clone()
-                .expect("dispute_assertion_args is not set"),
+        let args = SubmitVoteInstructionArgs {
+            submit_vote_args: self.submit_vote_args.clone().expect("submit_vote_args is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
     }
 }
 
-/// `dispute_assertion` CPI accounts.
-pub struct DisputeAssertionCpiAccounts<'a, 'b> {
+/// `submit_vote` CPI accounts.
+pub struct SubmitVoteCpiAccounts<'a, 'b> {
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Assertion
-    pub assertion: &'b solana_program::account_info::AccountInfo<'a>,
     /// Voting
     pub voting: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond mint
-    pub bond_mint: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond source token account
-    pub bond_source: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond escrow token account
-    pub bond_escrow: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Disputer
-    pub disputer: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Vote
+    pub vote: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Stake
+    pub stake: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Voter
+    pub voter: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// SPL token program
-    pub token_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// System program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `dispute_assertion` CPI instruction.
-pub struct DisputeAssertionCpi<'a, 'b> {
+/// `submit_vote` CPI instruction.
+pub struct SubmitVoteCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Assertion
-    pub assertion: &'b solana_program::account_info::AccountInfo<'a>,
     /// Voting
     pub voting: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond mint
-    pub bond_mint: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond source token account
-    pub bond_source: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Bond escrow token account
-    pub bond_escrow: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Disputer
-    pub disputer: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Vote
+    pub vote: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Stake
+    pub stake: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Voter
+    pub voter: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
-    /// SPL token program
-    pub token_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// System program
     pub system_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
-    pub __args: DisputeAssertionInstructionArgs,
+    pub __args: SubmitVoteInstructionArgs,
 }
 
-impl<'a, 'b> DisputeAssertionCpi<'a, 'b> {
+impl<'a, 'b> SubmitVoteCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: DisputeAssertionCpiAccounts<'a, 'b>,
-        args: DisputeAssertionInstructionArgs,
+        accounts: SubmitVoteCpiAccounts<'a, 'b>,
+        args: SubmitVoteInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
             request: accounts.request,
-            assertion: accounts.assertion,
             voting: accounts.voting,
-            bond_mint: accounts.bond_mint,
-            bond_source: accounts.bond_source,
-            bond_escrow: accounts.bond_escrow,
-            disputer: accounts.disputer,
+            vote: accounts.vote,
+            stake: accounts.stake,
+            voter: accounts.voter,
             payer: accounts.payer,
-            token_program: accounts.token_program,
             system_program: accounts.system_program,
             __args: args,
         }
@@ -342,23 +278,16 @@ impl<'a, 'b> DisputeAssertionCpi<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
         remaining_accounts: &[(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)],
     ) -> solana_program::entrypoint::ProgramResult {
-        let mut accounts = Vec::with_capacity(10 + remaining_accounts.len());
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.request.key, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.assertion.key, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.voting.key, false));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.bond_mint.key,
-            false,
-        ));
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.bond_source.key, false));
-        accounts.push(solana_program::instruction::AccountMeta::new(*self.bond_escrow.key, false));
+        let mut accounts = Vec::with_capacity(7 + remaining_accounts.len());
         accounts
-            .push(solana_program::instruction::AccountMeta::new_readonly(*self.disputer.key, true));
+            .push(solana_program::instruction::AccountMeta::new_readonly(*self.request.key, false));
+        accounts.push(solana_program::instruction::AccountMeta::new(*self.voting.key, false));
+        accounts.push(solana_program::instruction::AccountMeta::new(*self.vote.key, false));
+        accounts
+            .push(solana_program::instruction::AccountMeta::new_readonly(*self.stake.key, false));
+        accounts
+            .push(solana_program::instruction::AccountMeta::new_readonly(*self.voter.key, true));
         accounts.push(solana_program::instruction::AccountMeta::new(*self.payer.key, true));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.token_program.key,
-            false,
-        ));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.system_program.key,
             false,
@@ -370,7 +299,7 @@ impl<'a, 'b> DisputeAssertionCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = DisputeAssertionInstructionData::new().try_to_vec().unwrap();
+        let mut data = SubmitVoteInstructionData::new().try_to_vec().unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -379,17 +308,14 @@ impl<'a, 'b> DisputeAssertionCpi<'a, 'b> {
             accounts,
             data,
         };
-        let mut account_infos = Vec::with_capacity(10 + 1 + remaining_accounts.len());
+        let mut account_infos = Vec::with_capacity(7 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.request.clone());
-        account_infos.push(self.assertion.clone());
         account_infos.push(self.voting.clone());
-        account_infos.push(self.bond_mint.clone());
-        account_infos.push(self.bond_source.clone());
-        account_infos.push(self.bond_escrow.clone());
-        account_infos.push(self.disputer.clone());
+        account_infos.push(self.vote.clone());
+        account_infos.push(self.stake.clone());
+        account_infos.push(self.voter.clone());
         account_infos.push(self.payer.clone());
-        account_infos.push(self.token_program.clone());
         account_infos.push(self.system_program.clone());
         remaining_accounts
             .iter()
@@ -403,39 +329,33 @@ impl<'a, 'b> DisputeAssertionCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `DisputeAssertion` via CPI.
+/// Instruction builder for `SubmitVote` via CPI.
 ///
 /// ### Accounts:
 ///
-///   0. `[writable]` request
-///   1. `[writable]` assertion
-///   2. `[writable]` voting
-///   3. `[]` bond_mint
-///   4. `[writable]` bond_source
-///   5. `[writable]` bond_escrow
-///   6. `[signer]` disputer
-///   7. `[writable, signer]` payer
-///   8. `[]` token_program
-///   9. `[]` system_program
-pub struct DisputeAssertionCpiBuilder<'a, 'b> {
-    instruction: Box<DisputeAssertionCpiBuilderInstruction<'a, 'b>>,
+///   0. `[]` request
+///   1. `[writable]` voting
+///   2. `[writable]` vote
+///   3. `[]` stake
+///   4. `[signer]` voter
+///   5. `[writable, signer]` payer
+///   6. `[]` system_program
+pub struct SubmitVoteCpiBuilder<'a, 'b> {
+    instruction: Box<SubmitVoteCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> DisputeAssertionCpiBuilder<'a, 'b> {
+impl<'a, 'b> SubmitVoteCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(DisputeAssertionCpiBuilderInstruction {
+        let instruction = Box::new(SubmitVoteCpiBuilderInstruction {
             __program: program,
             request: None,
-            assertion: None,
             voting: None,
-            bond_mint: None,
-            bond_source: None,
-            bond_escrow: None,
-            disputer: None,
+            vote: None,
+            stake: None,
+            voter: None,
             payer: None,
-            token_program: None,
             system_program: None,
-            dispute_assertion_args: None,
+            submit_vote_args: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -449,15 +369,6 @@ impl<'a, 'b> DisputeAssertionCpiBuilder<'a, 'b> {
         self.instruction.request = Some(request);
         self
     }
-    /// Assertion
-    #[inline(always)]
-    pub fn assertion(
-        &mut self,
-        assertion: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.assertion = Some(assertion);
-        self
-    }
     /// Voting
     #[inline(always)]
     pub fn voting(
@@ -467,55 +378,28 @@ impl<'a, 'b> DisputeAssertionCpiBuilder<'a, 'b> {
         self.instruction.voting = Some(voting);
         self
     }
-    /// Bond mint
+    /// Vote
     #[inline(always)]
-    pub fn bond_mint(
-        &mut self,
-        bond_mint: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.bond_mint = Some(bond_mint);
+    pub fn vote(&mut self, vote: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
+        self.instruction.vote = Some(vote);
         self
     }
-    /// Bond source token account
+    /// Stake
     #[inline(always)]
-    pub fn bond_source(
-        &mut self,
-        bond_source: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.bond_source = Some(bond_source);
+    pub fn stake(&mut self, stake: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
+        self.instruction.stake = Some(stake);
         self
     }
-    /// Bond escrow token account
+    /// Voter
     #[inline(always)]
-    pub fn bond_escrow(
-        &mut self,
-        bond_escrow: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.bond_escrow = Some(bond_escrow);
-        self
-    }
-    /// Disputer
-    #[inline(always)]
-    pub fn disputer(
-        &mut self,
-        disputer: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.disputer = Some(disputer);
+    pub fn voter(&mut self, voter: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
+        self.instruction.voter = Some(voter);
         self
     }
     /// Payer
     #[inline(always)]
     pub fn payer(&mut self, payer: &'b solana_program::account_info::AccountInfo<'a>) -> &mut Self {
         self.instruction.payer = Some(payer);
-        self
-    }
-    /// SPL token program
-    #[inline(always)]
-    pub fn token_program(
-        &mut self,
-        token_program: &'b solana_program::account_info::AccountInfo<'a>,
-    ) -> &mut Self {
-        self.instruction.token_program = Some(token_program);
         self
     }
     /// System program
@@ -528,11 +412,8 @@ impl<'a, 'b> DisputeAssertionCpiBuilder<'a, 'b> {
         self
     }
     #[inline(always)]
-    pub fn dispute_assertion_args(
-        &mut self,
-        dispute_assertion_args: DisputeAssertionArgs,
-    ) -> &mut Self {
-        self.instruction.dispute_assertion_args = Some(dispute_assertion_args);
+    pub fn submit_vote_args(&mut self, submit_vote_args: SubmitVoteArgs) -> &mut Self {
+        self.instruction.submit_vote_args = Some(submit_vote_args);
         self
     }
     /// Add an additional account to the instruction.
@@ -568,33 +449,27 @@ impl<'a, 'b> DisputeAssertionCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = DisputeAssertionInstructionArgs {
-            dispute_assertion_args: self
+        let args = SubmitVoteInstructionArgs {
+            submit_vote_args: self
                 .instruction
-                .dispute_assertion_args
+                .submit_vote_args
                 .clone()
-                .expect("dispute_assertion_args is not set"),
+                .expect("submit_vote_args is not set"),
         };
-        let instruction = DisputeAssertionCpi {
+        let instruction = SubmitVoteCpi {
             __program: self.instruction.__program,
 
             request: self.instruction.request.expect("request is not set"),
 
-            assertion: self.instruction.assertion.expect("assertion is not set"),
-
             voting: self.instruction.voting.expect("voting is not set"),
 
-            bond_mint: self.instruction.bond_mint.expect("bond_mint is not set"),
+            vote: self.instruction.vote.expect("vote is not set"),
 
-            bond_source: self.instruction.bond_source.expect("bond_source is not set"),
+            stake: self.instruction.stake.expect("stake is not set"),
 
-            bond_escrow: self.instruction.bond_escrow.expect("bond_escrow is not set"),
-
-            disputer: self.instruction.disputer.expect("disputer is not set"),
+            voter: self.instruction.voter.expect("voter is not set"),
 
             payer: self.instruction.payer.expect("payer is not set"),
-
-            token_program: self.instruction.token_program.expect("token_program is not set"),
 
             system_program: self.instruction.system_program.expect("system_program is not set"),
             __args: args,
@@ -606,19 +481,16 @@ impl<'a, 'b> DisputeAssertionCpiBuilder<'a, 'b> {
     }
 }
 
-struct DisputeAssertionCpiBuilderInstruction<'a, 'b> {
+struct SubmitVoteCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     request: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    assertion: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     voting: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    bond_mint: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    bond_source: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    bond_escrow: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    disputer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    vote: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    stake: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    voter: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     payer: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    token_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     system_program: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    dispute_assertion_args: Option<DisputeAssertionArgs>,
+    submit_vote_args: Option<SubmitVoteArgs>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)>,
 }

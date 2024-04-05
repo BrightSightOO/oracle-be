@@ -19,36 +19,45 @@ pub enum OptimisticOracleError {
     /// 2 (0x2) - Request does not have an assertion
     #[error("Request does not have an assertion")]
     NotAsserted,
-    /// 3 (0x3) - Request already has an assertion
+    /// 3 (0x3) - Request is not disputed
+    #[error("Request is not disputed")]
+    NotDisputed,
+    /// 4 (0x4) - Request already has an assertion
     #[error("Request already has an assertion")]
     AlreadyAsserted,
-    /// 4 (0x4) - Assertion has already been disputed
+    /// 5 (0x5) - Assertion has already been disputed
     #[error("Assertion has already been disputed")]
     AlreadyDisputed,
-    /// 5 (0x5) - Request has already been resolved
+    /// 6 (0x6) - Request has already been resolved
     #[error("Request has already been resolved")]
     AlreadyResolved,
-    /// 6 (0x6) - Request is not accepting assertion yet
+    /// 7 (0x7) - Request is not accepting assertion yet
     #[error("Request is not accepting assertion yet")]
     AssertionTooEarly,
-    /// 7 (0x7) - Dispute window has not expired
+    /// 8 (0x8) - Dispute window has not expired
     #[error("Dispute window has not expired")]
     DisputeWindowOpen,
-    /// 8 (0x8) - Dispute window has expired
+    /// 9 (0x9) - Dispute window has expired
     #[error("Dispute window has expired")]
     DisputeWindowExpired,
-    /// 9 (0x9) - Value is not valid for the request
+    /// 10 (0xA) - Value is not valid for the request
     #[error("Value is not valid for the request")]
     InvalidValue,
-    /// 10 (0xA) - Disputed value falls within range of acceptable deviation for asserted value
+    /// 11 (0xB) - Disputed value falls within range of acceptable deviation for asserted value
     #[error("Disputed value falls within range of acceptable deviation for asserted value")]
     InvalidDispute,
-    /// 11 (0xB) - Disputer cannot be the same as the asserter
+    /// 12 (0xC) - Disputer cannot be the same as the asserter
     #[error("Disputer cannot be the same as the asserter")]
     DisputerIsAsserter,
-    /// 12 (0xC) - Bond mint address does not match
+    /// 13 (0xD) - Bond mint address does not match
     #[error("Bond mint address does not match")]
     BondMismatch,
+    /// 14 (0xE) - Voting window has not expired
+    #[error("Voting window has not expired")]
+    VotingWindowOpen,
+    /// 15 (0xF) - Voting window has expired
+    #[error("Voting window has expired")]
+    VotingWindowExpired,
 }
 
 impl solana_program::program_error::PrintProgramError for OptimisticOracleError {

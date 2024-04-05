@@ -14,3 +14,4 @@ export * from "./disputeAssertionArgs";
 export * from "./expireAssertionArgs";
 export * from "./requestData";
 export * from "./requestState";
+export * from "./submitVoteArgs";

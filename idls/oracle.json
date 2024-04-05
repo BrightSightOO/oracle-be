@@ -282,6 +282,14 @@
           ]
         },
         {
+          "name": "voting",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Voting"
+          ]
+        },
+        {
           "name": "bondMint",
           "isMut": false,
           "isSigner": false,
@@ -350,6 +358,79 @@
         "type": "u8",
         "value": 4
       }
+    },
+    {
+      "name": "SubmitVote",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Request"
+          ]
+        },
+        {
+          "name": "voting",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Voting"
+          ]
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Vote"
+          ]
+        },
+        {
+          "name": "stake",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Stake"
+          ]
+        },
+        {
+          "name": "voter",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Voter"
+          ]
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Payer"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "submitVoteArgs",
+          "type": {
+            "defined": "SubmitVoteArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 5
+      }
     }
   ],
   "accounts": [
@@ -405,6 +486,10 @@
             "type": {
               "defined": "AccountType"
             }
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
           },
           {
             "name": "minimumBond",
@@ -519,10 +604,75 @@
           {
             "name": "amount",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Vote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "accountType",
+            "type": {
+              "defined": "AccountType"
+            }
           },
           {
-            "name": "lockup",
+            "name": "stake",
+            "type": "publicKey"
+          },
+          {
+            "name": "value",
+            "type": "u64"
+          },
+          {
+            "name": "votes",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Voting",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "accountType",
+            "type": {
+              "defined": "AccountType"
+            }
+          },
+          {
+            "name": "request",
+            "type": "publicKey"
+          },
+          {
+            "name": "startTimestamp",
             "type": "i64"
+          },
+          {
+            "name": "endTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "voteCount",
+            "type": "u64"
+          },
+          {
+            "name": "modeValue",
+            "type": "u64"
+          },
+          {
+            "name": "votes",
+            "type": {
+              "bTreeMap": [
+                "u64",
+                "u64"
+              ]
+            }
           }
         ]
       }
@@ -623,6 +773,23 @@
       }
     },
     {
+      "name": "SubmitVoteArgs",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "V1",
+            "fields": [
+              {
+                "name": "value",
+                "type": "u64"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "AccountType",
       "type": {
         "kind": "enum",
@@ -644,6 +811,12 @@
           },
           {
             "name": "Currency"
+          },
+          {
+            "name": "Voting"
+          },
+          {
+            "name": "Vote"
           }
         ]
       }
@@ -704,53 +877,68 @@
     },
     {
       "code": 3,
+      "name": "NotDisputed",
+      "msg": "Request is not disputed"
+    },
+    {
+      "code": 4,
       "name": "AlreadyAsserted",
       "msg": "Request already has an assertion"
     },
     {
-      "code": 4,
+      "code": 5,
       "name": "AlreadyDisputed",
       "msg": "Assertion has already been disputed"
     },
     {
-      "code": 5,
+      "code": 6,
       "name": "AlreadyResolved",
       "msg": "Request has already been resolved"
     },
     {
-      "code": 6,
+      "code": 7,
       "name": "AssertionTooEarly",
       "msg": "Request is not accepting assertion yet"
     },
     {
-      "code": 7,
+      "code": 8,
       "name": "DisputeWindowOpen",
       "msg": "Dispute window has not expired"
     },
     {
-      "code": 8,
+      "code": 9,
       "name": "DisputeWindowExpired",
       "msg": "Dispute window has expired"
     },
     {
-      "code": 9,
+      "code": 10,
       "name": "InvalidValue",
       "msg": "Value is not valid for the request"
     },
     {
-      "code": 10,
+      "code": 11,
       "name": "InvalidDispute",
       "msg": "Disputed value falls within range of acceptable deviation for asserted value"
     },
     {
-      "code": 11,
+      "code": 12,
       "name": "DisputerIsAsserter",
       "msg": "Disputer cannot be the same as the asserter"
     },
     {
-      "code": 12,
+      "code": 13,
       "name": "BondMismatch",
       "msg": "Bond mint address does not match"
+    },
+    {
+      "code": 14,
+      "name": "VotingWindowOpen",
+      "msg": "Voting window has not expired"
+    },
+    {
+      "code": 15,
+      "name": "VotingWindowExpired",
+      "msg": "Voting window has expired"
     }
   ],
   "metadata": {
