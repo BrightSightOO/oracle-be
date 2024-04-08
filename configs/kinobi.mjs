@@ -15,10 +15,6 @@ const rootDir = path.dirname(__dirname);
 const idlDir = path.join(rootDir, "idls");
 const clientDir = path.join(rootDir, "clients");
 
-const jsDir = path.join(clientDir, "js", "src", "generated");
-const crateDir = path.join(clientDir, "rust");
-const rustDir = path.join(crateDir, "src", "generated");
-
 const start = Date.now();
 
 console.log("generating client code...");
@@ -193,18 +189,21 @@ const accountType = (name) => ({
 // Set account discriminators.
 kinobi.update(
   k.setAccountDiscriminatorFromFieldVisitor({
-    Oracle: accountType("Oracle"),
-    Stake: accountType("Stake"),
-    Request: accountType("Request"),
-    Assertion: accountType("Assertion"),
-    Currency: accountType("Currency"),
-    Voting: accountType("Voting"),
-    Vote: accountType("Vote"),
+    oracle: accountType("Oracle"),
+    stake: accountType("Stake"),
+    request: accountType("Request"),
+    assertion: accountType("Assertion"),
+    currency: accountType("Currency"),
+    voting: accountType("Voting"),
+    vote: accountType("Vote"),
   }),
 );
 
 // Render Rust.
 {
+  const crateDir = path.join(clientDir, "rust");
+  const rustDir = path.join(crateDir, "src", "generated");
+
   console.log(`writing rust client to ${bold(path.relative(rootDir, rustDir))}...`);
 
   kinobi.accept(
@@ -221,6 +220,8 @@ kinobi.update(
 
 // Render JavaScript.
 {
+  const jsDir = path.join(clientDir, "js", "src", "generated");
+
   console.log(`writing js client to ${bold(path.relative(rootDir, jsDir))}...`);
 
   kinobi.accept(
