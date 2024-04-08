@@ -27,5 +27,6 @@ pub fn process_instruction<'a>(
         I::ExpireAssertion(args) => assertion::expire(program_id, accounts, args),
         I::DisputeAssertion(args) => assertion::dispute(program_id, accounts, args),
         I::SubmitVote(args) => voting::submit(program_id, accounts, args),
+        I::FinalizeVoting(args) => voting::finalize(program_id, accounts, args),
     }
 }

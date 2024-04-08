@@ -45,7 +45,7 @@ impl Assertion {
 
     pub fn validate_expiration_timestamp(&self, timestamp: i64) -> Result<(), OracleError> {
         if self.in_dispute_window(timestamp) {
-            return Err(OracleError::DisputeWindowOpen);
+            return Err(OracleError::DisputeWindowNotExpired);
         }
         Ok(())
     }

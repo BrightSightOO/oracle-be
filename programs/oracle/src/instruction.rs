@@ -89,6 +89,13 @@ pub enum OracleInstruction {
     #[account(5, signer, writable, name = "payer", desc = "Payer")]
     #[account(6, name = "system_program", desc = "System program")]
     SubmitVote(SubmitVoteArgs),
+
+    /// Finalizes [`Voting`].
+    ///
+    /// [`Voting`]: crate::state::Voting
+    #[account(0, writable, name = "request", desc = "Request")]
+    #[account(1, writable, name = "voting", desc = "Voting")]
+    FinalizeVoting(FinalizeVotingArgs),
 }
 
 #[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
@@ -140,4 +147,9 @@ pub enum SubmitVoteArgs {
         /// Value to vote for.
         value: u64,
     },
+}
+
+#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+pub enum FinalizeVotingArgs {
+    V1 {},
 }

@@ -39,7 +39,7 @@ pub enum OracleError {
 
     /// 8 - Dispute window has not expired.
     #[error("Dispute window has not expired")]
-    DisputeWindowOpen,
+    DisputeWindowNotExpired,
 
     /// 9 - Dispute window has expired.
     #[error("Dispute window has expired")]
@@ -63,7 +63,7 @@ pub enum OracleError {
 
     /// 14 - Voting window has not expired.
     #[error("Voting window has not expired")]
-    VotingWindowOpen,
+    VotingWindowNotExpired,
 
     /// 15 - Voting window has expired.
     #[error("Voting window has expired")]

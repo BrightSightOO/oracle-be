@@ -66,7 +66,15 @@ fn submit_v1(
 
     // Step 2: Check the voting window hasn't expired.
     if voting.end_timestamp <= now.unix_timestamp {
-        return Err(OracleError::VotingWindowExpired.into());
+        if voting.vote_count != 0 {
+            return Err(OracleError::VotingWindowExpired.into());
+        }
+
+        // If no votes were cast then start a new vote window.
+        log!("No votes cast - starting new vote window");
+
+        voting.start_timestamp = now.unix_timestamp;
+        voting.end_timestamp = increment!(now.unix_timestamp, crate::VOTING_WINDOW)?;
     }
 
     // TODO: Implement staking for votes.

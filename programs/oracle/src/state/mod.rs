@@ -155,6 +155,10 @@ pub(crate) struct AccountSizedMut<'a, 'info, T> {
 }
 
 impl<'a, 'info, T: AccountSized> AccountSizedMut<'a, 'info, T> {
+    pub fn into_inner(self) -> T {
+        self.account
+    }
+
     pub fn realloc(
         &mut self,
         payer: &'a AccountInfo<'info>,
