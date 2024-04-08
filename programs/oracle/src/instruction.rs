@@ -58,7 +58,7 @@ pub enum OracleInstruction {
     ///
     /// [`Assertion`]: crate::state::Assertion
     #[account(0, writable, name = "request", desc = "Request")]
-    #[account(1, writable, name = "assertion", desc = "Assertion")]
+    #[account(1, name = "assertion", desc = "Assertion")]
     ExpireAssertion(ExpireAssertionArgs),
 
     /// Disputes an [`Assertion`] for a [`Request`].
