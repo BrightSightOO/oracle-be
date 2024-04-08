@@ -48,6 +48,7 @@ kinobi.update(
       ],
     },
     request: {
+      size: null,
       seeds: [
         k.constantPdaSeedNodeFromString("request"),
         k.variablePdaSeedNode(
@@ -70,6 +71,7 @@ kinobi.update(
       ],
     },
     voting: {
+      size: null,
       seeds: [
         k.constantPdaSeedNodeFromString("voting"),
         k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),

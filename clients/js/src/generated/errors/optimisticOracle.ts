@@ -118,9 +118,9 @@ export class AssertionTooEarlyError extends ProgramError {
 codeToErrorMap.set(0x7, AssertionTooEarlyError);
 nameToErrorMap.set("AssertionTooEarly", AssertionTooEarlyError);
 
-/** DisputeWindowOpen: Dispute window has not expired */
-export class DisputeWindowOpenError extends ProgramError {
-  override readonly name: string = "DisputeWindowOpen";
+/** DisputeWindowNotExpired: Dispute window has not expired */
+export class DisputeWindowNotExpiredError extends ProgramError {
+  override readonly name: string = "DisputeWindowNotExpired";
 
   readonly code: number = 0x8; // 8
 
@@ -128,8 +128,8 @@ export class DisputeWindowOpenError extends ProgramError {
     super("Dispute window has not expired", program, cause);
   }
 }
-codeToErrorMap.set(0x8, DisputeWindowOpenError);
-nameToErrorMap.set("DisputeWindowOpen", DisputeWindowOpenError);
+codeToErrorMap.set(0x8, DisputeWindowNotExpiredError);
+nameToErrorMap.set("DisputeWindowNotExpired", DisputeWindowNotExpiredError);
 
 /** DisputeWindowExpired: Dispute window has expired */
 export class DisputeWindowExpiredError extends ProgramError {
@@ -200,9 +200,9 @@ export class BondMismatchError extends ProgramError {
 codeToErrorMap.set(0xd, BondMismatchError);
 nameToErrorMap.set("BondMismatch", BondMismatchError);
 
-/** VotingWindowOpen: Voting window has not expired */
-export class VotingWindowOpenError extends ProgramError {
-  override readonly name: string = "VotingWindowOpen";
+/** VotingWindowNotExpired: Voting window has not expired */
+export class VotingWindowNotExpiredError extends ProgramError {
+  override readonly name: string = "VotingWindowNotExpired";
 
   readonly code: number = 0xe; // 14
 
@@ -210,8 +210,8 @@ export class VotingWindowOpenError extends ProgramError {
     super("Voting window has not expired", program, cause);
   }
 }
-codeToErrorMap.set(0xe, VotingWindowOpenError);
-nameToErrorMap.set("VotingWindowOpen", VotingWindowOpenError);
+codeToErrorMap.set(0xe, VotingWindowNotExpiredError);
+nameToErrorMap.set("VotingWindowNotExpired", VotingWindowNotExpiredError);
 
 /** VotingWindowExpired: Voting window has expired */
 export class VotingWindowExpiredError extends ProgramError {

@@ -5,36 +5,35 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-use crate::generated::types::ExpireAssertionArgs;
+use crate::generated::types::FinalizeVotingArgs;
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
-pub struct ExpireAssertion {
+pub struct FinalizeVoting {
     /// Request
     pub request: solana_program::pubkey::Pubkey,
-    /// Assertion
-    pub assertion: solana_program::pubkey::Pubkey,
+    /// Voting
+    pub voting: solana_program::pubkey::Pubkey,
 }
 
-impl ExpireAssertion {
+impl FinalizeVoting {
     pub fn instruction(
         &self,
-        args: ExpireAssertionInstructionArgs,
+        args: FinalizeVotingInstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: ExpireAssertionInstructionArgs,
+        args: FinalizeVotingInstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(self.request, false));
-        accounts
-            .push(solana_program::instruction::AccountMeta::new_readonly(self.assertion, false));
+        accounts.push(solana_program::instruction::AccountMeta::new(self.voting, false));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = ExpireAssertionInstructionData::new().try_to_vec().unwrap();
+        let mut data = FinalizeVotingInstructionData::new().try_to_vec().unwrap();
         let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -47,37 +46,37 @@ impl ExpireAssertion {
 }
 
 #[derive(BorshDeserialize, BorshSerialize)]
-struct ExpireAssertionInstructionData {
+struct FinalizeVotingInstructionData {
     discriminator: u8,
 }
 
-impl ExpireAssertionInstructionData {
+impl FinalizeVotingInstructionData {
     fn new() -> Self {
-        Self { discriminator: 3 }
+        Self { discriminator: 6 }
     }
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ExpireAssertionInstructionArgs {
-    pub expire_assertion_args: ExpireAssertionArgs,
+pub struct FinalizeVotingInstructionArgs {
+    pub finalize_voting_args: FinalizeVotingArgs,
 }
 
-/// Instruction builder for `ExpireAssertion`.
+/// Instruction builder for `FinalizeVoting`.
 ///
 /// ### Accounts:
 ///
 ///   0. `[writable]` request
-///   1. `[]` assertion
+///   1. `[writable]` voting
 #[derive(Default)]
-pub struct ExpireAssertionBuilder {
+pub struct FinalizeVotingBuilder {
     request: Option<solana_program::pubkey::Pubkey>,
-    assertion: Option<solana_program::pubkey::Pubkey>,
-    expire_assertion_args: Option<ExpireAssertionArgs>,
+    voting: Option<solana_program::pubkey::Pubkey>,
+    finalize_voting_args: Option<FinalizeVotingArgs>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl ExpireAssertionBuilder {
+impl FinalizeVotingBuilder {
     pub fn new() -> Self {
         Self::default()
     }
@@ -87,18 +86,15 @@ impl ExpireAssertionBuilder {
         self.request = Some(request);
         self
     }
-    /// Assertion
+    /// Voting
     #[inline(always)]
-    pub fn assertion(&mut self, assertion: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.assertion = Some(assertion);
+    pub fn voting(&mut self, voting: solana_program::pubkey::Pubkey) -> &mut Self {
+        self.voting = Some(voting);
         self
     }
     #[inline(always)]
-    pub fn expire_assertion_args(
-        &mut self,
-        expire_assertion_args: ExpireAssertionArgs,
-    ) -> &mut Self {
-        self.expire_assertion_args = Some(expire_assertion_args);
+    pub fn finalize_voting_args(&mut self, finalize_voting_args: FinalizeVotingArgs) -> &mut Self {
+        self.finalize_voting_args = Some(finalize_voting_args);
         self
     }
     /// Add an aditional account to the instruction.
@@ -121,51 +117,51 @@ impl ExpireAssertionBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = ExpireAssertion {
+        let accounts = FinalizeVoting {
             request: self.request.expect("request is not set"),
-            assertion: self.assertion.expect("assertion is not set"),
+            voting: self.voting.expect("voting is not set"),
         };
-        let args = ExpireAssertionInstructionArgs {
-            expire_assertion_args: self
-                .expire_assertion_args
+        let args = FinalizeVotingInstructionArgs {
+            finalize_voting_args: self
+                .finalize_voting_args
                 .clone()
-                .expect("expire_assertion_args is not set"),
+                .expect("finalize_voting_args is not set"),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
     }
 }
 
-/// `expire_assertion` CPI accounts.
-pub struct ExpireAssertionCpiAccounts<'a, 'b> {
+/// `finalize_voting` CPI accounts.
+pub struct FinalizeVotingCpiAccounts<'a, 'b> {
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Assertion
-    pub assertion: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Voting
+    pub voting: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `expire_assertion` CPI instruction.
-pub struct ExpireAssertionCpi<'a, 'b> {
+/// `finalize_voting` CPI instruction.
+pub struct FinalizeVotingCpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
     /// Request
     pub request: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Assertion
-    pub assertion: &'b solana_program::account_info::AccountInfo<'a>,
+    /// Voting
+    pub voting: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
-    pub __args: ExpireAssertionInstructionArgs,
+    pub __args: FinalizeVotingInstructionArgs,
 }
 
-impl<'a, 'b> ExpireAssertionCpi<'a, 'b> {
+impl<'a, 'b> FinalizeVotingCpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: ExpireAssertionCpiAccounts<'a, 'b>,
-        args: ExpireAssertionInstructionArgs,
+        accounts: FinalizeVotingCpiAccounts<'a, 'b>,
+        args: FinalizeVotingInstructionArgs,
     ) -> Self {
         Self {
             __program: program,
             request: accounts.request,
-            assertion: accounts.assertion,
+            voting: accounts.voting,
             __args: args,
         }
     }
@@ -196,10 +192,7 @@ impl<'a, 'b> ExpireAssertionCpi<'a, 'b> {
     ) -> solana_program::entrypoint::ProgramResult {
         let mut accounts = Vec::with_capacity(2 + remaining_accounts.len());
         accounts.push(solana_program::instruction::AccountMeta::new(*self.request.key, false));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
-            *self.assertion.key,
-            false,
-        ));
+        accounts.push(solana_program::instruction::AccountMeta::new(*self.voting.key, false));
         remaining_accounts.iter().for_each(|remaining_account| {
             accounts.push(solana_program::instruction::AccountMeta {
                 pubkey: *remaining_account.0.key,
@@ -207,7 +200,7 @@ impl<'a, 'b> ExpireAssertionCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = ExpireAssertionInstructionData::new().try_to_vec().unwrap();
+        let mut data = FinalizeVotingInstructionData::new().try_to_vec().unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -219,7 +212,7 @@ impl<'a, 'b> ExpireAssertionCpi<'a, 'b> {
         let mut account_infos = Vec::with_capacity(2 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.request.clone());
-        account_infos.push(self.assertion.clone());
+        account_infos.push(self.voting.clone());
         remaining_accounts
             .iter()
             .for_each(|remaining_account| account_infos.push(remaining_account.0.clone()));
@@ -232,23 +225,23 @@ impl<'a, 'b> ExpireAssertionCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `ExpireAssertion` via CPI.
+/// Instruction builder for `FinalizeVoting` via CPI.
 ///
 /// ### Accounts:
 ///
 ///   0. `[writable]` request
-///   1. `[]` assertion
-pub struct ExpireAssertionCpiBuilder<'a, 'b> {
-    instruction: Box<ExpireAssertionCpiBuilderInstruction<'a, 'b>>,
+///   1. `[writable]` voting
+pub struct FinalizeVotingCpiBuilder<'a, 'b> {
+    instruction: Box<FinalizeVotingCpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> ExpireAssertionCpiBuilder<'a, 'b> {
+impl<'a, 'b> FinalizeVotingCpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(ExpireAssertionCpiBuilderInstruction {
+        let instruction = Box::new(FinalizeVotingCpiBuilderInstruction {
             __program: program,
             request: None,
-            assertion: None,
-            expire_assertion_args: None,
+            voting: None,
+            finalize_voting_args: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -262,21 +255,18 @@ impl<'a, 'b> ExpireAssertionCpiBuilder<'a, 'b> {
         self.instruction.request = Some(request);
         self
     }
-    /// Assertion
+    /// Voting
     #[inline(always)]
-    pub fn assertion(
+    pub fn voting(
         &mut self,
-        assertion: &'b solana_program::account_info::AccountInfo<'a>,
+        voting: &'b solana_program::account_info::AccountInfo<'a>,
     ) -> &mut Self {
-        self.instruction.assertion = Some(assertion);
+        self.instruction.voting = Some(voting);
         self
     }
     #[inline(always)]
-    pub fn expire_assertion_args(
-        &mut self,
-        expire_assertion_args: ExpireAssertionArgs,
-    ) -> &mut Self {
-        self.instruction.expire_assertion_args = Some(expire_assertion_args);
+    pub fn finalize_voting_args(&mut self, finalize_voting_args: FinalizeVotingArgs) -> &mut Self {
+        self.instruction.finalize_voting_args = Some(finalize_voting_args);
         self
     }
     /// Add an additional account to the instruction.
@@ -312,19 +302,19 @@ impl<'a, 'b> ExpireAssertionCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = ExpireAssertionInstructionArgs {
-            expire_assertion_args: self
+        let args = FinalizeVotingInstructionArgs {
+            finalize_voting_args: self
                 .instruction
-                .expire_assertion_args
+                .finalize_voting_args
                 .clone()
-                .expect("expire_assertion_args is not set"),
+                .expect("finalize_voting_args is not set"),
         };
-        let instruction = ExpireAssertionCpi {
+        let instruction = FinalizeVotingCpi {
             __program: self.instruction.__program,
 
             request: self.instruction.request.expect("request is not set"),
 
-            assertion: self.instruction.assertion.expect("assertion is not set"),
+            voting: self.instruction.voting.expect("voting is not set"),
             __args: args,
         };
         instruction.invoke_signed_with_remaining_accounts(
@@ -334,11 +324,11 @@ impl<'a, 'b> ExpireAssertionCpiBuilder<'a, 'b> {
     }
 }
 
-struct ExpireAssertionCpiBuilderInstruction<'a, 'b> {
+struct FinalizeVotingCpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     request: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    assertion: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    expire_assertion_args: Option<ExpireAssertionArgs>,
+    voting: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    finalize_voting_args: Option<FinalizeVotingArgs>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(&'b solana_program::account_info::AccountInfo<'a>, bool, bool)>,
 }

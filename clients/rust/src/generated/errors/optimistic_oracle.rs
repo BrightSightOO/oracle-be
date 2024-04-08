@@ -36,7 +36,7 @@ pub enum OptimisticOracleError {
     AssertionTooEarly,
     /// 8 (0x8) - Dispute window has not expired
     #[error("Dispute window has not expired")]
-    DisputeWindowOpen,
+    DisputeWindowNotExpired,
     /// 9 (0x9) - Dispute window has expired
     #[error("Dispute window has expired")]
     DisputeWindowExpired,
@@ -54,7 +54,7 @@ pub enum OptimisticOracleError {
     BondMismatch,
     /// 14 (0xE) - Voting window has not expired
     #[error("Voting window has not expired")]
-    VotingWindowOpen,
+    VotingWindowNotExpired,
     /// 15 (0xF) - Voting window has expired
     #[error("Voting window has expired")]
     VotingWindowExpired,

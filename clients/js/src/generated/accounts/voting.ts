@@ -157,10 +157,6 @@ export function getVotingGpaBuilder(context: Pick<Context, "rpc" | "programs">) 
     .whereField("accountType", AccountType.Voting);
 }
 
-export function getVotingSize(): number {
-  return 81;
-}
-
 export function findVotingPda(
   context: Pick<Context, "eddsa" | "programs">,
   seeds: {

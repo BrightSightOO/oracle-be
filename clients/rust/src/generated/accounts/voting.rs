@@ -24,8 +24,6 @@ pub struct Voting {
 }
 
 impl Voting {
-    pub const LEN: usize = 81;
-
     /// Prefix values used to generate a PDA for this account.
     ///
     /// Values are positional and appear in the following order:

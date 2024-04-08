@@ -242,7 +242,7 @@
         },
         {
           "name": "assertion",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false,
           "docs": [
             "Assertion"
@@ -430,6 +430,39 @@
       "discriminant": {
         "type": "u8",
         "value": 5
+      }
+    },
+    {
+      "name": "FinalizeVoting",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Request"
+          ]
+        },
+        {
+          "name": "voting",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Voting"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "finalizeVotingArgs",
+          "type": {
+            "defined": "FinalizeVotingArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 6
       }
     }
   ],
@@ -790,6 +823,17 @@
       }
     },
     {
+      "name": "FinalizeVotingArgs",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "V1"
+          }
+        ]
+      }
+    },
+    {
       "name": "AccountType",
       "type": {
         "kind": "enum",
@@ -902,7 +946,7 @@
     },
     {
       "code": 8,
-      "name": "DisputeWindowOpen",
+      "name": "DisputeWindowNotExpired",
       "msg": "Dispute window has not expired"
     },
     {
@@ -932,7 +976,7 @@
     },
     {
       "code": 14,
-      "name": "VotingWindowOpen",
+      "name": "VotingWindowNotExpired",
       "msg": "Voting window has not expired"
     },
     {
