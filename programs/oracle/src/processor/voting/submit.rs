@@ -23,11 +23,11 @@ pub fn submit<'a>(
     let ctx = SubmitVoteAccounts::context(accounts)?;
 
     match args {
-        SubmitVoteArgs::V1 { .. } => dispute_v1(program_id, ctx, args),
+        SubmitVoteArgs::V1 { .. } => submit_v1(program_id, ctx, args),
     }
 }
 
-fn dispute_v1(
+fn submit_v1(
     program_id: &Pubkey,
     ctx: Context<SubmitVoteAccounts>,
     args: SubmitVoteArgs,
