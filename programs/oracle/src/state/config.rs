@@ -1,4 +1,4 @@
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::pubkey::Pubkey;
@@ -7,7 +7,7 @@ use crate::error::OracleError;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize, ShankAccount)]
 pub struct ConfigV1 {
     account_type: AccountType,
 

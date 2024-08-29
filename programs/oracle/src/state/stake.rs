@@ -1,4 +1,4 @@
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::clock::UnixTimestamp;
@@ -13,7 +13,7 @@ use super::{Account, AccountType};
 // - merging staking accounts
 //   - cannot be done if an account has a lock for an active vote
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize, ShankAccount)]
 pub struct StakeV1 {
     account_type: AccountType,
 

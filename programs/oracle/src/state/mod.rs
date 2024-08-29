@@ -3,7 +3,7 @@ use std::convert::Infallible;
 use std::io;
 use std::ops::{Deref, DerefMut};
 
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::{BorshSize, BorshSizeProperties};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
@@ -44,6 +44,7 @@ pub use self::voting::*;
     FromPrimitive,
     BorshDeserialize,
     BorshSerialize,
+    BorshSchema,
     BorshSize,
     VariantName,
 )]
@@ -69,6 +70,8 @@ pub enum AccountType {
     /// Account containing [`VoteV1`] state.
     VoteV1,
 }
+
+account_schema_tests! { OracleV1 ConfigV1 StakeV1 RequestV1 AssertionV1 CurrencyV1 VotingV1 VoteV1 }
 
 pub(crate) trait Account: BorshDeserialize + BorshSerialize {
     const TYPE: AccountType;

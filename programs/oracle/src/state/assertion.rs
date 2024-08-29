@@ -1,4 +1,4 @@
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::clock::UnixTimestamp;
@@ -9,7 +9,7 @@ use crate::error::OracleError;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, ShankAccount, BorshSize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize, ShankAccount)]
 pub struct AssertionV1 {
     account_type: AccountType,
 

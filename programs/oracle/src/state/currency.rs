@@ -1,4 +1,4 @@
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::program_error::ProgramError;
@@ -10,7 +10,7 @@ use crate::utils::Bounds;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize, ShankAccount)]
 pub struct CurrencyV1 {
     account_type: AccountType,
 

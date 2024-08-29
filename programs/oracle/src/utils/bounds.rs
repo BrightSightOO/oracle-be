@@ -1,9 +1,9 @@
 use std::ops::{Bound, Range, RangeBounds};
 
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::BorshSize;
 
-#[derive(Clone, Copy, BorshDeserialize, BorshSerialize, BorshSize)]
+#[derive(Clone, Copy, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize)]
 pub struct Bounds {
     /// The lower bound of the range (inclusive).
     pub start: u64,

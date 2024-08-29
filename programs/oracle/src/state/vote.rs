@@ -1,11 +1,11 @@
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::pubkey::Pubkey;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize, ShankAccount)]
 pub struct VoteV1 {
     account_type: AccountType,
 

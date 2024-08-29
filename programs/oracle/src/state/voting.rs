@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::BorshSize;
 use shank::ShankAccount;
 use solana_program::clock::UnixTimestamp;
@@ -9,7 +9,7 @@ use solana_program::pubkey::Pubkey;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize, ShankAccount)]
 pub struct VotingV1 {
     account_type: AccountType,
 

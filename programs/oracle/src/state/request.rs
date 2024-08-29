@@ -1,4 +1,4 @@
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::BorshSize;
 use shank::ShankAccount;
 use solana_program::clock::UnixTimestamp;
@@ -10,7 +10,7 @@ use crate::pda;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize, ShankAccount)]
 pub struct RequestV1 {
     account_type: AccountType,
 
@@ -58,7 +58,7 @@ pub struct RequestV1 {
     pub data: RequestData,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, BorshDeserialize, BorshSerialize, BorshSize)]
+#[derive(Clone, Copy, PartialEq, Eq, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize)]
 #[repr(u8)]
 pub enum RequestState {
     /// Request pending a proposal.
@@ -71,7 +71,7 @@ pub enum RequestState {
     Resolved,
 }
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize)]
 pub enum RequestData {
     /// Yes/No request:
     /// - 0 = No
