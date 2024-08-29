@@ -80,7 +80,7 @@ module.exports = {
     {
       files: ["*.cjs"],
       rules: {
-        "@typescript-eslint/no-require-imports": ["error", { allowAsImport: true }],
+        "@typescript-eslint/no-require-imports": "off",
       },
     },
     {
