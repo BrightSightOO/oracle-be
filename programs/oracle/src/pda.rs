@@ -11,6 +11,12 @@ impl<T: bytemuck::NoUninit> PdaSeed for T {
 #[cfg(not(target_endian = "little"))]
 compile_error!("only little endian targets are supported");
 
+macro_rules! count_tts {
+    () => { 0 };
+    ($odd:tt $($a:tt $b:tt)*) => { (count_tts!($($a)*) << 1) | 1 };
+    ($($a:tt $even:tt)*) => { count_tts!($($a)*) << 1 };
+}
+
 macro_rules! pdas {
     ($(
         $desc:literal: $name:ident($($seed:ident : $seed_ty:ty),* $(,)?);
@@ -24,19 +30,16 @@ macro_rules! pdas {
                 use solana_program::program_error::ProgramError;
                 use solana_program::pubkey::Pubkey;
 
-                pub const PREFIX_SEED: &str = stringify!($name);
+                pub const PREFIX: &str = stringify!($name);
 
-                const N_SEEDS: usize = 1 $(+ {
-                    stringify!($seed);
-                    1
-                })*;
+                const N_SEEDS: usize = 1 + count_tts!($($seed)*);
 
                 pub fn seeds<'a>($($seed : &'a $seed_ty),*) -> [&'a [u8]; N_SEEDS] {
-                    [PREFIX_SEED.as_bytes(), $(PdaSeed::pda_seed($seed)),*]
+                    [PREFIX.as_bytes(), $(PdaSeed::pda_seed($seed)),*]
                 }
 
                 pub fn seeds_with_bump<'a>($($seed : &'a $seed_ty,)* bump: &'a u8) -> [&'a [u8]; N_SEEDS + 1] {
-                    [PREFIX_SEED.as_bytes(), $(PdaSeed::pda_seed($seed),)* std::slice::from_ref(bump)]
+                    [PREFIX.as_bytes(), $(PdaSeed::pda_seed($seed),)* std::slice::from_ref(bump)]
                 }
 
                 pub fn pda<'a>($($seed : &'a $seed_ty),*) -> (Pubkey, u8) {

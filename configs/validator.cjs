@@ -23,19 +23,7 @@ module.exports = {
       {
         label: "Optimistic Oracle",
         programId: "DVMcc2M87dcTZfp4PLvzGU1Aps4xrNmNpkHKEpWm3hJW",
-        deployPath: getProgram("oracle.so"),
-      },
-    ],
-    accounts: [
-      {
-        label: "System Extras",
-        accountId: "SysExL2WDyJi9aRZrXorrjHJut3JwHQ7R9bTyctbNNG",
-        executable: true,
-      },
-      {
-        label: "Token Extras",
-        accountId: "TokExjvjJmhKaRBShsBAsbSvEWMA1AgUNK7ps4SAc2p",
-        executable: true,
+        deployPath: getProgram("oracle_program.so"),
       },
     ],
   },

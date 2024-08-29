@@ -10,32 +10,32 @@ import type { ResolvedAccount, ResolvedAccountsWithIndices } from "../shared";
 import type { Context, Pda, PublicKey, Signer, TransactionBuilder } from "@metaplex-foundation/umi";
 import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
-import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import { transactionBuilder } from "@metaplex-foundation/umi";
-import { mapSerializer, struct, u64, u8 } from "@metaplex-foundation/umi/serializers";
+import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { findAssertBondPda } from "../../hooked";
 import { findAssertionV1Pda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 
 // Accounts.
-export type CreateAssertionV1InstructionAccounts = {
-  /** Config */
-  config: PublicKey | Pda;
+export type ClaimDisputeV1InstructionAccounts = {
   /** Request */
   request: PublicKey | Pda;
   /** Assertion */
   assertion?: PublicKey | Pda;
   /** Bond mint */
   bondMint: PublicKey | Pda;
-  /** Bond source token account */
-  bondSource?: PublicKey | Pda;
-  /** Bond escrow token account */
-  bondEscrow?: PublicKey | Pda;
-  /** Asserter */
-  asserter?: Signer;
-  /** Payer */
-  payer?: Signer;
+  /** Reclaimed bond destination token account */
+  bondDestination: PublicKey | Pda;
+  /** Disputer bond escrow token account */
+  bondEscrow: PublicKey | Pda;
+  /** Reward mint */
+  rewardMint: PublicKey | Pda;
+  /** Reward destination token account */
+  rewardDestination: PublicKey | Pda;
+  /** Reward escrow token account */
+  rewardEscrow: PublicKey | Pda;
+  /** Disputer */
+  disputer: Signer;
   /** SPL token program */
   tokenProgram?: PublicKey | Pda;
   /** System program */
@@ -43,36 +43,26 @@ export type CreateAssertionV1InstructionAccounts = {
 };
 
 // Data.
-export type CreateAssertionV1InstructionData = {
-  discriminator: number;
-  value: bigint;
-};
+export type ClaimDisputeV1InstructionData = { discriminator: number };
 
-export type CreateAssertionV1InstructionDataArgs = { value: number | bigint };
+export type ClaimDisputeV1InstructionDataArgs = {};
 
-export function getCreateAssertionV1InstructionDataSerializer(): Serializer<
-  CreateAssertionV1InstructionDataArgs,
-  CreateAssertionV1InstructionData
+export function getClaimDisputeV1InstructionDataSerializer(): Serializer<
+  ClaimDisputeV1InstructionDataArgs,
+  ClaimDisputeV1InstructionData
 > {
-  return mapSerializer<CreateAssertionV1InstructionDataArgs, any, CreateAssertionV1InstructionData>(
-    struct<CreateAssertionV1InstructionData>(
-      [
-        ["discriminator", u8()],
-        ["value", u64()],
-      ],
-      { description: "CreateAssertionV1InstructionData" },
-    ),
-    (value) => ({ ...value, discriminator: 7 }),
+  return mapSerializer<ClaimDisputeV1InstructionDataArgs, any, ClaimDisputeV1InstructionData>(
+    struct<ClaimDisputeV1InstructionData>([["discriminator", u8()]], {
+      description: "ClaimDisputeV1InstructionData",
+    }),
+    (value) => ({ ...value, discriminator: 14 }),
   );
 }
 
-// Args.
-export type CreateAssertionV1InstructionArgs = CreateAssertionV1InstructionDataArgs;
-
 // Instruction.
-export function createAssertionV1(
-  context: Pick<Context, "eddsa" | "identity" | "payer" | "programs">,
-  input: CreateAssertionV1InstructionAccounts & CreateAssertionV1InstructionArgs,
+export function claimDisputeV1(
+  context: Pick<Context, "eddsa" | "programs">,
+  input: ClaimDisputeV1InstructionAccounts,
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -82,83 +72,68 @@ export function createAssertionV1(
 
   // Accounts.
   const resolvedAccounts = {
-    config: {
+    request: {
       index: 0,
       isWritable: false as boolean,
-      value: input.config ?? null,
-    },
-    request: {
-      index: 1,
-      isWritable: true as boolean,
       value: input.request ?? null,
     },
     assertion: {
-      index: 2,
+      index: 1,
       isWritable: true as boolean,
       value: input.assertion ?? null,
     },
     bondMint: {
-      index: 3,
+      index: 2,
       isWritable: false as boolean,
       value: input.bondMint ?? null,
     },
-    bondSource: {
-      index: 4,
+    bondDestination: {
+      index: 3,
       isWritable: true as boolean,
-      value: input.bondSource ?? null,
+      value: input.bondDestination ?? null,
     },
     bondEscrow: {
-      index: 5,
+      index: 4,
       isWritable: true as boolean,
       value: input.bondEscrow ?? null,
     },
-    asserter: {
-      index: 6,
+    rewardMint: {
+      index: 5,
       isWritable: false as boolean,
-      value: input.asserter ?? null,
+      value: input.rewardMint ?? null,
     },
-    payer: {
+    rewardDestination: {
+      index: 6,
+      isWritable: true as boolean,
+      value: input.rewardDestination ?? null,
+    },
+    rewardEscrow: {
       index: 7,
       isWritable: true as boolean,
-      value: input.payer ?? null,
+      value: input.rewardEscrow ?? null,
+    },
+    disputer: {
+      index: 8,
+      isWritable: true as boolean,
+      value: input.disputer ?? null,
     },
     tokenProgram: {
-      index: 8,
+      index: 9,
       isWritable: false as boolean,
       value: input.tokenProgram ?? null,
     },
     systemProgram: {
-      index: 9,
+      index: 10,
       isWritable: false as boolean,
       value: input.systemProgram ?? null,
     },
   } satisfies ResolvedAccountsWithIndices;
-
-  // Arguments.
-  const resolvedArgs: CreateAssertionV1InstructionArgs = { ...input };
 
   // Default values.
   if (!resolvedAccounts.assertion.value) {
     resolvedAccounts.assertion.value = findAssertionV1Pda(context, {
       request: expectPublicKey(resolvedAccounts.request.value),
     });
-  }
-  if (!resolvedAccounts.asserter.value) {
-    resolvedAccounts.asserter.value = context.identity;
-  }
-  if (!resolvedAccounts.bondSource.value) {
-    resolvedAccounts.bondSource.value = findAssociatedTokenPda(context, {
-      mint: expectPublicKey(resolvedAccounts.bondMint.value),
-      owner: expectPublicKey(resolvedAccounts.asserter.value),
-    });
-  }
-  if (!resolvedAccounts.bondEscrow.value) {
-    resolvedAccounts.bondEscrow.value = findAssertBondPda(context, {
-      request: expectPublicKey(resolvedAccounts.request.value),
-    });
-  }
-  if (!resolvedAccounts.payer.value) {
-    resolvedAccounts.payer.value = context.payer;
   }
   if (!resolvedAccounts.tokenProgram.value) {
     resolvedAccounts.tokenProgram.value = context.programs.getPublicKey(
@@ -184,7 +159,7 @@ export function createAssertionV1(
   const [keys, signers] = getAccountMetasAndSigners(orderedAccounts, "programId", programId);
 
   // Data.
-  const data = getCreateAssertionV1InstructionDataSerializer().serialize(resolvedArgs);
+  const data = getClaimDisputeV1InstructionDataSerializer().serialize({});
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

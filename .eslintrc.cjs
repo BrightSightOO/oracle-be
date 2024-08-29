@@ -40,6 +40,7 @@ module.exports = {
       },
       rules: {
         "@typescript-eslint/array-type": ["error", { default: "generic" }],
+        "@typescript-eslint/consistent-type-definitions": ["error", "type"],
         "@typescript-eslint/consistent-type-imports": [
           "error",
           { prefer: "type-imports", fixStyle: "separate-type-imports" },
@@ -79,7 +80,7 @@ module.exports = {
     {
       files: ["*.cjs"],
       rules: {
-        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-require-imports": ["error", { allowAsImport: true }],
       },
     },
     {

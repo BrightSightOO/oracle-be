@@ -15,8 +15,13 @@ const binaryInstallDir = path.join(rootDir, ".crates");
 
 await generateIdl({
   generator: "shank",
-  programName: "oracle",
+  programName: "optimistic_oracle",
+  idlName: "optimistic_oracle",
   idlDir,
   binaryInstallDir,
   programDir: path.join(programDir, "oracle"),
+  idlHook: (idl) => {
+    idl.name = "optimistic_oracle";
+    return idl;
+  },
 });

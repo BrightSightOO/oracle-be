@@ -1,6 +1,6 @@
 {
-  "version": "0.0.0",
-  "name": "oracle",
+  "version": "2.0.0",
+  "name": "optimistic_oracle",
   "instructions": [
     {
       "name": "CreateOracleV1",
@@ -10,7 +10,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Oracle account"
+            "Oracle"
           ]
         },
         {
@@ -59,7 +59,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Oracle account"
+            "Oracle"
           ]
         },
         {
@@ -280,7 +280,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Oracle account"
+            "Oracle"
           ]
         },
         {
@@ -520,6 +520,14 @@
       "name": "DisputeAssertionV1",
       "accounts": [
         {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Oracle"
+          ]
+        },
+        {
           "name": "config",
           "isMut": false,
           "isSigner": false,
@@ -737,7 +745,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Oracle account"
+            "Oracle"
           ]
         },
         {
@@ -816,6 +824,300 @@
       "discriminant": {
         "type": "u8",
         "value": 12
+      }
+    },
+    {
+      "name": "ClaimAssertionV1",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Request"
+          ]
+        },
+        {
+          "name": "assertion",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Assertion"
+          ]
+        },
+        {
+          "name": "bondMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bond mint"
+          ]
+        },
+        {
+          "name": "bondDestination",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reclaimed bond destination token account"
+          ]
+        },
+        {
+          "name": "bondEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Asserter bond escrow token account"
+          ]
+        },
+        {
+          "name": "rewardMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Reward mint"
+          ]
+        },
+        {
+          "name": "rewardDestination",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reward destination token account"
+          ]
+        },
+        {
+          "name": "rewardEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reward escrow token account"
+          ]
+        },
+        {
+          "name": "asserter",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Asserter"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL token program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 13
+      }
+    },
+    {
+      "name": "ClaimDisputeV1",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Request"
+          ]
+        },
+        {
+          "name": "assertion",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Assertion"
+          ]
+        },
+        {
+          "name": "bondMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bond mint"
+          ]
+        },
+        {
+          "name": "bondDestination",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reclaimed bond destination token account"
+          ]
+        },
+        {
+          "name": "bondEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Disputer bond escrow token account"
+          ]
+        },
+        {
+          "name": "rewardMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Reward mint"
+          ]
+        },
+        {
+          "name": "rewardDestination",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reward destination token account"
+          ]
+        },
+        {
+          "name": "rewardEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Reward escrow token account"
+          ]
+        },
+        {
+          "name": "disputer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Disputer"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL token program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 14
+      }
+    },
+    {
+      "name": "ClaimVoteV1",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Request"
+          ]
+        },
+        {
+          "name": "assertion",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Assertion"
+          ]
+        },
+        {
+          "name": "voting",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Voting"
+          ]
+        },
+        {
+          "name": "vote",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Vote"
+          ]
+        },
+        {
+          "name": "stake",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Stake"
+          ]
+        },
+        {
+          "name": "bondMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Bond mint"
+          ]
+        },
+        {
+          "name": "bondDestination",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bond destination token account"
+          ]
+        },
+        {
+          "name": "bondEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Bond escrow token account of incorrect asserter/disputer"
+          ]
+        },
+        {
+          "name": "voter",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Voter"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "SPL token program"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 15
       }
     }
   ],
@@ -1042,6 +1344,10 @@
             }
           },
           {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
             "name": "owner",
             "type": "publicKey"
           },
@@ -1074,6 +1380,10 @@
             }
           },
           {
+            "name": "voting",
+            "type": "publicKey"
+          },
+          {
             "name": "stake",
             "type": "publicKey"
           },
@@ -1101,6 +1411,10 @@
           },
           {
             "name": "request",
+            "type": "publicKey"
+          },
+          {
+            "name": "governanceMint",
             "type": "publicKey"
           },
           {
@@ -1457,98 +1771,133 @@
     },
     {
       "code": 5,
+      "name": "InvalidBps",
+      "msg": "Invalid basis points value"
+    },
+    {
+      "code": 6,
       "name": "DisputerIsAsserter",
       "msg": "Disputer cannot be the same as the asserter"
     },
     {
-      "code": 6,
+      "code": 7,
       "name": "NotAsserted",
       "msg": "Request does not have an assertion"
     },
     {
-      "code": 7,
+      "code": 8,
       "name": "NotDisputed",
       "msg": "Request is not disputed"
     },
     {
-      "code": 8,
+      "code": 9,
+      "name": "NotResolved",
+      "msg": "Request is not resolved"
+    },
+    {
+      "code": 10,
       "name": "AlreadyAsserted",
       "msg": "Request already has an assertion"
     },
     {
-      "code": 9,
+      "code": 11,
       "name": "AlreadyDisputed",
       "msg": "Assertion has already been disputed"
     },
     {
-      "code": 10,
+      "code": 12,
       "name": "AlreadyResolved",
       "msg": "Request has already been resolved"
     },
     {
-      "code": 11,
+      "code": 13,
       "name": "AssertionTooEarly",
       "msg": "Request is not accepting assertion yet"
     },
     {
-      "code": 12,
+      "code": 14,
       "name": "DisputeWindowNotExpired",
       "msg": "Dispute window has not expired"
     },
     {
-      "code": 13,
+      "code": 15,
       "name": "DisputeWindowExpired",
       "msg": "Dispute window has expired"
     },
     {
-      "code": 14,
+      "code": 16,
       "name": "VotingWindowNotExpired",
       "msg": "Voting window has not expired"
     },
     {
-      "code": 15,
+      "code": 17,
       "name": "VotingWindowExpired",
       "msg": "Voting window has expired"
     },
     {
-      "code": 16,
+      "code": 18,
       "name": "ArbitrationWindowNotExpired",
       "msg": "Arbitration window has not expired"
     },
     {
-      "code": 17,
+      "code": 19,
       "name": "OracleAuthorityMismatch",
       "msg": "Oracle authority address does not match"
     },
     {
-      "code": 18,
+      "code": 20,
       "name": "ConfigAuthorityMismatch",
       "msg": "Config authority address does not match"
     },
     {
-      "code": 19,
+      "code": 21,
       "name": "ConfigMismatch",
       "msg": "Config address does not match"
     },
     {
-      "code": 20,
+      "code": 22,
       "name": "CurrencyMintMismatch",
       "msg": "Currency mint address does not match"
     },
     {
-      "code": 21,
+      "code": 23,
+      "name": "RewardMintMismatch",
+      "msg": "Bond mint address does not match"
+    },
+    {
+      "code": 24,
       "name": "BondMintMismatch",
       "msg": "Bond mint address does not match"
     },
     {
-      "code": 22,
+      "code": 25,
       "name": "StakeMintMismatch",
       "msg": "Stake mint address does not match"
     },
     {
-      "code": 23,
+      "code": 26,
       "name": "StakeVoterMismatch",
       "msg": "Stake delegate does not match voter"
+    },
+    {
+      "code": 27,
+      "name": "AsserterMismatch",
+      "msg": "Asserter address does not match"
+    },
+    {
+      "code": 28,
+      "name": "DisputerMismatch",
+      "msg": "Disputer address does not match"
+    },
+    {
+      "code": 29,
+      "name": "IncorrectClaimer",
+      "msg": "Incorrect claimer"
+    },
+    {
+      "code": 30,
+      "name": "IncorrectVote",
+      "msg": "Value voted for is not the resolved value"
     }
   ],
   "metadata": {

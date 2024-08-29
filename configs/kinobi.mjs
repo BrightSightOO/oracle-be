@@ -1,35 +1,32 @@
 // @ts-check
 
-import { execFile } from "child_process";
+import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import * as k from "@metaplex-foundation/kinobi";
+import * as kIdl from "@kinobi-so/nodes-from-anchor";
+import * as kJs from "@kinobi-so/renderers-js-umi";
+import * as kRust from "@kinobi-so/renderers-rust";
 import { bold } from "colorette";
 import { ESLint } from "eslint";
+import * as k from "kinobi";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const rootDir = path.dirname(__dirname);
-
 const idlDir = path.join(rootDir, "idls");
 const clientDir = path.join(rootDir, "clients");
 
+const idlJson = await fs.readFile(path.join(idlDir, "optimistic_oracle.json"), "utf8");
+
 const start = Date.now();
 
-console.log("generating client code...");
+console.log("generating clients...");
 
-const kinobi = k.createFromIdl(path.join(idlDir, "oracle.json"), undefined, true);
+const idl = kIdl.rootNodeFromAnchor(JSON.parse(idlJson));
+const kinobi = k.createFromRoot(idl);
 
-kinobi.update(
-  k.updateProgramsVisitor({
-    oracle: {
-      name: "optimisticOracle",
-    },
-  }),
-);
-
-// Update accounts.
+// Add PDA seeds for accounts.
 kinobi.update(
   k.updateAccountsVisitor({
     oracleV1: {
@@ -42,7 +39,6 @@ kinobi.update(
       ],
     },
     requestV1: {
-      size: null,
       seeds: [
         k.constantPdaSeedNodeFromString("utf8", "request"),
         k.variablePdaSeedNode(
@@ -65,7 +61,6 @@ kinobi.update(
       ],
     },
     votingV1: {
-      size: null,
       seeds: [
         k.constantPdaSeedNodeFromString("utf8", "voting"),
         k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
@@ -84,12 +79,6 @@ kinobi.update(
     },
   }),
 );
-
-const ataPdaValueNode = (mint = "mint", owner = "owner") =>
-  k.pdaValueNode(k.pdaLinkNode("associatedToken", "mplToolbox"), [
-    k.pdaSeedValueNode("mint", k.accountValueNode(mint)),
-    k.pdaSeedValueNode("owner", k.accountValueNode(owner)),
-  ]);
 
 // Set default values for instruction accounts.
 kinobi.update(
@@ -124,12 +113,17 @@ kinobi.update(
   ]),
 );
 
+const ataPdaValueNode = (mint = "mint", owner = "owner") =>
+  k.pdaValueNode(k.pdaLinkNode("associatedToken", "mplToolbox"), [
+    k.pdaSeedValueNode("mint", k.accountValueNode(mint)),
+    k.pdaSeedValueNode("owner", k.accountValueNode(owner)),
+  ]);
+
 // Update instructions.
 kinobi.update(
   k.updateInstructionsVisitor({
     createRequestV1: {
       accounts: {
-        // TODO: Default rewardMint to SOL/USDC?
         rewardSource: {
           defaultValue: ataPdaValueNode("rewardMint", "creator"),
         },
@@ -169,6 +163,20 @@ kinobi.update(
   }),
 );
 
+// Mark UnixTimestamp as a i64 date-time type.
+kinobi.update(
+  k.bottomUpTransformerVisitor([
+    {
+      select: ["[definedTypeLinkNode]UnixTimestamp"],
+      transform: (node) => {
+        k.assertIsNode(node, "definedTypeLinkNode");
+
+        return k.dateTimeTypeNode(k.numberTypeNode("i64"));
+      },
+    },
+  ]),
+);
+
 /** @param {string} name */
 const accountType = (name) => ({
   field: "accountType",
@@ -178,29 +186,15 @@ const accountType = (name) => ({
 // Set account discriminators.
 kinobi.update(
   k.setAccountDiscriminatorFromFieldVisitor({
-    oracleV1: accountType("OracleV1"),
-    configV1: accountType("ConfigV1"),
-    stakeV1: accountType("StakeV1"),
-    requestV1: accountType("RequestV1"),
-    assertionV1: accountType("AssertionV1"),
-    currencyV1: accountType("CurrencyV1"),
-    votingV1: accountType("VotingV1"),
-    voteV1: accountType("VoteV1"),
+    OracleV1: accountType("OracleV1"),
+    ConfigV1: accountType("ConfigV1"),
+    StakeV1: accountType("StakeV1"),
+    RequestV1: accountType("RequestV1"),
+    AssertionV1: accountType("AssertionV1"),
+    CurrencyV1: accountType("CurrencyV1"),
+    VotingV1: accountType("VotingV1"),
+    VoteV1: accountType("VoteV1"),
   }),
-);
-
-// Fix UnixTimestamp type.
-kinobi.update(
-  k.bottomUpTransformerVisitor([
-    {
-      select: (node) => node.kind === "definedTypeLinkNode" && node.name === "unixTimestamp",
-      transform: (node) => {
-        k.assertIsNode(node, "definedTypeLinkNode");
-
-        return k.dateTimeTypeNode(k.numberTypeNode("i64"));
-      },
-    },
-  ]),
 );
 
 // Render Rust.
@@ -211,15 +205,12 @@ kinobi.update(
   console.log(`writing rust client to ${bold(path.relative(rootDir, rustDir))}...`);
 
   kinobi.accept(
-    k.renderRustVisitor(rustDir, {
+    kRust.renderVisitor(rustDir, {
       crateFolder: crateDir,
       formatCode: true,
+      toolchain: "+nightly",
     }),
   );
-
-  console.log("cleaning up generated rust client code...");
-
-  execFile("cargo", ["fmt", `--manifest-path=${path.join(crateDir, "Cargo.toml")}`]);
 }
 
 // Render JavaScript.
@@ -228,8 +219,8 @@ kinobi.update(
 
   console.log(`writing js client to ${bold(path.relative(rootDir, jsDir))}...`);
 
-  kinobi.accept(
-    k.renderJavaScriptVisitor(jsDir, {
+  await kinobi.accept(
+    kJs.renderVisitor(jsDir, {
       formatCode: true,
     }),
   );
