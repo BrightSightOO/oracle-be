@@ -8,7 +8,7 @@ use solana_program::sysvar::Sysvar;
 use crate::error::OracleError;
 use crate::instruction::accounts::DisputeAssertionV1Accounts;
 use crate::state::{
-    Account, AccountSized, AssertionV1, ConfigV1, InitAccount, InitContext, InitVoting,
+    Account, AccountSized, AssertionV1, ConfigV1, InitAccount, InitContext, InitVoting, OracleV1,
     RequestState, RequestV1, VotingV1,
 };
 use crate::{pda, utils};
@@ -27,9 +27,21 @@ pub fn dispute_assertion_v1<'a>(
     utils::assert_token_program(ctx.accounts.token_program.key)?;
     utils::assert_system_program(ctx.accounts.system_program.key)?;
 
+    // Guard PDAs.
+    pda::oracle::assert_pda(ctx.accounts.oracle.key)?;
+
+    let governance_mint: Pubkey;
+
+    // Step 1: Get oracle governance mint.
+    {
+        let oracle = OracleV1::from_account_info(ctx.accounts.oracle)?;
+
+        governance_mint = oracle.governance_mint;
+    }
+
     let voting_window: u32;
 
-    // Step 1: Get config voting window.
+    // Step 2: Get config voting window.
     {
         let config = ConfigV1::from_account_info(ctx.accounts.config)?;
 
@@ -39,29 +51,26 @@ pub fn dispute_assertion_v1<'a>(
     let now = Clock::get()?.unix_timestamp;
     let bond: u64;
 
-    // Step 2: Update request and assertion states.
+    // Step 3: Update request and assertion states.
     {
         let mut request = RequestV1::from_account_info_mut(ctx.accounts.request)?;
 
-        // Step 2.1: Check request.
-        {
-            // Guard request.
-            request.assert_pda(ctx.accounts.request.key)?;
-            request.assert_config(ctx.accounts.config.key)?;
-            request.assert_bond_mint(ctx.accounts.bond_mint.key)?;
+        // Guard request.
+        request.assert_pda(ctx.accounts.request.key)?;
+        request.assert_config(ctx.accounts.config.key)?;
+        request.assert_bond_mint(ctx.accounts.bond_mint.key)?;
 
-            // The request state must be `Asserted` to dispute.
-            match request.state {
-                RequestState::Asserted => {}
-                RequestState::Requested => return Err(OracleError::NotAsserted.into()),
-                RequestState::Disputed => return Err(OracleError::AlreadyDisputed.into()),
-                RequestState::Resolved => return Err(OracleError::AlreadyResolved.into()),
-            }
+        // The request state must be `Asserted` to dispute.
+        match request.state {
+            RequestState::Asserted => {}
+            RequestState::Requested => return Err(OracleError::NotAsserted.into()),
+            RequestState::Disputed => return Err(OracleError::AlreadyDisputed.into()),
+            RequestState::Resolved => return Err(OracleError::AlreadyResolved.into()),
         }
 
         bond = request.bond;
 
-        // Step 2.2: Check and update assertion.
+        // Step 3.1: Check and update assertion.
         {
             // Guard assertion PDA.
             pda::assertion::assert_pda(ctx.accounts.assertion.key, ctx.accounts.request.key)?;
@@ -80,18 +89,18 @@ pub fn dispute_assertion_v1<'a>(
             assertion.save()?;
         }
 
-        // Step 2.3: Update request state.
+        // Step 3.2: Update request state.
         {
             request.state = RequestState::Disputed;
             request.save()?;
         }
     }
 
-    // Step 3: Transfer bond to escrow.
+    // Step 4: Transfer bond to escrow.
     {
         let mint_decimals = cpi::spl::mint_decimals(ctx.accounts.bond_mint)?;
 
-        // Step 3.1: Initialize `bond_escrow` account.
+        // Step 4.1: Initialize `bond_escrow` account.
         {
             let bump = pda::dispute_bond::assert_pda(
                 ctx.accounts.bond_escrow.key,
@@ -112,7 +121,7 @@ pub fn dispute_assertion_v1<'a>(
             )?;
         }
 
-        // Step 3.2: Transfer bond from `bond_source` to `bond_escrow`.
+        // Step 4.2: Transfer bond from `bond_source` to `bond_escrow`.
         cpi::spl::transfer_checked(
             bond,
             mint_decimals,
@@ -127,13 +136,14 @@ pub fn dispute_assertion_v1<'a>(
         )?;
     }
 
-    // Step 4: Initialize `voting` account.
+    // Step 5: Initialize `voting` account.
     {
         let bump = pda::voting::assert_pda(ctx.accounts.voting.key, ctx.accounts.request.key)?;
         let signer_seeds = pda::voting::seeds_with_bump(ctx.accounts.request.key, &bump);
 
         VotingV1::try_init(InitVoting {
             request: *ctx.accounts.request.key,
+            governance_mint,
             start_timestamp: now,
             voting_window,
         })?

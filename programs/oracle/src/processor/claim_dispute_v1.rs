@@ -4,18 +4,18 @@ use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 
 use crate::error::OracleError;
-use crate::instruction::accounts::ClaimAssertionV1Accounts;
+use crate::instruction::accounts::ClaimDisputeV1Accounts;
 use crate::state::{Account, AssertionV1, RequestState, RequestV1};
 use crate::{pda, utils};
 
-pub fn claim_assertion_v1<'a>(
+pub fn claim_dispute_v1<'a>(
     _program_id: &'a Pubkey,
     accounts: &'a [AccountInfo<'a>],
 ) -> ProgramResult {
-    let ctx = ClaimAssertionV1Accounts::context(accounts)?;
+    let ctx = ClaimDisputeV1Accounts::context(accounts)?;
 
     // Guard signatures.
-    utils::assert_signer(ctx.accounts.asserter)?;
+    utils::assert_signer(ctx.accounts.disputer)?;
 
     // Guard programs.
     utils::assert_token_program(ctx.accounts.token_program.key)?;
@@ -53,10 +53,10 @@ pub fn claim_assertion_v1<'a>(
             let assertion = AssertionV1::from_account_info(ctx.accounts.assertion)?;
 
             // Guard assertion.
-            assertion.assert_asserter(ctx.accounts.asserter.key)?;
+            assertion.assert_disputer(ctx.accounts.disputer.key)?;
 
-            // The asserter can only claim if the asserted value is correct.
-            if assertion.asserted_value != resolved_value {
+            // The disputer can only claim if the asserted value is incorrect.
+            if assertion.asserted_value == resolved_value {
                 return Err(OracleError::IncorrectClaimer.into());
             }
         }
@@ -64,14 +64,14 @@ pub fn claim_assertion_v1<'a>(
 
     let signer_seeds = pda::request::seeds_with_bump(&request_index, &request_bump);
 
-    // Step 3: Recover asserter bond.
+    // Step 3: Recover disputer bond.
     {
-        pda::assert_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.request.key)?;
+        pda::dispute_bond::assert_pda(ctx.accounts.bond_escrow.key, ctx.accounts.request.key)?;
 
         let bond = cpi::spl::account_amount(ctx.accounts.bond_escrow)?;
         let decimals = cpi::spl::mint_decimals(ctx.accounts.bond_mint)?;
 
-        // Step 3.1: Transfer bond from escrow to asserter.
+        // Step 3.1: Transfer bond from escrow to disputer.
         cpi::spl::transfer_checked(
             bond,
             decimals,
@@ -89,7 +89,7 @@ pub fn claim_assertion_v1<'a>(
         cpi::spl::close_account(
             cpi::spl::CloseAccount {
                 account: ctx.accounts.bond_escrow,
-                destination: ctx.accounts.asserter,
+                destination: ctx.accounts.disputer,
                 authority: ctx.accounts.request,
                 token_program: ctx.accounts.token_program,
             },
@@ -104,7 +104,7 @@ pub fn claim_assertion_v1<'a>(
         let reward = cpi::spl::account_amount(ctx.accounts.reward_escrow)?;
         let decimals = cpi::spl::mint_decimals(ctx.accounts.reward_mint)?;
 
-        // Step 4.1: Transfer reward from escrow to asserter.
+        // Step 4.1: Transfer reward from escrow to disputer.
         cpi::spl::transfer_checked(
             reward,
             decimals,
@@ -122,7 +122,7 @@ pub fn claim_assertion_v1<'a>(
         cpi::spl::close_account(
             cpi::spl::CloseAccount {
                 account: ctx.accounts.reward_escrow,
-                destination: ctx.accounts.asserter,
+                destination: ctx.accounts.disputer,
                 authority: ctx.accounts.request,
                 token_program: ctx.accounts.token_program,
             },

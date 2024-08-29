@@ -9,9 +9,9 @@ use super::{Account, AccountType};
 pub struct VoteV1 {
     account_type: AccountType,
 
-    /// The address of the [`Stake`] the votes represent.
-    ///
-    /// [`Stake`]: crate::state::Stake
+    /// The address of the voting account.
+    pub voting: Pubkey,
+    /// The address of the stake the votes represent.
     pub stake: Pubkey,
 
     /// The value voted for.
@@ -26,13 +26,14 @@ impl Account for VoteV1 {
 
 impl From<InitVote> for (VoteV1, usize) {
     fn from(params: InitVote) -> (VoteV1, usize) {
-        let InitVote { stake, value, votes } = params;
+        let InitVote { voting, stake, value, votes } = params;
 
-        (VoteV1 { account_type: VoteV1::TYPE, stake, value, votes }, VoteV1::SIZE)
+        (VoteV1 { account_type: VoteV1::TYPE, voting, stake, value, votes }, VoteV1::SIZE)
     }
 }
 
 pub(crate) struct InitVote {
+    pub voting: Pubkey,
     pub stake: Pubkey,
     pub value: u64,
     pub votes: u64,

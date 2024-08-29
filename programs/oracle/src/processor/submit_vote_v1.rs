@@ -107,15 +107,19 @@ pub fn submit_vote_v1<'a>(
         let signer_seeds =
             pda::vote::seeds_with_bump(ctx.accounts.voting.key, ctx.accounts.stake.key, &bump);
 
-        VoteV1::init(InitVote { stake: *ctx.accounts.stake.key, value: args.value, votes }).save(
-            InitContext {
-                account: ctx.accounts.vote,
-                payer: ctx.accounts.payer,
-                system_program: ctx.accounts.system_program,
-                program_id,
-                signers_seeds: &[&signer_seeds],
-            },
-        )?;
+        VoteV1::init(InitVote {
+            voting: *ctx.accounts.voting.key,
+            stake: *ctx.accounts.stake.key,
+            value: args.value,
+            votes,
+        })
+        .save(InitContext {
+            account: ctx.accounts.vote,
+            payer: ctx.accounts.payer,
+            system_program: ctx.accounts.system_program,
+            program_id,
+            signers_seeds: &[&signer_seeds],
+        })?;
     }
 
     // Step 6: Add votes for the submitted value.

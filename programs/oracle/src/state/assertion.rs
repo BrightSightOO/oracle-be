@@ -43,6 +43,20 @@ impl AssertionV1 {
         timestamp < self.expiration_timestamp
     }
 
+    pub fn assert_asserter(&self, asserter: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(asserter, &self.asserter) {
+            return Err(OracleError::AsserterMismatch);
+        }
+        Ok(())
+    }
+
+    pub fn assert_disputer(&self, disputer: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(disputer, &self.disputer) {
+            return Err(OracleError::DisputerMismatch);
+        }
+        Ok(())
+    }
+
     pub fn validate_expiration_timestamp(&self, timestamp: i64) -> Result<(), OracleError> {
         if self.in_dispute_window(timestamp) {
             return Err(OracleError::DisputeWindowNotExpired);

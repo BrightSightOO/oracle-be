@@ -15,7 +15,7 @@ pub struct ConfigV1 {
     pub authority: Pubkey,
 
     /// The fee taken, in basis points, from the bond of the incorrect party in a dispute.
-    pub bond_fee_bps: u16,
+    pub bond_fee_bps: u16, // FIXME: Use Bps type.
 
     /// The duration of the dispute window in seconds.
     pub dispute_window: u32,

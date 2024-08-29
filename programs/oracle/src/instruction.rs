@@ -8,14 +8,14 @@ use crate::processor::*;
 #[derive(Clone, VariantName, ShankContext, ShankInstruction, BorshDeserialize)]
 pub enum OracleInstruction {
     /// Creates program oracle.
-    #[account(0, writable, name = "oracle", desc = "Oracle account")]
+    #[account(0, writable, name = "oracle", desc = "Oracle")]
     #[account(1, name = "governance_mint", desc = "Governance token mint")]
     #[account(2, signer, writable, name = "payer", desc = "Payer")]
     #[account(3, name = "system_program", desc = "System program")]
     CreateOracleV1(CreateOracleV1Args),
 
     /// Updates program oracle.
-    #[account(0, writable, name = "oracle", desc = "Oracle account")]
+    #[account(0, writable, name = "oracle", desc = "Oracle")]
     #[account(1, signer, name = "authority", desc = "Oracle authority")]
     UpdateOracleV1(UpdateOracleV1Args),
 
@@ -47,7 +47,7 @@ pub enum OracleInstruction {
     UpdateCurrencyV1(UpdateCurrencyV1Args),
 
     /// Creates a new request.
-    #[account(0, writable, name = "oracle", desc = "Oracle account")]
+    #[account(0, writable, name = "oracle", desc = "Oracle")]
     #[account(1, name = "config", desc = "Config")]
     #[account(2, writable, name = "request", desc = "Request")]
     #[account(3, name = "reward_currency", desc = "Reward currency")]
@@ -81,17 +81,18 @@ pub enum OracleInstruction {
     ResolveAssertionV1,
 
     /// Disputes the assertion for a request.
-    #[account(0, name = "config", desc = "Config")]
-    #[account(1, writable, name = "request", desc = "Request")]
-    #[account(2, writable, name = "assertion", desc = "Assertion")]
-    #[account(3, writable, name = "voting", desc = "Voting")]
-    #[account(4, name = "bond_mint", desc = "Bond mint")]
-    #[account(5, writable, name = "bond_source", desc = "Bond source token account")]
-    #[account(6, writable, name = "bond_escrow", desc = "Bond escrow token account")]
-    #[account(7, signer, name = "disputer", desc = "Disputer")]
-    #[account(8, signer, writable, name = "payer", desc = "Payer")]
-    #[account(9, name = "token_program", desc = "SPL token program")]
-    #[account(10, name = "system_program", desc = "System program")]
+    #[account(0, name = "oracle", desc = "Oracle")]
+    #[account(1, name = "config", desc = "Config")]
+    #[account(2, writable, name = "request", desc = "Request")]
+    #[account(3, writable, name = "assertion", desc = "Assertion")]
+    #[account(4, writable, name = "voting", desc = "Voting")]
+    #[account(5, name = "bond_mint", desc = "Bond mint")]
+    #[account(6, writable, name = "bond_source", desc = "Bond source token account")]
+    #[account(7, writable, name = "bond_escrow", desc = "Bond escrow token account")]
+    #[account(8, signer, name = "disputer", desc = "Disputer")]
+    #[account(9, signer, writable, name = "payer", desc = "Payer")]
+    #[account(10, name = "token_program", desc = "SPL token program")]
+    #[account(11, name = "system_program", desc = "System program")]
     DisputeAssertionV1,
 
     /// Submits a vote for resolving a disputed assertion.
@@ -112,7 +113,7 @@ pub enum OracleInstruction {
     CloseVotingV1,
 
     /// Creates a stake account.
-    #[account(0, name = "oracle", desc = "Oracle account")]
+    #[account(0, name = "oracle", desc = "Oracle")]
     #[account(1, signer, writable, name = "stake", desc = "Stake")]
     #[account(2, writable, name = "mint", desc = "Stake")]
     #[account(3, writable, name = "stake_source", desc = "Stake source token account")]
@@ -123,7 +124,42 @@ pub enum OracleInstruction {
     #[account(8, name = "system_program", desc = "System program")]
     CreateStakeV1(CreateStakeV1Args),
 
-    // #[account(0, name = "config", desc = "Config")]
-    // #[account(0, writable, name = "config", desc = "Config")]
-    // ClaimAssertionV1,
+    #[account(0, name = "request", desc = "Request")]
+    #[account(1, writable, name = "assertion", desc = "Assertion")]
+    #[account(2, name = "bond_mint", desc = "Bond mint")]
+    #[account(3, writable, name = "bond_destination", desc = "Reclaimed bond destination token account")]
+    #[account(4, writable, name = "bond_escrow", desc = "Asserter bond escrow token account")]
+    #[account(5, name = "reward_mint", desc = "Reward mint")]
+    #[account(6, writable, name = "reward_destination", desc = "Reward destination token account")]
+    #[account(7, writable, name = "reward_escrow", desc = "Reward escrow token account")]
+    #[account(8, signer, writable, name = "asserter", desc = "Asserter")]
+    #[account(9, name = "token_program", desc = "SPL token program")]
+    #[account(10, name = "system_program", desc = "System program")]
+    ClaimAssertionV1,
+
+    #[account(0, name = "request", desc = "Request")]
+    #[account(1, writable, name = "assertion", desc = "Assertion")]
+    #[account(2, name = "bond_mint", desc = "Bond mint")]
+    #[account(3, writable, name = "bond_destination", desc = "Reclaimed bond destination token account")]
+    #[account(4, writable, name = "bond_escrow", desc = "Disputer bond escrow token account")]
+    #[account(5, name = "reward_mint", desc = "Reward mint")]
+    #[account(6, writable, name = "reward_destination", desc = "Reward destination token account")]
+    #[account(7, writable, name = "reward_escrow", desc = "Reward escrow token account")]
+    #[account(8, signer, writable, name = "disputer", desc = "Disputer")]
+    #[account(9, name = "token_program", desc = "SPL token program")]
+    #[account(10, name = "system_program", desc = "System program")]
+    ClaimDisputeV1,
+
+    #[account(0, name = "request", desc = "Request")]
+    #[account(1, name = "assertion", desc = "Assertion")]
+    #[account(2, name = "voting", desc = "Voting")]
+    #[account(3, writable, name = "vote", desc = "Vote")]
+    #[account(4, name = "stake", desc = "Stake")]
+    #[account(5, name = "bond_mint", desc = "Bond mint")]
+    #[account(6, writable, name = "bond_destination", desc = "Bond destination token account")]
+    #[account(7, writable, name = "bond_escrow", desc = "Bond escrow token account of incorrect asserter/disputer")]
+    #[account(8, signer, writable, name = "voter", desc = "Voter")]
+    #[account(9, name = "token_program", desc = "SPL token program")]
+    #[account(10, name = "system_program", desc = "System program")]
+    ClaimVoteV1,
 }

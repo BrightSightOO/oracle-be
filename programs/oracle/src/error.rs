@@ -20,6 +20,9 @@ pub enum OracleError {
     #[error("Value is not valid for the request")]
     InvalidValue,
 
+    #[error("Invalid basis points value")]
+    InvalidBps,
+
     #[error("Disputer cannot be the same as the asserter")]
     DisputerIsAsserter,
 
@@ -28,6 +31,9 @@ pub enum OracleError {
 
     #[error("Request is not disputed")]
     NotDisputed,
+
+    #[error("Request is not resolved")]
+    NotResolved,
 
     #[error("Request already has an assertion")]
     AlreadyAsserted,
@@ -69,6 +75,9 @@ pub enum OracleError {
     CurrencyMintMismatch,
 
     #[error("Bond mint address does not match")]
+    RewardMintMismatch,
+
+    #[error("Bond mint address does not match")]
     BondMintMismatch,
 
     #[error("Stake mint address does not match")]
@@ -76,6 +85,18 @@ pub enum OracleError {
 
     #[error("Stake delegate does not match voter")]
     StakeVoterMismatch,
+
+    #[error("Asserter address does not match")]
+    AsserterMismatch,
+
+    #[error("Disputer address does not match")]
+    DisputerMismatch,
+
+    #[error("Incorrect claimer")]
+    IncorrectClaimer,
+
+    #[error("Value voted for is not the resolved value")]
+    IncorrectVote,
 }
 
 impl PrintProgramError for OracleError {

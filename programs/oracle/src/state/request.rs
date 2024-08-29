@@ -114,6 +114,13 @@ impl RequestV1 {
         Ok(())
     }
 
+    pub fn assert_reward_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(&self.reward_mint, mint) {
+            return Err(OracleError::RewardMintMismatch);
+        }
+        Ok(())
+    }
+
     pub fn assert_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
         if !common::cmp_pubkeys(&self.bond_mint, mint) {
             return Err(OracleError::BondMintMismatch);

@@ -18,6 +18,9 @@ pub struct VotingV1 {
     /// [`Request`]: crate::state::Request
     pub request: Pubkey,
 
+    /// The address of the mint of the governance token required to vote.
+    pub governance_mint: Pubkey,
+
     /// The Unix timestamp when voting started.
     pub start_timestamp: UnixTimestamp,
     /// The Unix timestamp when voting ends.
@@ -36,6 +39,7 @@ impl VotingV1 {
     const BASE_SIZE: usize =
         AccountType::SIZE       // account_type
         + Pubkey::SIZE          // request
+        + Pubkey::SIZE          // governance_mint
         + UnixTimestamp::SIZE   // start_timestamp
         + UnixTimestamp::SIZE   // end_timestamp
         + u64::SIZE             // vote_count
@@ -60,7 +64,7 @@ impl TryFrom<InitVoting> for (VotingV1, usize) {
     type Error = ProgramError;
 
     fn try_from(params: InitVoting) -> Result<(VotingV1, usize), Self::Error> {
-        let InitVoting { request, start_timestamp, voting_window } = params;
+        let InitVoting { request, governance_mint, start_timestamp, voting_window } = params;
 
         let end_timestamp = checked_add!(start_timestamp, i64::from(voting_window))?;
 
@@ -68,6 +72,7 @@ impl TryFrom<InitVoting> for (VotingV1, usize) {
             VotingV1 {
                 account_type: VotingV1::TYPE,
                 request,
+                governance_mint,
                 start_timestamp,
                 end_timestamp,
                 vote_count: 0,
@@ -81,8 +86,9 @@ impl TryFrom<InitVoting> for (VotingV1, usize) {
 
 pub(crate) struct InitVoting {
     pub request: Pubkey,
-    pub start_timestamp: UnixTimestamp,
+    pub governance_mint: Pubkey,
 
+    pub start_timestamp: UnixTimestamp,
     pub voting_window: u32,
 }
 
@@ -92,8 +98,12 @@ mod tests {
 
     #[test]
     fn account_size() {
-        let init =
-            InitVoting { request: Pubkey::new_unique(), start_timestamp: 0, voting_window: 0 };
+        let init = InitVoting {
+            request: Pubkey::new_unique(),
+            governance_mint: Pubkey::new_unique(),
+            start_timestamp: 0,
+            voting_window: 0,
+        };
 
         let (mut account, expected) = <(VotingV1, usize)>::try_from(init).unwrap();
         let actual = common_test::serialized_len(&account).unwrap();
