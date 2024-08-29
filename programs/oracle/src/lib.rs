@@ -12,4 +12,19 @@ pub mod pda;
 pub mod processor;
 pub mod state;
 
+#[cfg(not(feature = "no-entrypoint"))]
+security_txt::security_txt! {
+    // Required fields.
+    name: "Optimistic Oracle",
+    project_url: "https://github.com/BrightSightOO",
+    contacts: "email:james@hedgehog.markets",
+    policy: "https://github.com/BrightSightOO/oracle-be/security",
+
+    // Optional fields.
+    source_code: "https://github.com/BrightSightOO/oracle-be",
+}
+
+#[cfg(not(feature = "no-entrypoint"))]
+include_idl::include_idl!(concat!(env!("OUT_DIR"), "/solana.idl.zip"));
+
 solana_program::declare_id!("DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg");
