@@ -1,5 +1,4 @@
 use borsh::BorshDeserialize;
-use common::cpi;
 use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
@@ -37,7 +36,7 @@ pub fn create_stake_v1<'a>(
     {
         let oracle = OracleV1::from_account_info(ctx.accounts.oracle)?;
 
-        if !common::cmp_pubkeys(&oracle.governance_mint, ctx.accounts.mint.key) {
+        if !solana_utils::pubkeys_eq(&oracle.governance_mint, ctx.accounts.mint.key) {
             return Err(OracleError::StakeMintMismatch.into());
         }
     }

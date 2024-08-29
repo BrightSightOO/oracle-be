@@ -1,15 +1,15 @@
 use std::collections::BTreeMap;
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh_size::BorshSize;
 use shank::ShankAccount;
 use solana_program::clock::UnixTimestamp;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
-use super::{Account, AccountSized, AccountType};
+use super::{Account, AccountType};
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, ShankAccount)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
 pub struct VotingV1 {
     account_type: AccountType,
 
@@ -35,29 +35,8 @@ pub struct VotingV1 {
     pub votes: BTreeMap<u64, u64>,
 }
 
-impl VotingV1 {
-    const BASE_SIZE: usize =
-        AccountType::SIZE       // account_type
-        + Pubkey::SIZE          // request
-        + Pubkey::SIZE          // governance_mint
-        + UnixTimestamp::SIZE   // start_timestamp
-        + UnixTimestamp::SIZE   // end_timestamp
-        + u64::SIZE             // vote_count
-        + u64::SIZE             // mode_value
-        + u32::SIZE             // votes.len()
-        ;
-}
-
 impl Account for VotingV1 {
     const TYPE: AccountType = AccountType::VotingV1;
-}
-
-impl AccountSized for VotingV1 {
-    const IS_FIXED_SIZE: bool = false;
-
-    fn serialized_size(&self) -> Option<usize> {
-        self.votes.len().checked_mul(u64::SIZE + u64::SIZE)?.checked_add(Self::BASE_SIZE)
-    }
 }
 
 impl TryFrom<InitVoting> for (VotingV1, usize) {
@@ -68,19 +47,19 @@ impl TryFrom<InitVoting> for (VotingV1, usize) {
 
         let end_timestamp = checked_add!(start_timestamp, i64::from(voting_window))?;
 
-        Ok((
-            VotingV1 {
-                account_type: VotingV1::TYPE,
-                request,
-                governance_mint,
-                start_timestamp,
-                end_timestamp,
-                vote_count: 0,
-                mode_value: 0,
-                votes: BTreeMap::new(),
-            },
-            VotingV1::BASE_SIZE,
-        ))
+        let account = VotingV1 {
+            account_type: VotingV1::TYPE,
+            request,
+            governance_mint,
+            start_timestamp,
+            end_timestamp,
+            vote_count: 0,
+            mode_value: 0,
+            votes: BTreeMap::new(),
+        };
+        let space = account.borsh_size();
+
+        Ok((account, space))
     }
 }
 
@@ -106,15 +85,15 @@ mod tests {
         };
 
         let (mut account, expected) = <(VotingV1, usize)>::try_from(init).unwrap();
-        let actual = common_test::serialized_len(&account).unwrap();
+        let actual = account.try_to_vec().unwrap().len();
 
         assert_eq!(expected, actual);
 
         account.votes.insert(0, 10);
         account.votes.insert(1, 5);
 
-        let expected = account.serialized_size().unwrap();
-        let actual = common_test::serialized_len(&account).unwrap();
+        let expected = account.borsh_size();
+        let actual = account.try_to_vec().unwrap().len();
 
         assert_eq!(expected, actual);
     }

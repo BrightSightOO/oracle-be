@@ -1,12 +1,12 @@
-use common::cpi;
 use solana_program::account_info::AccountInfo;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 use solana_program::system_program;
+use solana_utils::log;
 
 pub fn assert_token_program(pubkey: &Pubkey) -> Result<(), ProgramError> {
-    if !common::cmp_pubkeys(pubkey, &cpi::spl::TOKEN_ID)
-        && !common::cmp_pubkeys(pubkey, &cpi::spl::TOKEN_2022_ID)
+    if !solana_utils::pubkeys_eq(pubkey, &cpi::spl::TOKEN_ID)
+        && !solana_utils::pubkeys_eq(pubkey, &cpi::spl::TOKEN_2022_ID)
     {
         log!("Error: Incorrect address for token program");
         return Err(ProgramError::IncorrectProgramId);
@@ -15,7 +15,7 @@ pub fn assert_token_program(pubkey: &Pubkey) -> Result<(), ProgramError> {
 }
 
 pub fn assert_system_program(pubkey: &Pubkey) -> Result<(), ProgramError> {
-    if !common::cmp_pubkeys(pubkey, &system_program::ID) {
+    if !solana_utils::pubkeys_eq(pubkey, &system_program::ID) {
         log!("Error: Incorrect address for system program");
         return Err(ProgramError::IncorrectProgramId);
     }

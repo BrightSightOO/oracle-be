@@ -1,7 +1,7 @@
 use std::ops::{Bound, Range, RangeBounds};
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh_size::BorshSize;
 
 #[derive(Clone, Copy, BorshDeserialize, BorshSerialize, BorshSize)]
 pub struct Bounds {

@@ -1,8 +1,8 @@
 use borsh::BorshDeserialize;
-use common::VariantName;
 use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
+use solana_utils::{log, VariantName};
 
 mod claim_assertion_v1;
 mod claim_dispute_v1;

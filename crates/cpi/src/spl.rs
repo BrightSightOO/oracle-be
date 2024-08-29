@@ -2,15 +2,19 @@
 
 use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
-use solana_program::program::{get_return_data, invoke, invoke_signed};
+use solana_program::program::get_return_data;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey;
 use solana_program::pubkey::Pubkey;
+use solana_utils::invoke::{invoke, invoke_signed};
 use spl_token_2022::extension::PodStateWithExtensions;
+use spl_token_2022::instruction::AuthorityType;
 use spl_token_2022::pod::{PodAccount, PodMint};
 
 pub const TOKEN_ID: Pubkey = pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 pub const TOKEN_2022_ID: Pubkey = spl_token_2022::ID;
+
+pub const ASSOCIATED_TOKEN_ID: Pubkey = pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 
 pub struct CreateTokenAccount<'a, 'info> {
     pub account: &'a AccountInfo<'info>,
@@ -35,6 +39,19 @@ pub struct CloseAccount<'a, 'info> {
     pub token_program: &'a AccountInfo<'info>,
 }
 
+pub struct SetAuthority<'a, 'info> {
+    pub owned: &'a AccountInfo<'info>,
+    pub owner: &'a AccountInfo<'info>,
+    pub token_program: &'a AccountInfo<'info>,
+}
+
+pub struct ApproveDelegate<'a, 'info> {
+    pub account: &'a AccountInfo<'info>,
+    pub delegate: &'a AccountInfo<'info>,
+    pub owner: &'a AccountInfo<'info>,
+    pub token_program: &'a AccountInfo<'info>,
+}
+
 /// Creates a new token account.
 pub fn create_token_account(
     owner: &Pubkey,
@@ -45,7 +62,7 @@ pub fn create_token_account(
 
     let account_len = get_account_len(mint, token_program)?;
 
-    crate::create_or_allocate_account(
+    solana_utils::create_or_allocate_account(
         account,
         payer,
         system_program,
@@ -95,7 +112,7 @@ pub fn transfer_checked(
     Ok(())
 }
 
-/// Transfers tokens from the source account to the destination account.
+/// Closes token account and transfers rent to the destination account.
 pub fn close_account(accounts: CloseAccount, signers_seeds: &[&[&[u8]]]) -> ProgramResult {
     let CloseAccount { account, destination, authority, token_program } = accounts;
 
@@ -114,6 +131,55 @@ pub fn close_account(accounts: CloseAccount, signers_seeds: &[&[&[u8]]]) -> Prog
     Ok(())
 }
 
+/// Sets a new authority for an account or mint.
+pub fn set_authority(
+    new_authority: Option<&Pubkey>,
+    authority_type: AuthorityType,
+    accounts: SetAuthority,
+    signers_seeds: &[&[&[u8]]],
+) -> ProgramResult {
+    let SetAuthority { owned, owner, token_program } = accounts;
+
+    invoke_signed(
+        &spl_token_2022::instruction::set_authority(
+            token_program.key,
+            owned.key,
+            new_authority,
+            authority_type,
+            owner.key,
+            &[],
+        )?,
+        &[owned.clone(), owner.clone()],
+        signers_seeds,
+    )?;
+
+    Ok(())
+}
+
+/// Approves a delegate.
+pub fn approve_delegate(
+    amount: u64,
+    accounts: ApproveDelegate,
+    signers_seeds: &[&[&[u8]]],
+) -> ProgramResult {
+    let ApproveDelegate { account, delegate, owner, token_program } = accounts;
+
+    invoke_signed(
+        &spl_token_2022::instruction::approve(
+            token_program.key,
+            account.key,
+            delegate.key,
+            owner.key,
+            &[],
+            amount,
+        )?,
+        &[account.clone(), delegate.clone(), owner.clone()],
+        signers_seeds,
+    )?;
+
+    Ok(())
+}
+
 /// Determines the required initial data length for a new token account.
 fn get_account_len<'a>(
     mint: &AccountInfo<'a>,
@@ -124,7 +190,7 @@ fn get_account_len<'a>(
         &[mint.clone()],
     )?;
     get_return_data().ok_or(ProgramError::InvalidInstructionData).and_then(|(key, data)| {
-        if !crate::cmp_pubkeys(&key, token_program.key) {
+        if !solana_utils::pubkeys_eq(&key, token_program.key) {
             return Err(ProgramError::IncorrectProgramId);
         }
         data.try_into().map(usize::from_le_bytes).map_err(|_| ProgramError::InvalidInstructionData)

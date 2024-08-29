@@ -1,5 +1,4 @@
 use borsh::BorshDeserialize;
-use common::cpi;
 use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;

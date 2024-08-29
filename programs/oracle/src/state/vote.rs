@@ -1,5 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::pubkey::Pubkey;
 
@@ -28,7 +28,7 @@ impl From<InitVote> for (VoteV1, usize) {
     fn from(params: InitVote) -> (VoteV1, usize) {
         let InitVote { voting, stake, value, votes } = params;
 
-        (VoteV1 { account_type: VoteV1::TYPE, voting, stake, value, votes }, VoteV1::SIZE)
+        (VoteV1 { account_type: VoteV1::TYPE, voting, stake, value, votes }, VoteV1::FIXED_SIZE)
     }
 }
 

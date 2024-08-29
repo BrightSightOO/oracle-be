@@ -1,5 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh_size::BorshSize;
 use shank::ShankAccount;
 use solana_program::clock::UnixTimestamp;
 use solana_program::program_error::ProgramError;
@@ -8,9 +8,9 @@ use solana_program::pubkey::Pubkey;
 use crate::error::OracleError;
 use crate::pda;
 
-use super::{Account, AccountSized, AccountType};
+use super::{Account, AccountType};
 
-#[derive(Clone, BorshDeserialize, BorshSerialize, ShankAccount)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
 pub struct RequestV1 {
     account_type: AccountType,
 
@@ -71,7 +71,7 @@ pub enum RequestState {
     Resolved,
 }
 
-#[derive(Clone, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize)]
 pub enum RequestData {
     /// Yes/No request:
     /// - 0 = No
@@ -83,24 +83,10 @@ pub enum RequestData {
 }
 
 impl RequestV1 {
-    const BASE_SIZE: usize =
-        AccountType::SIZE       // account_type
-        + u64::SIZE             // index
-        + Pubkey::SIZE          // config
-        + Pubkey::SIZE          // creator
-        + u64::SIZE             // bond
-        + Pubkey::SIZE          // bond_mint
-        + u64::SIZE             // reward
-        + Pubkey::SIZE          // reward_mint
-        + UnixTimestamp::SIZE   // assertion_timestamp
-        + UnixTimestamp::SIZE   // resolve_timestamp
-        + RequestState::SIZE    // state
-        + u64::SIZE             // value
-        + Pubkey::SIZE          // arbitrator
-        ;
-
     pub fn has_arbitrator(&self) -> bool {
-        !common::cmp_pubkeys(&self.arbitrator, &common::DEFAULT_PUBKEY)
+        const DEFAULT_PUBKEY: Pubkey = Pubkey::new_from_array([0; 32]);
+
+        !solana_utils::pubkeys_eq(&self.arbitrator, &DEFAULT_PUBKEY)
     }
 
     pub fn assert_pda(&self, request: &Pubkey) -> Result<u8, ProgramError> {
@@ -108,21 +94,21 @@ impl RequestV1 {
     }
 
     pub fn assert_config(&self, config: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(&self.config, config) {
+        if !solana_utils::pubkeys_eq(&self.config, config) {
             return Err(OracleError::ConfigMismatch);
         }
         Ok(())
     }
 
     pub fn assert_reward_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(&self.reward_mint, mint) {
+        if !solana_utils::pubkeys_eq(&self.reward_mint, mint) {
             return Err(OracleError::RewardMintMismatch);
         }
         Ok(())
     }
 
     pub fn assert_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(&self.bond_mint, mint) {
+        if !solana_utils::pubkeys_eq(&self.bond_mint, mint) {
             return Err(OracleError::BondMintMismatch);
         }
         Ok(())
@@ -147,21 +133,6 @@ impl RequestData {
         };
         if valid { Ok(()) } else { Err(OracleError::InvalidValue) }
     }
-
-    fn serialized_size(&self) -> Option<usize> {
-        let variant_size = match self {
-            Self::YesNo { question } => 4usize.checked_add(question.len())?,
-        };
-        variant_size.checked_add(1)
-    }
-}
-
-impl AccountSized for RequestV1 {
-    const IS_FIXED_SIZE: bool = false;
-
-    fn serialized_size(&self) -> Option<usize> {
-        self.data.serialized_size()?.checked_add(Self::BASE_SIZE)
-    }
 }
 
 impl TryFrom<InitRequest> for (RequestV1, usize) {
@@ -181,7 +152,7 @@ impl TryFrom<InitRequest> for (RequestV1, usize) {
             data,
         } = params;
 
-        let request = RequestV1 {
+        let account = RequestV1 {
             account_type: RequestV1::TYPE,
             index,
             config,
@@ -197,10 +168,9 @@ impl TryFrom<InitRequest> for (RequestV1, usize) {
             arbitrator,
             data,
         };
+        let space = account.borsh_size();
 
-        let space = request.serialized_size().ok_or(ProgramError::ArithmeticOverflow)?;
-
-        Ok((request, space))
+        Ok((account, space))
     }
 }
 
@@ -231,8 +201,8 @@ mod tests {
     fn data_size() {
         let data = RequestData::YesNo { question: "example question?".to_owned() };
 
-        let expected = data.serialized_size().unwrap();
-        let actual = common_test::serialized_len(&data).unwrap();
+        let expected = data.borsh_size();
+        let actual = data.try_to_vec().unwrap().len();
 
         assert_eq!(expected, actual);
     }
@@ -248,12 +218,12 @@ mod tests {
             bond: 0,
             bond_mint: Pubkey::new_unique(),
             timestamp: 0,
-            arbitrator: common::DEFAULT_PUBKEY,
+            arbitrator: Pubkey::new_unique(),
             data: RequestData::YesNo { question: "another example question?".to_owned() },
         };
 
         let (request, expected) = <(RequestV1, usize)>::try_from(init).unwrap();
-        let actual = common_test::serialized_len(&request).unwrap();
+        let actual = request.try_to_vec().unwrap().len();
 
         assert_eq!(expected, actual);
     }

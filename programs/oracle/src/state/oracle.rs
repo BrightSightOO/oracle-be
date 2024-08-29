@@ -1,5 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::pubkey::Pubkey;
 
@@ -22,7 +22,7 @@ pub struct OracleV1 {
 
 impl OracleV1 {
     pub fn assert_authority(&self, authority: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(&self.authority, authority) {
+        if !solana_utils::pubkeys_eq(&self.authority, authority) {
             return Err(OracleError::OracleAuthorityMismatch);
         }
         Ok(())
@@ -39,7 +39,7 @@ impl From<InitOracle> for (OracleV1, usize) {
 
         (
             OracleV1 { account_type: OracleV1::TYPE, next_index: 0, authority, governance_mint },
-            OracleV1::SIZE,
+            OracleV1::FIXED_SIZE,
         )
     }
 }

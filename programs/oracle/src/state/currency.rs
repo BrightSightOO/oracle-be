@@ -1,5 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
@@ -31,14 +31,14 @@ impl CurrencyV1 {
     }
 
     pub fn assert_config(&self, config: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(&self.config, config) {
+        if !solana_utils::pubkeys_eq(&self.config, config) {
             return Err(OracleError::ConfigMismatch);
         }
         Ok(())
     }
 
     pub fn assert_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(&self.mint, mint) {
+        if !solana_utils::pubkeys_eq(&self.mint, mint) {
             return Err(OracleError::CurrencyMintMismatch);
         }
         Ok(())
@@ -55,7 +55,7 @@ impl From<InitCurrency> for (CurrencyV1, usize) {
 
         (
             CurrencyV1 { account_type: CurrencyV1::TYPE, config, mint, reward_range, bond_range },
-            CurrencyV1::SIZE,
+            CurrencyV1::FIXED_SIZE,
         )
     }
 }

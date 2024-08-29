@@ -1,6 +1,6 @@
 use borsh::BorshDeserialize;
-use common::VariantName;
 use shank::{ShankContext, ShankInstruction};
+use solana_utils::VariantName;
 
 use crate::processor::*;
 

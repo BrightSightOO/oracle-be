@@ -1,5 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::pubkey::Pubkey;
 
@@ -27,7 +27,7 @@ pub struct ConfigV1 {
 
 impl ConfigV1 {
     pub fn assert_authority(&self, authority: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(&self.authority, authority) {
+        if !solana_utils::pubkeys_eq(&self.authority, authority) {
             return Err(OracleError::ConfigAuthorityMismatch);
         }
         Ok(())
@@ -57,7 +57,7 @@ impl From<InitConfig> for (ConfigV1, usize) {
                 voting_window,
                 arbitration_window,
             },
-            ConfigV1::SIZE,
+            ConfigV1::FIXED_SIZE,
         )
     }
 }

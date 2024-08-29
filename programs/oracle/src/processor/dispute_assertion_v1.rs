@@ -1,4 +1,3 @@
-use common::cpi;
 use solana_program::account_info::AccountInfo;
 use solana_program::clock::Clock;
 use solana_program::entrypoint::ProgramResult;
@@ -78,7 +77,7 @@ pub fn dispute_assertion_v1<'a>(
             let mut assertion = AssertionV1::from_account_info_mut(ctx.accounts.assertion)?;
 
             // The disputer cannot have the same address as the asserter.
-            if common::cmp_pubkeys(&assertion.asserter, ctx.accounts.disputer.key) {
+            if solana_utils::pubkeys_eq(&assertion.asserter, ctx.accounts.disputer.key) {
                 return Err(OracleError::DisputerIsAsserter.into());
             }
 

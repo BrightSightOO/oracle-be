@@ -6,6 +6,7 @@ use solana_program::clock::Clock;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 use solana_program::sysvar::Sysvar;
+use solana_utils::log;
 
 use crate::error::OracleError;
 use crate::instruction::accounts::SubmitVoteV1Accounts;

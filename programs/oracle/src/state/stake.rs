@@ -1,5 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::clock::UnixTimestamp;
 use solana_program::pubkey::Pubkey;
@@ -35,7 +35,9 @@ pub struct StakeV1 {
 
 impl StakeV1 {
     pub fn assert_voter(&self, voter: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(&self.owner, voter) && !common::cmp_pubkeys(&self.delegate, voter) {
+        if !solana_utils::pubkeys_eq(&self.owner, voter)
+            && !solana_utils::pubkeys_eq(&self.delegate, voter)
+        {
             return Err(OracleError::StakeVoterMismatch);
         }
         Ok(())
@@ -59,7 +61,7 @@ impl From<InitStake> for (StakeV1, usize) {
                 amount,
                 lock_timestamp: UnixTimestamp::MIN,
             },
-            StakeV1::SIZE,
+            StakeV1::FIXED_SIZE,
         )
     }
 }

@@ -1,5 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::clock::UnixTimestamp;
 use solana_program::program_error::ProgramError;
@@ -44,14 +44,14 @@ impl AssertionV1 {
     }
 
     pub fn assert_asserter(&self, asserter: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(asserter, &self.asserter) {
+        if !solana_utils::pubkeys_eq(asserter, &self.asserter) {
             return Err(OracleError::AsserterMismatch);
         }
         Ok(())
     }
 
     pub fn assert_disputer(&self, disputer: &Pubkey) -> Result<(), OracleError> {
-        if !common::cmp_pubkeys(disputer, &self.disputer) {
+        if !solana_utils::pubkeys_eq(disputer, &self.disputer) {
             return Err(OracleError::DisputerMismatch);
         }
         Ok(())
@@ -100,7 +100,7 @@ impl TryFrom<InitAssertion> for (AssertionV1, usize) {
                 disputer: Pubkey::default(),
                 asserted_value,
             },
-            AssertionV1::SIZE,
+            AssertionV1::FIXED_SIZE,
         ))
     }
 }

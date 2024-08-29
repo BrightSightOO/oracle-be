@@ -1,7 +1,7 @@
-use common::cpi;
 use solana_program::account_info::AccountInfo;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
+use solana_utils::log;
 
 use crate::error::OracleError;
 use crate::instruction::accounts::ClaimVoteV1Accounts;
@@ -130,7 +130,7 @@ pub fn claim_vote_v1<'a>(
     }
 
     // Step 7: Close vote account.
-    common::close_account(ctx.accounts.vote, ctx.accounts.voter)?;
+    solana_utils::close_account(ctx.accounts.vote, ctx.accounts.voter)?;
 
     Ok(())
 }
