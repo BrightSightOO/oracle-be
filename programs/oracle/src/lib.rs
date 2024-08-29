@@ -27,4 +27,4 @@ security_txt::security_txt! {
 #[cfg(not(feature = "no-entrypoint"))]
 include_idl::include_idl!(concat!(env!("OUT_DIR"), "/solana.idl.zip"));
 
-solana_program::declare_id!("DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg");
+solana_program::declare_id!("DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge");

@@ -128,7 +128,7 @@ export async function safeFetchAllConfigV1(
 export function getConfigV1GpaBuilder(context: Pick<Context, "rpc" | "programs">) {
   const programId = context.programs.getPublicKey(
     "optimisticOracle",
-    "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
+    "DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge",
   );
   return gpaBuilder(context, programId)
     .registerFields<{

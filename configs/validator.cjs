@@ -22,7 +22,7 @@ module.exports = {
     programs: [
       {
         label: "Optimistic Oracle",
-        programId: "DVMcc2M87dcTZfp4PLvzGU1Aps4xrNmNpkHKEpWm3hJW",
+        programId: "DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge",
         deployPath: getProgram("oracle_program.so"),
       },
     ],

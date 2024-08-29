@@ -9,4 +9,4 @@ use solana_program::pubkey;
 use solana_program::pubkey::Pubkey;
 
 /// `optimistic_oracle` program ID.
-pub const OPTIMISTIC_ORACLE_ID: Pubkey = pubkey!("DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg");
+pub const OPTIMISTIC_ORACLE_ID: Pubkey = pubkey!("DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge");

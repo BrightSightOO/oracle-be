@@ -55,7 +55,7 @@ export function resolveAssertionV1(
   // Program ID.
   const programId = context.programs.getPublicKey(
     "optimisticOracle",
-    "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
+    "DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge",
   );
 
   // Accounts.

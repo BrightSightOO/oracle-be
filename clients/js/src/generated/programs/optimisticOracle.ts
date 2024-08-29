@@ -11,7 +11,7 @@ import type { ClusterFilter, Context, Program, PublicKey } from "@metaplex-found
 import { getOptimisticOracleErrorFromCode, getOptimisticOracleErrorFromName } from "../errors";
 
 export const OPTIMISTIC_ORACLE_PROGRAM_ID =
-  "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg" as PublicKey<"DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg">;
+  "DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge" as PublicKey<"DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge">;
 
 export function createOptimisticOracleProgram(): Program {
   return {

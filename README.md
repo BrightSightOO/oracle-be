@@ -1,6 +1,6 @@
 # Optimistic Oracle
 
-Program ID: `DVMcc2M87dcTZfp4PLvzGU1Aps4xrNmNpkHKEpWm3hJW`
+Program ID: `DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge`
 
 The optimistic oracle serves as a source of truth for on-chain data.
 
