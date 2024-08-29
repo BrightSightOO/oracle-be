@@ -1,7 +1,6 @@
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
-use solana_program::clock::UnixTimestamp;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
@@ -19,7 +18,7 @@ pub struct AssertionV1 {
     pub request: Pubkey,
 
     /// Unix timestamp of the assertion.
-    pub assertion_timestamp: UnixTimestamp,
+    pub assertion_timestamp: i64,
     /// Unix timestamp at which the dispute window expires and the assertion
     /// can be resolved.
     ///
@@ -27,7 +26,7 @@ pub struct AssertionV1 {
     ///
     /// [`assertion_timestamp`]: Assertion::assertion_timestamp
     /// [`DISPUTE_WINDOW`]: crate::DISPUTE_WINDOW
-    pub expiration_timestamp: UnixTimestamp,
+    pub expiration_timestamp: i64,
 
     /// Asserter address.
     pub asserter: Pubkey,
@@ -108,7 +107,7 @@ impl TryFrom<InitAssertion> for (AssertionV1, usize) {
 pub(crate) struct InitAssertion {
     pub request: Pubkey,
 
-    pub assertion_timestamp: UnixTimestamp,
+    pub assertion_timestamp: i64,
     pub asserter: Pubkey,
     pub asserted_value: u64,
 

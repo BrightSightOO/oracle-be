@@ -1139,15 +1139,11 @@
           },
           {
             "name": "assertionTimestamp",
-            "type": {
-              "defined": "UnixTimestamp"
-            }
+            "type": "i64"
           },
           {
             "name": "expirationTimestamp",
-            "type": {
-              "defined": "UnixTimestamp"
-            }
+            "type": "i64"
           },
           {
             "name": "asserter",
@@ -1299,15 +1295,11 @@
           },
           {
             "name": "assertionTimestamp",
-            "type": {
-              "defined": "UnixTimestamp"
-            }
+            "type": "i64"
           },
           {
             "name": "resolveTimestamp",
-            "type": {
-              "defined": "UnixTimestamp"
-            }
+            "type": "i64"
           },
           {
             "name": "state",
@@ -1361,9 +1353,7 @@
           },
           {
             "name": "lockTimestamp",
-            "type": {
-              "defined": "UnixTimestamp"
-            }
+            "type": "i64"
           }
         ]
       }
@@ -1419,15 +1409,11 @@
           },
           {
             "name": "startTimestamp",
-            "type": {
-              "defined": "UnixTimestamp"
-            }
+            "type": "i64"
           },
           {
             "name": "endTimestamp",
-            "type": {
-              "defined": "UnixTimestamp"
-            }
+            "type": "i64"
           },
           {
             "name": "voteCount",
@@ -1538,9 +1524,7 @@
           },
           {
             "name": "timestamp",
-            "type": {
-              "defined": "UnixTimestamp"
-            }
+            "type": "i64"
           },
           {
             "name": "arbitrator",

@@ -3,7 +3,6 @@ use std::collections::BTreeMap;
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::BorshSize;
 use shank::ShankAccount;
-use solana_program::clock::UnixTimestamp;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
@@ -22,9 +21,9 @@ pub struct VotingV1 {
     pub governance_mint: Pubkey,
 
     /// The Unix timestamp when voting started.
-    pub start_timestamp: UnixTimestamp,
+    pub start_timestamp: i64,
     /// The Unix timestamp when voting ends.
-    pub end_timestamp: UnixTimestamp,
+    pub end_timestamp: i64,
 
     /// The number of votes that have been added.
     pub vote_count: u64,
@@ -67,7 +66,7 @@ pub(crate) struct InitVoting {
     pub request: Pubkey,
     pub governance_mint: Pubkey,
 
-    pub start_timestamp: UnixTimestamp,
+    pub start_timestamp: i64,
     pub voting_window: u32,
 }
 

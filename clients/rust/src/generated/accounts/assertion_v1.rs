@@ -25,6 +25,8 @@ pub struct AssertionV1 {
 }
 
 impl AssertionV1 {
+    pub const LEN: usize = 121;
+
     /// Prefix values used to generate a PDA for this account.
     ///
     /// Values are positional and appear in the following order:

@@ -26,7 +26,7 @@ console.log("generating clients...");
 const idl = kIdl.rootNodeFromAnchor(JSON.parse(idlJson));
 const kinobi = k.createFromRoot(idl);
 
-// Add PDA seeds for accounts.
+// Update accounts.
 kinobi.update(
   k.updateAccountsVisitor({
     oracleV1: {
@@ -39,6 +39,7 @@ kinobi.update(
       ],
     },
     requestV1: {
+      size: null,
       seeds: [
         k.constantPdaSeedNodeFromString("utf8", "request"),
         k.variablePdaSeedNode(
@@ -61,6 +62,7 @@ kinobi.update(
       ],
     },
     votingV1: {
+      size: null,
       seeds: [
         k.constantPdaSeedNodeFromString("utf8", "voting"),
         k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
@@ -163,15 +165,21 @@ kinobi.update(
   }),
 );
 
-// Mark UnixTimestamp as a i64 date-time type.
+// Mark timestamps fields as data-time types.
 kinobi.update(
   k.bottomUpTransformerVisitor([
     {
-      select: ["[definedTypeLinkNode]UnixTimestamp"],
+      select: (node) =>
+        (node.kind === "structFieldTypeNode" || node.kind === "instructionArgumentNode") &&
+        node.type.kind === "numberTypeNode" &&
+        node.type.format === "i64" &&
+        node.type.endian === "le" &&
+        k.snakeCase(node.name).split("_").includes("timestamp"),
       transform: (node) => {
-        k.assertIsNode(node, "definedTypeLinkNode");
+        k.assertIsNode(node, ["structFieldTypeNode", "instructionArgumentNode"]);
+        k.assertIsNode(node.type, "numberTypeNode");
 
-        return k.dateTimeTypeNode(k.numberTypeNode("i64"));
+        return { ...node, type: k.dateTimeTypeNode(node.type) };
       },
     },
   ]),

@@ -1,6 +1,5 @@
 use borsh::BorshDeserialize;
 use solana_program::account_info::AccountInfo;
-use solana_program::clock::UnixTimestamp;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::pubkey::Pubkey;
 
@@ -19,7 +18,7 @@ pub struct CreateRequestV1Args {
     /// Amount to required to bond in order to assert/dispute value.
     pub bond: u64,
     /// Unix timestamp after which a value can be asserted.
-    pub timestamp: UnixTimestamp,
+    pub timestamp: i64,
     /// Arbitrator address.
     pub arbitrator: Pubkey,
     /// Request data.

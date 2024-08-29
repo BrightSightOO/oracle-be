@@ -154,6 +154,10 @@ export function getStakeV1GpaBuilder(context: Pick<Context, "rpc" | "programs">)
     .whereField("accountType", AccountType.StakeV1);
 }
 
+export function getStakeV1Size(): number {
+  return 113;
+}
+
 export function findStakeV1Pda(
   context: Pick<Context, "eddsa" | "programs">,
   seeds: {

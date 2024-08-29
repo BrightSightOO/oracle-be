@@ -1,7 +1,6 @@
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::BorshSize;
 use shank::ShankAccount;
-use solana_program::clock::UnixTimestamp;
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
@@ -33,9 +32,9 @@ pub struct RequestV1 {
     pub bond_mint: Pubkey,
 
     /// Unix timestamp after which a value can be asserted.
-    pub assertion_timestamp: UnixTimestamp,
+    pub assertion_timestamp: i64,
     /// Unix timestamp at which the request was resolved.
-    pub resolve_timestamp: UnixTimestamp,
+    pub resolve_timestamp: i64,
 
     /// Request state.
     pub state: RequestState,
@@ -186,7 +185,7 @@ pub(crate) struct InitRequest {
     pub bond: u64,
     pub bond_mint: Pubkey,
 
-    pub timestamp: UnixTimestamp,
+    pub timestamp: i64,
     pub arbitrator: Pubkey,
 
     pub data: RequestData,

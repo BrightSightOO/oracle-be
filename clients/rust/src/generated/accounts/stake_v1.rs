@@ -24,6 +24,8 @@ pub struct StakeV1 {
 }
 
 impl StakeV1 {
+    pub const LEN: usize = 113;
+
     /// Prefix values used to generate a PDA for this account.
     ///
     /// Values are positional and appear in the following order:

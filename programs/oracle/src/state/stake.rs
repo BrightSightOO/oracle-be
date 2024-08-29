@@ -1,7 +1,6 @@
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
 use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
-use solana_program::clock::UnixTimestamp;
 use solana_program::pubkey::Pubkey;
 
 use crate::error::OracleError;
@@ -30,7 +29,7 @@ pub struct StakeV1 {
     pub amount: u64,
 
     /// The Unix timestamp the stake is locked until.
-    pub lock_timestamp: UnixTimestamp,
+    pub lock_timestamp: i64,
 }
 
 impl StakeV1 {
@@ -59,7 +58,7 @@ impl From<InitStake> for (StakeV1, usize) {
                 owner,
                 delegate: owner,
                 amount,
-                lock_timestamp: UnixTimestamp::MIN,
+                lock_timestamp: i64::MIN,
             },
             StakeV1::FIXED_SIZE,
         )

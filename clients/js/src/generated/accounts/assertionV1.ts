@@ -159,6 +159,10 @@ export function getAssertionV1GpaBuilder(context: Pick<Context, "rpc" | "program
     .whereField("accountType", AccountType.AssertionV1);
 }
 
+export function getAssertionV1Size(): number {
+  return 121;
+}
+
 export function findAssertionV1Pda(
   context: Pick<Context, "eddsa" | "programs">,
   seeds: {
