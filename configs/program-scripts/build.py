@@ -14,10 +14,6 @@ root_dir = script.parent.parent.parent
 programs_dir = root_dir / "programs"
 output_dir = root_dir / ".bin"
 
-cargo = shutil.which("cargo")
-if cargo is None:
-    raise RuntimeError("cargo executable not found")
-
 
 def get_program_dirs() -> Generator[Path, None, None]:
     for file in programs_dir.iterdir():
@@ -35,6 +31,10 @@ def parse_args(args: List[str]) -> Tuple[List[str], List[str]]:
 
 
 def build(program: Path, args: List[str]):
+    cargo = shutil.which("cargo")
+    if cargo is None:
+        raise RuntimeError("cargo executable not found")
+
     return subprocess.check_call(
         [cargo, "build-sbf", "--sbf-out-dir", output_dir, *args],
         cwd=program,

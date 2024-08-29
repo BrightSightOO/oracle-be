@@ -1,6 +1,6 @@
 [package]
-name = "oracle"
-version = "0.0.0"
+name = "oracle-program"
+version = "2.0.0"
 edition = "2021"
 publish = false
 
@@ -9,29 +9,26 @@ crate-type = ["cdylib", "lib"]
 
 [features]
 no-entrypoint = []
-test-sbf = []
 
 [dependencies]
-common = { workspace = true }
+cpi = { workspace = true }
+
+borsh-size = { workspace = true }
+include-idl = { workspace = true }
+security-txt = { workspace = true }
+solana-utils = { workspace = true }
 
 solana-program = { workspace = true }
 
-spl-token = { workspace = true }
 spl-token-2022 = { workspace = true }
 
 shank = "0.4.2"
-borsh = { workspace = true }
+borsh = { version = "1.5.1", features = ["derive"] }
 bytemuck = { workspace = true }
 
 thiserror = { workspace = true }
 num-traits = { workspace = true }
 num-derive = { workspace = true }
 
-[dev-dependencies]
-common-test = { workspace = true }
-
-# solana-sdk = { workspace = true }
-solana-program-test = { workspace = true }
-
-async-trait = { workspace = true }
-log = { workspace = true }
+[build-dependencies]
+include-idl = { workspace = true, features = ["shrink"] }

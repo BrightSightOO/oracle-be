@@ -22,20 +22,8 @@ module.exports = {
     programs: [
       {
         label: "Optimistic Oracle",
-        programId: "DVMysqEbKDZdaJ1AVcmAqyVfvvZAMFwUkEQsNMQTvMZg",
-        deployPath: getProgram("oracle.so"),
-      },
-    ],
-    accounts: [
-      {
-        label: "System Extras",
-        accountId: "SysExL2WDyJi9aRZrXorrjHJut3JwHQ7R9bTyctbNNG",
-        executable: true,
-      },
-      {
-        label: "Token Extras",
-        accountId: "TokExjvjJmhKaRBShsBAsbSvEWMA1AgUNK7ps4SAc2p",
-        executable: true,
+        programId: "DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge",
+        deployPath: getProgram("oracle_program.so"),
       },
     ],
   },

@@ -1,17 +1,17 @@
-use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
+use borsh_size::{BorshSize, BorshSizeProperties};
 use shank::ShankAccount;
 use solana_program::pubkey::Pubkey;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
-pub struct Vote {
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize, ShankAccount)]
+pub struct VoteV1 {
     account_type: AccountType,
 
-    /// The address of the [`Stake`] the votes represent.
-    ///
-    /// [`Stake`]: crate::state::Stake
+    /// The address of the voting account.
+    pub voting: Pubkey,
+    /// The address of the stake the votes represent.
     pub stake: Pubkey,
 
     /// The value voted for.
@@ -20,19 +20,20 @@ pub struct Vote {
     pub votes: u64,
 }
 
-impl Account for Vote {
-    const TYPE: AccountType = AccountType::Vote;
+impl Account for VoteV1 {
+    const TYPE: AccountType = AccountType::VoteV1;
 }
 
-impl From<InitVote> for (Vote, usize) {
-    fn from(params: InitVote) -> (Vote, usize) {
-        let InitVote { stake, value, votes } = params;
+impl From<InitVote> for (VoteV1, usize) {
+    fn from(params: InitVote) -> (VoteV1, usize) {
+        let InitVote { voting, stake, value, votes } = params;
 
-        (Vote { account_type: Vote::TYPE, stake, value, votes }, Vote::SIZE)
+        (VoteV1 { account_type: VoteV1::TYPE, voting, stake, value, votes }, VoteV1::FIXED_SIZE)
     }
 }
 
 pub(crate) struct InitVote {
+    pub voting: Pubkey,
     pub stake: Pubkey,
     pub value: u64,
     pub votes: u64,

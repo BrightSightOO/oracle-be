@@ -1,0 +1,12 @@
+[package]
+name = "cpi"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+solana-utils = { workspace = true }
+
+solana-program = { workspace = true }
+
+spl-token-2022 = { workspace = true }

@@ -1,22 +1,24 @@
 use std::collections::BTreeMap;
 
-use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
+use borsh_size::BorshSize;
 use shank::ShankAccount;
+use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
-use crate::error::OracleError;
+use super::{Account, AccountType};
 
-use super::{Account, AccountSized, AccountType};
-
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, ShankAccount)]
-pub struct Voting {
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSchema, BorshSize, ShankAccount)]
+pub struct VotingV1 {
     account_type: AccountType,
 
     /// The [`Request`]` this assertion is for.
     ///
     /// [`Request`]: crate::state::Request
     pub request: Pubkey,
+
+    /// The address of the mint of the governance token required to vote.
+    pub governance_mint: Pubkey,
 
     /// The Unix timestamp when voting started.
     pub start_timestamp: i64,
@@ -32,56 +34,66 @@ pub struct Voting {
     pub votes: BTreeMap<u64, u64>,
 }
 
-impl Voting {
-    const BASE_SIZE: usize =
-        AccountType::SIZE       // account_type
-        + Pubkey::SIZE          // request
-        + i64::SIZE             // start_timestamp
-        + i64::SIZE             // end_timestamp
-        + u64::SIZE             // vote_count
-        + u64::SIZE             // mode_value
-        + u32::SIZE             // votes.len()
-        ;
+impl Account for VotingV1 {
+    const TYPE: AccountType = AccountType::VotingV1;
 }
 
-impl Account for Voting {
-    const TYPE: AccountType = AccountType::Voting;
-}
+impl TryFrom<InitVoting> for (VotingV1, usize) {
+    type Error = ProgramError;
 
-impl AccountSized for Voting {
-    const IS_FIXED_SIZE: bool = false;
+    fn try_from(params: InitVoting) -> Result<(VotingV1, usize), Self::Error> {
+        let InitVoting { request, governance_mint, start_timestamp, voting_window } = params;
 
-    fn serialized_size(&self) -> Option<usize> {
-        self.votes.len().checked_mul(u64::SIZE)?.checked_add(Self::BASE_SIZE)
-    }
-}
+        let end_timestamp = checked_add!(start_timestamp, i64::from(voting_window))?;
 
-impl TryFrom<InitVoting> for (Voting, usize) {
-    type Error = OracleError;
+        let account = VotingV1 {
+            account_type: VotingV1::TYPE,
+            request,
+            governance_mint,
+            start_timestamp,
+            end_timestamp,
+            vote_count: 0,
+            mode_value: 0,
+            votes: BTreeMap::new(),
+        };
+        let space = account.borsh_size();
 
-    fn try_from(params: InitVoting) -> Result<(Voting, usize), Self::Error> {
-        let InitVoting { request, start_timestamp } = params;
-
-        let end_timestamp = start_timestamp
-            .checked_add(crate::VOTING_WINDOW)
-            .ok_or(OracleError::ArithmeticOverflow)?;
-
-        Ok((
-            Voting {
-                account_type: Voting::TYPE,
-                request,
-                start_timestamp,
-                end_timestamp,
-                vote_count: 0,
-                mode_value: 0,
-                votes: BTreeMap::new(),
-            },
-            Voting::BASE_SIZE,
-        ))
+        Ok((account, space))
     }
 }
 
 pub(crate) struct InitVoting {
     pub request: Pubkey,
+    pub governance_mint: Pubkey,
+
     pub start_timestamp: i64,
+    pub voting_window: u32,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn account_size() {
+        let init = InitVoting {
+            request: Pubkey::new_unique(),
+            governance_mint: Pubkey::new_unique(),
+            start_timestamp: 0,
+            voting_window: 0,
+        };
+
+        let (mut account, expected) = <(VotingV1, usize)>::try_from(init).unwrap();
+        let actual = borsh::object_length(&account).unwrap();
+
+        assert_eq!(expected, actual);
+
+        account.votes.insert(0, 10);
+        account.votes.insert(1, 5);
+
+        let expected = account.borsh_size();
+        let actual = borsh::object_length(&account).unwrap();
+
+        assert_eq!(expected, actual);
+    }
 }

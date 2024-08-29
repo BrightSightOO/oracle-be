@@ -40,6 +40,7 @@ module.exports = {
       },
       rules: {
         "@typescript-eslint/array-type": ["error", { default: "generic" }],
+        "@typescript-eslint/consistent-type-definitions": ["error", "type"],
         "@typescript-eslint/consistent-type-imports": [
           "error",
           { prefer: "type-imports", fixStyle: "separate-type-imports" },
@@ -54,9 +55,16 @@ module.exports = {
           { allowBitwiseExpressions: true },
         ],
 
-        // There is a semantic difference between `type` and `interface`.
-        // `type A = { a: 1 }` is considered to extend `Record<PropertyKey, unknown>`.
-        "@typescript-eslint/consistent-type-definitions": "off",
+        "@typescript-eslint/restrict-template-expressions": [
+          "error",
+          {
+            allowAny: false,
+            allowBoolean: true,
+            allowNullish: false,
+            allowNumber: true,
+            allowRegExp: true,
+          },
+        ],
 
         // TS verifies these.
         "consistent-return": "off",
@@ -72,7 +80,7 @@ module.exports = {
     {
       files: ["*.cjs"],
       rules: {
-        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/no-require-imports": "off",
       },
     },
     {

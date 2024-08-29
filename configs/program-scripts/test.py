@@ -10,7 +10,7 @@ import sys
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import AnyStr, Dict, Generator, List, Tuple
+from typing import AnyStr, Dict, Generator, List, Optional, Tuple
 
 script = Path(__file__)
 
@@ -18,13 +18,6 @@ root_dir = script.parent.parent.parent
 programs_dir = root_dir / "programs"
 output_dir = root_dir / ".bin"
 
-cargo = shutil.which("cargo")
-if cargo is None:
-    raise RuntimeError("cargo executable not found")
-
-solana = shutil.which("solana")
-if solana is None:
-    raise RuntimeError("solana executable not found")
 
 LEVELS = ["ERROR", "WARN", "INFO", "DEBUG", "TRACE"]
 PROGRAM_LOG = "Program log:"
@@ -45,9 +38,13 @@ def get_program_dirs() -> Generator[Path, None, None]:
 
 
 def get_inactive_features() -> List[str]:
+    solana = shutil.which("solana")
+    if solana is None:
+        raise RuntimeError("solana executable not found")
+
     feature_statuses = subprocess.check_output(
         [
-            "solana",
+            solana,
             "feature",
             "status",
             "--display-all",
@@ -150,14 +147,16 @@ def format_log(line: str) -> str:
     return f"  {log_level_align}{log_level}  {msg}\n"
 
 
-def test(program: Path, cmd: List[AnyStr | Path], env: Dict[str, AnyStr]):
+def test(
+    program: Path, cmd: List[AnyStr | Path], env: Dict[str, AnyStr], cwd: Optional[Path] = None
+):
     with subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         close_fds=True,
         encoding="utf-8",
-        cwd=program,
+        cwd=(cwd or program),
         env=env,
     ) as p:
         stdout = p.stdout
@@ -178,8 +177,8 @@ def test(program: Path, cmd: List[AnyStr | Path], env: Dict[str, AnyStr]):
                 sys.stderr.write(format_log(line))
                 sys.stderr.flush()
 
-        t1 = Thread(target=pipe_stdout, args=(stdout,))
-        t2 = Thread(target=pipe_stderr, args=(stderr,))
+        t1 = Thread(target=pipe_stdout, args=[stdout])
+        t2 = Thread(target=pipe_stderr, args=[stderr])
 
         t1.start()
         t2.start()
@@ -193,6 +192,10 @@ def test(program: Path, cmd: List[AnyStr | Path], env: Dict[str, AnyStr]):
 
 
 def main(args: List[str]):
+    cargo = shutil.which("cargo")
+    if cargo is None:
+        raise RuntimeError("cargo executable not found")
+
     program_filter, args = split_args(args)
     cargo_args, test_args = split_args(args)
 

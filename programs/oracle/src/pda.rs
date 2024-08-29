@@ -8,8 +8,14 @@ impl<T: bytemuck::NoUninit> PdaSeed for T {
     }
 }
 
-#[cfg(target_endian = "big")]
+#[cfg(not(target_endian = "little"))]
 compile_error!("only little endian targets are supported");
+
+macro_rules! count_tts {
+    () => { 0 };
+    ($odd:tt $($a:tt $b:tt)*) => { (count_tts!($($a)*) << 1) | 1 };
+    ($($a:tt $even:tt)*) => { count_tts!($($a)*) << 1 };
+}
 
 macro_rules! pdas {
     ($(
@@ -24,19 +30,16 @@ macro_rules! pdas {
                 use solana_program::program_error::ProgramError;
                 use solana_program::pubkey::Pubkey;
 
-                pub const PREFIX_SEED: &str = stringify!($name);
+                pub const PREFIX: &str = stringify!($name);
 
-                const N_SEEDS: usize = 1 $(+ {
-                    stringify!($seed);
-                    1
-                })*;
+                const N_SEEDS: usize = 1 + count_tts!($($seed)*);
 
                 pub fn seeds<'a>($($seed : &'a $seed_ty),*) -> [&'a [u8]; N_SEEDS] {
-                    [PREFIX_SEED.as_bytes(), $(PdaSeed::pda_seed($seed)),*]
+                    [PREFIX.as_bytes(), $(PdaSeed::pda_seed($seed)),*]
                 }
 
                 pub fn seeds_with_bump<'a>($($seed : &'a $seed_ty,)* bump: &'a u8) -> [&'a [u8]; N_SEEDS + 1] {
-                    [PREFIX_SEED.as_bytes(), $(PdaSeed::pda_seed($seed),)* std::slice::from_ref(bump)]
+                    [PREFIX.as_bytes(), $(PdaSeed::pda_seed($seed),)* std::slice::from_ref(bump)]
                 }
 
                 pub fn pda<'a>($($seed : &'a $seed_ty),*) -> (Pubkey, u8) {
@@ -46,8 +49,8 @@ macro_rules! pdas {
 
                 pub fn assert_pda<'a>($name: &'a Pubkey, $($seed : &'a $seed_ty),*) -> Result<u8, ProgramError> {
                     let (expected, bump) = pda($($seed),*);
-                    if !common::cmp_pubkeys($name, &expected) {
-                        err!("{} address does not match seed derivation", $desc);
+                    if !solana_utils::pubkeys_eq($name, &expected) {
+                        solana_utils::log!("Error: {} address does not match seed derivation", $desc);
                         return Err(ProgramError::InvalidSeeds);
                     }
                     Ok(bump)
@@ -59,13 +62,17 @@ macro_rules! pdas {
 
 pdas! {
     "Oracle": oracle();
-    "Currency": currency(mint: Pubkey);
+
+    "Currency": currency(config: Pubkey, mint: Pubkey);
+    "Stake pool": stake_pool(mint: Pubkey);
+
     "Request": request(index: u64);
-    "Assertion": assertion(request: Pubkey);
     "Reward": reward(request: Pubkey);
+
+    "Assertion": assertion(request: Pubkey);
     "Assert bond": assert_bond(request: Pubkey);
     "Dispute bond": dispute_bond(request: Pubkey);
-    "Stake": stake(wallet: Pubkey);
+
     "Voting": voting(request: Pubkey);
-    "Vote": vote(voting: Pubkey, wallet: Pubkey);
+    "Vote": vote(voting: Pubkey, stake: Pubkey);
 }

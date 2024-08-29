@@ -1,9 +1,10 @@
 use std::cell::RefMut;
 use std::convert::Infallible;
+use std::io;
 use std::ops::{Deref, DerefMut};
 
-use borsh::{BorshDeserialize, BorshSerialize};
-use common::BorshSize;
+use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
+use borsh_size::{BorshSize, BorshSizeProperties};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 use solana_program::account_info::AccountInfo;
@@ -12,12 +13,10 @@ use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 use solana_program::rent::Rent;
 use solana_program::sysvar::Sysvar;
-
-use crate::cpi::sys::Transfer;
-use crate::error::OracleError;
-use crate::{cpi, utils};
+use solana_utils::{log, VariantName};
 
 mod assertion;
+mod config;
 mod currency;
 mod oracle;
 mod request;
@@ -25,7 +24,11 @@ mod stake;
 mod vote;
 mod voting;
 
+use crate::error::OracleError;
+
 pub use self::assertion::*;
+pub use self::config::*;
+pub use self::currency::*;
 pub use self::oracle::*;
 pub use self::request::*;
 pub use self::stake::*;
@@ -37,79 +40,85 @@ pub use self::voting::*;
     Copy,
     PartialEq,
     Eq,
-    Debug,
     Default,
     FromPrimitive,
     BorshDeserialize,
     BorshSerialize,
+    BorshSchema,
     BorshSize,
+    VariantName,
 )]
 #[repr(u8)]
 pub enum AccountType {
     /// Uninitialized account, which has all bytes set to zero by default.
     #[default]
     Uninitialized,
-    /// Account containing [`Oracle`] state.
-    Oracle,
-    /// Account containing [`Stake`] state.
-    Stake,
-    /// Account containing [`Request`] state.
-    Request,
-    /// Account containing [`Assertion`] state.
-    Assertion,
-    /// Account containing [`Currency`] state.
-    Currency,
-    /// Account containing [`Voting`] state.
-    Voting,
-    /// Account containing [`Vote`] state.
-    Vote,
+    /// Account containing [`OracleV1`] state.
+    OracleV1,
+    /// Account containing [`ConfigV1`] state.
+    ConfigV1,
+    /// Account containing [`StakeV1`] state.
+    StakeV1,
+    /// Account containing [`RequestV1`] state.
+    RequestV1,
+    /// Account containing [`AssertionV1`] state.
+    AssertionV1,
+    /// Account containing [`CurrencyV1`] state.
+    CurrencyV1,
+    /// Account containing [`VotingV1`] state.
+    VotingV1,
+    /// Account containing [`VoteV1`] state.
+    VoteV1,
 }
+
+account_schema_tests! { OracleV1 ConfigV1 StakeV1 RequestV1 AssertionV1 CurrencyV1 VotingV1 VoteV1 }
 
 pub(crate) trait Account: BorshDeserialize + BorshSerialize {
     const TYPE: AccountType;
 
-    fn check_account_owner(owner: &Pubkey) -> Result<(), ProgramError> {
-        if common::cmp_pubkeys(owner, &crate::ID) {
-            Ok(())
-        } else {
-            err!("{:?} account is owned by the wrong program", Self::TYPE);
-            Err(ProgramError::IncorrectProgramId)
-        }
+    #[inline]
+    fn name() -> &'static str {
+        Self::TYPE.variant_name()
     }
 
-    fn from_bytes(data: &[u8]) -> Result<Self, ProgramError> {
-        let account_type = Self::TYPE;
-
-        Self::deserialize(&mut &data[..]).map_err(|err| {
-            err!("Failed to deserialize {account_type:?} account: {err}");
-            ProgramError::InvalidAccountData
-        })
+    fn check_account_owner(owner: &Pubkey) -> Result<(), ProgramError> {
+        if !solana_utils::pubkeys_eq(owner, &crate::ID) {
+            log!("Error: {} account is owned by the wrong program", Self::name());
+            return Err(ProgramError::IncorrectProgramId);
+        }
+        Ok(())
     }
 
     fn safe_deserialize(data: &[u8]) -> Result<Self, ProgramError> {
-        let expected_type = Self::TYPE;
+        let key = match data {
+            [] | [0, ..] => {
+                log!("Error: {} account is uninitialized", Self::name());
+                return Err(OracleError::DeserializationError.into());
+            }
+            &[key, ..] => key,
+        };
 
-        let account_type = data.first().ok_or_else(|| {
-            err!("{expected_type:?} account is uninitialized");
-            ProgramError::UninitializedAccount
-        })?;
+        let Some(account_type) = AccountType::from_u8(key) else {
+            log!("Error: Unknown account type: {key:#x}, expected {}", Self::name());
+            return Err(OracleError::DeserializationError.into());
+        };
 
-        let account_type = AccountType::from_u8(*account_type).ok_or_else(|| {
-            err!("Unknown account type: {account_type:#x}, expected {expected_type:?}");
-            ProgramError::InvalidAccountData
-        })?;
-
-        if account_type != expected_type {
-            err!("Incorrect account type: expected {expected_type:?}, found {account_type:?}");
-            return match account_type {
-                AccountType::Uninitialized => Err(ProgramError::UninitializedAccount),
-                _ => Err(ProgramError::InvalidAccountData),
-            };
+        if account_type != Self::TYPE {
+            log!(
+                "Error: Incorrect account type: {}, expected {}",
+                account_type.variant_name(),
+                Self::name(),
+            );
+            return Err(OracleError::DeserializationError.into());
         }
 
-        Self::from_bytes(data)
+        Self::deserialize(&mut &data[..]).map_err(|err| {
+            log!("Error: {} account deserialization failed: {err}", Self::name());
+            OracleError::DeserializationError.into()
+        })
     }
 
+    #[track_caller]
     fn from_account_info(info: &AccountInfo) -> Result<Self, ProgramError> {
         let data = info.try_borrow_data()?;
         let account = Self::safe_deserialize(*data)?;
@@ -120,11 +129,8 @@ pub(crate) trait Account: BorshDeserialize + BorshSerialize {
     }
 }
 
-pub(crate) trait AccountSized: Account {
-    const IS_FIXED_SIZE: bool;
-
-    fn serialized_size(&self) -> Option<usize>;
-
+pub(crate) trait AccountSized: Account + BorshSize {
+    #[track_caller]
     fn from_account_info_mut<'a, 'info>(
         info: &'a AccountInfo<'info>,
     ) -> Result<AccountSizedMut<'a, 'info, Self>, ProgramError> {
@@ -139,13 +145,7 @@ pub(crate) trait AccountSized: Account {
     }
 }
 
-impl<T: Account + BorshSize> AccountSized for T {
-    const IS_FIXED_SIZE: bool = true;
-
-    fn serialized_size(&self) -> Option<usize> {
-        Some(<T as BorshSize>::SIZE)
-    }
-}
+impl<T: Account + BorshSize> AccountSized for T {}
 
 #[must_use = "Must call `.save()` to save account"]
 pub(crate) struct AccountSizedMut<'a, 'info, T> {
@@ -168,7 +168,7 @@ impl<'a, 'info, T: AccountSized> AccountSizedMut<'a, 'info, T> {
             return Ok(());
         }
 
-        let new_size = self.account.serialized_size().ok_or(OracleError::ArithmeticOverflow)?;
+        let new_size = self.account.borsh_size();
         let current_size = self.data.len();
 
         if new_size <= current_size {
@@ -182,32 +182,38 @@ impl<'a, 'info, T: AccountSized> AccountSizedMut<'a, 'info, T> {
 
         let rent_diff = new_rent.saturating_sub(current_rent);
 
-        log!("Reallocating account data");
+        log!("Reallocating {} account data", T::name());
 
         // Reallocate the account and update the data reference.
-        self.data = utils::realloc_account_mut(self.info, new_size)?;
+        self.data = solana_utils::realloc_account_mut(self.info, new_size)?;
 
-        log!("Transferring {rent_diff} lamports for additional rent");
+        if rent_diff > 0 {
+            log!("Transferring {rent_diff} lamports for additional rent");
 
-        // Transfer the additional rent required.
-        cpi::sys::transfer(
-            rent_diff,
-            Transfer { source: payer, destination: self.info, system_program },
-            &[],
-        )?;
+            // Transfer the additional rent required.
+            cpi::sys::transfer(
+                rent_diff,
+                cpi::sys::Transfer { source: payer, destination: self.info, system_program },
+                &[],
+            )?;
+        }
 
         Ok(())
     }
 
-    pub fn save(mut self) -> ProgramResult {
-        if !T::IS_FIXED_SIZE
-            && self.serialized_size().ok_or(OracleError::ArithmeticOverflow)? > self.data.len()
-        {
-            err!("Account cannot be saved as it overflows allocation");
-            return Err(ProgramError::InvalidAccountData);
+    pub fn save(mut self) -> Result<T, ProgramError> {
+        if !T::IS_FIXED_SIZE {
+            let size = self.borsh_size();
+
+            if size > self.data.len() {
+                log!("Error: {} account overflows allocation", T::name());
+                return Err(OracleError::SerializationError.into());
+            }
         }
-        BorshSerialize::serialize(&self.account, &mut &mut *self.data)?;
-        Ok(())
+
+        serialize_account(&mut *self.data, &self.account)?;
+
+        Ok(self.account)
     }
 }
 
@@ -241,6 +247,7 @@ where
     {
         match Self::try_init(params).map_err(|err| err.into()) {
             Ok(account_init) => account_init,
+            #[allow(unreachable_patterns)]
             Err(err) => match err {},
         }
     }
@@ -261,10 +268,15 @@ pub(crate) struct AccountInitializer<T> {
 
 impl<T: Account> AccountInitializer<T> {
     pub fn save(self, context: InitContext) -> Result<T, ProgramError> {
-        let InitContext { account: account_info, payer, system_program, program_id, signer_seeds } =
-            context;
+        let InitContext {
+            account: account_info,
+            payer,
+            system_program,
+            program_id,
+            signers_seeds: signer_seeds,
+        } = context;
 
-        utils::create_or_allocate_account(
+        solana_utils::create_or_allocate_account(
             account_info,
             payer,
             system_program,
@@ -273,9 +285,7 @@ impl<T: Account> AccountInitializer<T> {
             signer_seeds,
         )?;
 
-        let mut data = account_info.try_borrow_mut_data()?;
-
-        self.account.serialize(&mut *data)?;
+        serialize_account(account_info.try_borrow_mut_data()?.deref_mut(), &self.account)?;
 
         Ok(self.account)
     }
@@ -300,5 +310,12 @@ pub(crate) struct InitContext<'a, 'b, 'c, 'info> {
     pub payer: &'a AccountInfo<'info>,
     pub system_program: &'a AccountInfo<'info>,
     pub program_id: &'a Pubkey,
-    pub signer_seeds: &'a [&'b [&'c [u8]]],
+    pub signers_seeds: &'a [&'b [&'c [u8]]],
+}
+
+fn serialize_account<W: io::Write, T: Account>(writer: W, account: &T) -> ProgramResult {
+    borsh::to_writer(writer, account).map_err(|err| {
+        log!("Error: {} serialization failed: {err}", T::name());
+        OracleError::SerializationError.into()
+    })
 }
