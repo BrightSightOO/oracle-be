@@ -23,7 +23,7 @@ solana-program = { workspace = true }
 spl-token-2022 = { workspace = true }
 
 shank = "0.4.2"
-borsh = { workspace = true }
+borsh = { version = "1.5.1", features = ["derive"] }
 bytemuck = { workspace = true }
 
 thiserror = { workspace = true }

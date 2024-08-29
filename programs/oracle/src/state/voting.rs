@@ -85,7 +85,7 @@ mod tests {
         };
 
         let (mut account, expected) = <(VotingV1, usize)>::try_from(init).unwrap();
-        let actual = account.try_to_vec().unwrap().len();
+        let actual = borsh::object_length(&account).unwrap();
 
         assert_eq!(expected, actual);
 
@@ -93,7 +93,7 @@ mod tests {
         account.votes.insert(1, 5);
 
         let expected = account.borsh_size();
-        let actual = account.try_to_vec().unwrap().len();
+        let actual = borsh::object_length(&account).unwrap();
 
         assert_eq!(expected, actual);
     }

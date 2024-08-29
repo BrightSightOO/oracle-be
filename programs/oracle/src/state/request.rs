@@ -202,7 +202,7 @@ mod tests {
         let data = RequestData::YesNo { question: "example question?".to_owned() };
 
         let expected = data.borsh_size();
-        let actual = data.try_to_vec().unwrap().len();
+        let actual = borsh::object_length(&data).unwrap();
 
         assert_eq!(expected, actual);
     }
@@ -223,7 +223,7 @@ mod tests {
         };
 
         let (request, expected) = <(RequestV1, usize)>::try_from(init).unwrap();
-        let actual = request.try_to_vec().unwrap().len();
+        let actual = borsh::object_length(&request).unwrap();
 
         assert_eq!(expected, actual);
     }
