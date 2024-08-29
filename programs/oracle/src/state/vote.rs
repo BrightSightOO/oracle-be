@@ -5,8 +5,8 @@ use solana_program::pubkey::Pubkey;
 
 use super::{Account, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
-pub struct Vote {
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+pub struct VoteV1 {
     account_type: AccountType,
 
     /// The address of the [`Stake`] the votes represent.
@@ -20,15 +20,15 @@ pub struct Vote {
     pub votes: u64,
 }
 
-impl Account for Vote {
-    const TYPE: AccountType = AccountType::Vote;
+impl Account for VoteV1 {
+    const TYPE: AccountType = AccountType::VoteV1;
 }
 
-impl From<InitVote> for (Vote, usize) {
-    fn from(params: InitVote) -> (Vote, usize) {
+impl From<InitVote> for (VoteV1, usize) {
+    fn from(params: InitVote) -> (VoteV1, usize) {
         let InitVote { stake, value, votes } = params;
 
-        (Vote { account_type: Vote::TYPE, stake, value, votes }, Vote::SIZE)
+        (VoteV1 { account_type: VoteV1::TYPE, stake, value, votes }, VoteV1::SIZE)
     }
 }
 

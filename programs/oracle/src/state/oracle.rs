@@ -3,10 +3,12 @@ use common::BorshSize;
 use shank::ShankAccount;
 use solana_program::pubkey::Pubkey;
 
+use crate::error::OracleError;
+
 use super::{Account, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
-pub struct Oracle {
+#[derive(Clone, BorshDeserialize, BorshSerialize, BorshSize, ShankAccount)]
+pub struct OracleV1 {
     account_type: AccountType,
 
     /// Index for the next request.
@@ -14,20 +16,35 @@ pub struct Oracle {
 
     /// Authority address.
     pub authority: Pubkey,
+    /// Governance token mint address.
+    pub governance_mint: Pubkey,
 }
 
-impl Account for Oracle {
-    const TYPE: AccountType = AccountType::Oracle;
+impl OracleV1 {
+    pub fn assert_authority(&self, authority: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(&self.authority, authority) {
+            return Err(OracleError::OracleAuthorityMismatch);
+        }
+        Ok(())
+    }
 }
 
-impl From<InitOracle> for (Oracle, usize) {
-    fn from(params: InitOracle) -> (Oracle, usize) {
-        let InitOracle { authority } = params;
+impl Account for OracleV1 {
+    const TYPE: AccountType = AccountType::OracleV1;
+}
 
-        (Oracle { account_type: Oracle::TYPE, next_index: 0, authority }, Oracle::SIZE)
+impl From<InitOracle> for (OracleV1, usize) {
+    fn from(params: InitOracle) -> (OracleV1, usize) {
+        let InitOracle { authority, governance_mint } = params;
+
+        (
+            OracleV1 { account_type: OracleV1::TYPE, next_index: 0, authority, governance_mint },
+            OracleV1::SIZE,
+        )
     }
 }
 
 pub(crate) struct InitOracle {
     pub authority: Pubkey,
+    pub governance_mint: Pubkey,
 }

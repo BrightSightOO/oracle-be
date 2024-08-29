@@ -12,13 +12,14 @@ import { scalarEnum } from "@metaplex-foundation/umi/serializers";
 
 export enum AccountType {
   Uninitialized,
-  Oracle,
-  Stake,
-  Request,
-  Assertion,
-  Currency,
-  Voting,
-  Vote,
+  OracleV1,
+  ConfigV1,
+  StakeV1,
+  RequestV1,
+  AssertionV1,
+  CurrencyV1,
+  VotingV1,
+  VoteV1,
 }
 
 export type AccountTypeArgs = AccountType;

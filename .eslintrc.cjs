@@ -54,9 +54,16 @@ module.exports = {
           { allowBitwiseExpressions: true },
         ],
 
-        // There is a semantic difference between `type` and `interface`.
-        // `type A = { a: 1 }` is considered to extend `Record<PropertyKey, unknown>`.
-        "@typescript-eslint/consistent-type-definitions": "off",
+        "@typescript-eslint/restrict-template-expressions": [
+          "error",
+          {
+            allowAny: false,
+            allowBoolean: true,
+            allowNullish: false,
+            allowNumber: true,
+            allowRegExp: true,
+          },
+        ],
 
         // TS verifies these.
         "consistent-return": "off",

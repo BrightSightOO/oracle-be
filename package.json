@@ -17,11 +17,11 @@
   },
   "devDependencies": {
     "@metaplex-foundation/amman": "^0.12.1",
-    "@metaplex-foundation/kinobi": "^0.18.2",
+    "@metaplex-foundation/kinobi": "^0.19.2",
     "@metaplex-foundation/shank-js": "^0.1.7",
-    "@types/eslint": "^8.56.6",
-    "@typescript-eslint/eslint-plugin": "^7.4.0",
-    "@typescript-eslint/parser": "^7.4.0",
+    "@types/eslint": "^8.56.10",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
     "colorette": "^2.0.20",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -29,8 +29,7 @@
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "npm:eslint-plugin-i@^2.29.1",
     "eslint-plugin-prettier": "^5.1.3",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.3"
-  },
-  "packageManager": "pnpm@8.12.1"
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  }
 }

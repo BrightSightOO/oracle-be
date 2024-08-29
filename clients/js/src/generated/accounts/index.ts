@@ -6,10 +6,11 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from "./assertion";
-export * from "./currency";
-export * from "./oracle";
-export * from "./request";
-export * from "./stake";
-export * from "./vote";
-export * from "./voting";
+export * from "./assertionV1";
+export * from "./configV1";
+export * from "./currencyV1";
+export * from "./oracleV1";
+export * from "./requestV1";
+export * from "./stakeV1";
+export * from "./voteV1";
+export * from "./votingV1";

@@ -8,7 +8,7 @@ impl<T: bytemuck::NoUninit> PdaSeed for T {
     }
 }
 
-#[cfg(target_endian = "big")]
+#[cfg(not(target_endian = "little"))]
 compile_error!("only little endian targets are supported");
 
 macro_rules! pdas {
@@ -47,7 +47,7 @@ macro_rules! pdas {
                 pub fn assert_pda<'a>($name: &'a Pubkey, $($seed : &'a $seed_ty),*) -> Result<u8, ProgramError> {
                     let (expected, bump) = pda($($seed),*);
                     if !common::cmp_pubkeys($name, &expected) {
-                        err!("{} address does not match seed derivation", $desc);
+                        log!(concat!("Error: ", $desc, " address does not match seed derivation"));
                         return Err(ProgramError::InvalidSeeds);
                     }
                     Ok(bump)
@@ -59,13 +59,17 @@ macro_rules! pdas {
 
 pdas! {
     "Oracle": oracle();
-    "Currency": currency(mint: Pubkey);
+
+    "Currency": currency(config: Pubkey, mint: Pubkey);
+    "Stake pool": stake_pool(mint: Pubkey);
+
     "Request": request(index: u64);
-    "Assertion": assertion(request: Pubkey);
     "Reward": reward(request: Pubkey);
+
+    "Assertion": assertion(request: Pubkey);
     "Assert bond": assert_bond(request: Pubkey);
     "Dispute bond": dispute_bond(request: Pubkey);
-    "Stake": stake(wallet: Pubkey);
+
     "Voting": voting(request: Pubkey);
-    "Vote": vote(voting: Pubkey, wallet: Pubkey);
+    "Vote": vote(voting: Pubkey, stake: Pubkey);
 }

@@ -7,12 +7,8 @@
  */
 
 export * from "./accountType";
-export * from "./createAssertionArgs";
-export * from "./createOracleArgs";
-export * from "./createRequestArgs";
-export * from "./disputeAssertionArgs";
-export * from "./expireAssertionArgs";
-export * from "./finalizeVotingArgs";
+export * from "./bounds";
 export * from "./requestData";
 export * from "./requestState";
-export * from "./submitVoteArgs";
+export * from "./updateConfigV1Args";
+export * from "./updateOracleV1Args";

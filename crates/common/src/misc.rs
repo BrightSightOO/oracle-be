@@ -2,6 +2,9 @@ use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
 
 use crate::syscalls;
 
+/// Default pubkey (`11111111111111111111111111111111`).
+pub const DEFAULT_PUBKEY: Pubkey = Pubkey::new_from_array([0; 32]);
+
 /// Checks two pubkeys for equality in a computationally cheap way using `sol_memcmp`.
 #[inline]
 pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {

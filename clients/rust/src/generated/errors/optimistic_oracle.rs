@@ -10,54 +10,78 @@ use thiserror::Error;
 
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
 pub enum OptimisticOracleError {
-    /// 0 (0x0) - Program arithmetic overflowed
-    #[error("Program arithmetic overflowed")]
-    ArithmeticOverflow,
-    /// 1 (0x1) - Insufficient bond
-    #[error("Insufficient bond")]
-    InsufficientBond,
-    /// 2 (0x2) - Request does not have an assertion
-    #[error("Request does not have an assertion")]
-    NotAsserted,
-    /// 3 (0x3) - Request is not disputed
-    #[error("Request is not disputed")]
-    NotDisputed,
-    /// 4 (0x4) - Request already has an assertion
-    #[error("Request already has an assertion")]
-    AlreadyAsserted,
-    /// 5 (0x5) - Assertion has already been disputed
-    #[error("Assertion has already been disputed")]
-    AlreadyDisputed,
-    /// 6 (0x6) - Request has already been resolved
-    #[error("Request has already been resolved")]
-    AlreadyResolved,
-    /// 7 (0x7) - Request is not accepting assertion yet
-    #[error("Request is not accepting assertion yet")]
-    AssertionTooEarly,
-    /// 8 (0x8) - Dispute window has not expired
-    #[error("Dispute window has not expired")]
-    DisputeWindowNotExpired,
-    /// 9 (0x9) - Dispute window has expired
-    #[error("Dispute window has expired")]
-    DisputeWindowExpired,
-    /// 10 (0xA) - Value is not valid for the request
+    /// 0 (0x0) - Failed to deserialize account
+    #[error("Failed to deserialize account")]
+    DeserializationError,
+    /// 1 (0x1) - Failed to serialize account
+    #[error("Failed to serialize account")]
+    SerializationError,
+    /// 2 (0x2) - Reward must be within valid bounds
+    #[error("Reward must be within valid bounds")]
+    RewardBounds,
+    /// 3 (0x3) - Bond must be within valid bounds
+    #[error("Bond must be within valid bounds")]
+    BondBounds,
+    /// 4 (0x4) - Value is not valid for the request
     #[error("Value is not valid for the request")]
     InvalidValue,
-    /// 11 (0xB) - Disputed value falls within range of acceptable deviation for asserted value
-    #[error("Disputed value falls within range of acceptable deviation for asserted value")]
-    InvalidDispute,
-    /// 12 (0xC) - Disputer cannot be the same as the asserter
+    /// 5 (0x5) - Disputer cannot be the same as the asserter
     #[error("Disputer cannot be the same as the asserter")]
     DisputerIsAsserter,
-    /// 13 (0xD) - Bond mint address does not match
-    #[error("Bond mint address does not match")]
-    BondMismatch,
+    /// 6 (0x6) - Request does not have an assertion
+    #[error("Request does not have an assertion")]
+    NotAsserted,
+    /// 7 (0x7) - Request is not disputed
+    #[error("Request is not disputed")]
+    NotDisputed,
+    /// 8 (0x8) - Request already has an assertion
+    #[error("Request already has an assertion")]
+    AlreadyAsserted,
+    /// 9 (0x9) - Assertion has already been disputed
+    #[error("Assertion has already been disputed")]
+    AlreadyDisputed,
+    /// 10 (0xA) - Request has already been resolved
+    #[error("Request has already been resolved")]
+    AlreadyResolved,
+    /// 11 (0xB) - Request is not accepting assertion yet
+    #[error("Request is not accepting assertion yet")]
+    AssertionTooEarly,
+    /// 12 (0xC) - Dispute window has not expired
+    #[error("Dispute window has not expired")]
+    DisputeWindowNotExpired,
+    /// 13 (0xD) - Dispute window has expired
+    #[error("Dispute window has expired")]
+    DisputeWindowExpired,
     /// 14 (0xE) - Voting window has not expired
     #[error("Voting window has not expired")]
     VotingWindowNotExpired,
     /// 15 (0xF) - Voting window has expired
     #[error("Voting window has expired")]
     VotingWindowExpired,
+    /// 16 (0x10) - Arbitration window has not expired
+    #[error("Arbitration window has not expired")]
+    ArbitrationWindowNotExpired,
+    /// 17 (0x11) - Oracle authority address does not match
+    #[error("Oracle authority address does not match")]
+    OracleAuthorityMismatch,
+    /// 18 (0x12) - Config authority address does not match
+    #[error("Config authority address does not match")]
+    ConfigAuthorityMismatch,
+    /// 19 (0x13) - Config address does not match
+    #[error("Config address does not match")]
+    ConfigMismatch,
+    /// 20 (0x14) - Currency mint address does not match
+    #[error("Currency mint address does not match")]
+    CurrencyMintMismatch,
+    /// 21 (0x15) - Bond mint address does not match
+    #[error("Bond mint address does not match")]
+    BondMintMismatch,
+    /// 22 (0x16) - Stake mint address does not match
+    #[error("Stake mint address does not match")]
+    StakeMintMismatch,
+    /// 23 (0x17) - Stake delegate does not match voter
+    #[error("Stake delegate does not match voter")]
+    StakeVoterMismatch,
 }
 
 impl solana_program::program_error::PrintProgramError for OptimisticOracleError {

@@ -14,7 +14,10 @@ import type {
 
 import { dataEnum, string, struct } from "@metaplex-foundation/umi/serializers";
 
-export type RequestData = { __kind: "YesNo"; question: string };
+export interface RequestData {
+  __kind: "YesNo";
+  question: string;
+}
 
 export type RequestDataArgs = RequestData;
 

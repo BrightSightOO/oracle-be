@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 /// Copies `count` bytes from `src` to `dst`. The source and destination must
 /// *not* overlap.
 ///

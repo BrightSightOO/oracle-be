@@ -6,10 +6,16 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
-export * from "./createAssertion";
-export * from "./createOracle";
-export * from "./createRequest";
-export * from "./disputeAssertion";
-export * from "./expireAssertion";
-export * from "./finalizeVoting";
-export * from "./submitVote";
+export * from "./closeVotingV1";
+export * from "./createAssertionV1";
+export * from "./createConfigV1";
+export * from "./createCurrencyV1";
+export * from "./createOracleV1";
+export * from "./createRequestV1";
+export * from "./createStakeV1";
+export * from "./disputeAssertionV1";
+export * from "./resolveAssertionV1";
+export * from "./submitVoteV1";
+export * from "./updateConfigV1";
+export * from "./updateCurrencyV1";
+export * from "./updateOracleV1";

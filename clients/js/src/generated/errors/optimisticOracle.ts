@@ -14,191 +14,187 @@ type ProgramErrorConstructor = new (program: Program, cause?: Error) => ProgramE
 const codeToErrorMap = new Map<number, ProgramErrorConstructor>();
 const nameToErrorMap = new Map<string, ProgramErrorConstructor>();
 
-/** ArithmeticOverflow: Program arithmetic overflowed */
-export class ArithmeticOverflowError extends ProgramError {
-  override readonly name: string = "ArithmeticOverflow";
+/** DeserializationError: Failed to deserialize account */
+export class DeserializationErrorError extends ProgramError {
+  override readonly name: string = "DeserializationError";
 
   readonly code: number = 0x0; // 0
 
   constructor(program: Program, cause?: Error) {
-    super("Program arithmetic overflowed", program, cause);
+    super("Failed to deserialize account", program, cause);
   }
 }
-codeToErrorMap.set(0x0, ArithmeticOverflowError);
-nameToErrorMap.set("ArithmeticOverflow", ArithmeticOverflowError);
+codeToErrorMap.set(0x0, DeserializationErrorError);
+nameToErrorMap.set("DeserializationError", DeserializationErrorError);
 
-/** InsufficientBond: Insufficient bond */
-export class InsufficientBondError extends ProgramError {
-  override readonly name: string = "InsufficientBond";
+/** SerializationError: Failed to serialize account */
+export class SerializationErrorError extends ProgramError {
+  override readonly name: string = "SerializationError";
 
   readonly code: number = 0x1; // 1
 
   constructor(program: Program, cause?: Error) {
-    super("Insufficient bond", program, cause);
+    super("Failed to serialize account", program, cause);
   }
 }
-codeToErrorMap.set(0x1, InsufficientBondError);
-nameToErrorMap.set("InsufficientBond", InsufficientBondError);
+codeToErrorMap.set(0x1, SerializationErrorError);
+nameToErrorMap.set("SerializationError", SerializationErrorError);
+
+/** RewardBounds: Reward must be within valid bounds */
+export class RewardBoundsError extends ProgramError {
+  override readonly name: string = "RewardBounds";
+
+  readonly code: number = 0x2; // 2
+
+  constructor(program: Program, cause?: Error) {
+    super("Reward must be within valid bounds", program, cause);
+  }
+}
+codeToErrorMap.set(0x2, RewardBoundsError);
+nameToErrorMap.set("RewardBounds", RewardBoundsError);
+
+/** BondBounds: Bond must be within valid bounds */
+export class BondBoundsError extends ProgramError {
+  override readonly name: string = "BondBounds";
+
+  readonly code: number = 0x3; // 3
+
+  constructor(program: Program, cause?: Error) {
+    super("Bond must be within valid bounds", program, cause);
+  }
+}
+codeToErrorMap.set(0x3, BondBoundsError);
+nameToErrorMap.set("BondBounds", BondBoundsError);
+
+/** InvalidValue: Value is not valid for the request */
+export class InvalidValueError extends ProgramError {
+  override readonly name: string = "InvalidValue";
+
+  readonly code: number = 0x4; // 4
+
+  constructor(program: Program, cause?: Error) {
+    super("Value is not valid for the request", program, cause);
+  }
+}
+codeToErrorMap.set(0x4, InvalidValueError);
+nameToErrorMap.set("InvalidValue", InvalidValueError);
+
+/** DisputerIsAsserter: Disputer cannot be the same as the asserter */
+export class DisputerIsAsserterError extends ProgramError {
+  override readonly name: string = "DisputerIsAsserter";
+
+  readonly code: number = 0x5; // 5
+
+  constructor(program: Program, cause?: Error) {
+    super("Disputer cannot be the same as the asserter", program, cause);
+  }
+}
+codeToErrorMap.set(0x5, DisputerIsAsserterError);
+nameToErrorMap.set("DisputerIsAsserter", DisputerIsAsserterError);
 
 /** NotAsserted: Request does not have an assertion */
 export class NotAssertedError extends ProgramError {
   override readonly name: string = "NotAsserted";
 
-  readonly code: number = 0x2; // 2
+  readonly code: number = 0x6; // 6
 
   constructor(program: Program, cause?: Error) {
     super("Request does not have an assertion", program, cause);
   }
 }
-codeToErrorMap.set(0x2, NotAssertedError);
+codeToErrorMap.set(0x6, NotAssertedError);
 nameToErrorMap.set("NotAsserted", NotAssertedError);
 
 /** NotDisputed: Request is not disputed */
 export class NotDisputedError extends ProgramError {
   override readonly name: string = "NotDisputed";
 
-  readonly code: number = 0x3; // 3
+  readonly code: number = 0x7; // 7
 
   constructor(program: Program, cause?: Error) {
     super("Request is not disputed", program, cause);
   }
 }
-codeToErrorMap.set(0x3, NotDisputedError);
+codeToErrorMap.set(0x7, NotDisputedError);
 nameToErrorMap.set("NotDisputed", NotDisputedError);
 
 /** AlreadyAsserted: Request already has an assertion */
 export class AlreadyAssertedError extends ProgramError {
   override readonly name: string = "AlreadyAsserted";
 
-  readonly code: number = 0x4; // 4
+  readonly code: number = 0x8; // 8
 
   constructor(program: Program, cause?: Error) {
     super("Request already has an assertion", program, cause);
   }
 }
-codeToErrorMap.set(0x4, AlreadyAssertedError);
+codeToErrorMap.set(0x8, AlreadyAssertedError);
 nameToErrorMap.set("AlreadyAsserted", AlreadyAssertedError);
 
 /** AlreadyDisputed: Assertion has already been disputed */
 export class AlreadyDisputedError extends ProgramError {
   override readonly name: string = "AlreadyDisputed";
 
-  readonly code: number = 0x5; // 5
+  readonly code: number = 0x9; // 9
 
   constructor(program: Program, cause?: Error) {
     super("Assertion has already been disputed", program, cause);
   }
 }
-codeToErrorMap.set(0x5, AlreadyDisputedError);
+codeToErrorMap.set(0x9, AlreadyDisputedError);
 nameToErrorMap.set("AlreadyDisputed", AlreadyDisputedError);
 
 /** AlreadyResolved: Request has already been resolved */
 export class AlreadyResolvedError extends ProgramError {
   override readonly name: string = "AlreadyResolved";
 
-  readonly code: number = 0x6; // 6
+  readonly code: number = 0xa; // 10
 
   constructor(program: Program, cause?: Error) {
     super("Request has already been resolved", program, cause);
   }
 }
-codeToErrorMap.set(0x6, AlreadyResolvedError);
+codeToErrorMap.set(0xa, AlreadyResolvedError);
 nameToErrorMap.set("AlreadyResolved", AlreadyResolvedError);
 
 /** AssertionTooEarly: Request is not accepting assertion yet */
 export class AssertionTooEarlyError extends ProgramError {
   override readonly name: string = "AssertionTooEarly";
 
-  readonly code: number = 0x7; // 7
+  readonly code: number = 0xb; // 11
 
   constructor(program: Program, cause?: Error) {
     super("Request is not accepting assertion yet", program, cause);
   }
 }
-codeToErrorMap.set(0x7, AssertionTooEarlyError);
+codeToErrorMap.set(0xb, AssertionTooEarlyError);
 nameToErrorMap.set("AssertionTooEarly", AssertionTooEarlyError);
 
 /** DisputeWindowNotExpired: Dispute window has not expired */
 export class DisputeWindowNotExpiredError extends ProgramError {
   override readonly name: string = "DisputeWindowNotExpired";
 
-  readonly code: number = 0x8; // 8
+  readonly code: number = 0xc; // 12
 
   constructor(program: Program, cause?: Error) {
     super("Dispute window has not expired", program, cause);
   }
 }
-codeToErrorMap.set(0x8, DisputeWindowNotExpiredError);
+codeToErrorMap.set(0xc, DisputeWindowNotExpiredError);
 nameToErrorMap.set("DisputeWindowNotExpired", DisputeWindowNotExpiredError);
 
 /** DisputeWindowExpired: Dispute window has expired */
 export class DisputeWindowExpiredError extends ProgramError {
   override readonly name: string = "DisputeWindowExpired";
 
-  readonly code: number = 0x9; // 9
+  readonly code: number = 0xd; // 13
 
   constructor(program: Program, cause?: Error) {
     super("Dispute window has expired", program, cause);
   }
 }
-codeToErrorMap.set(0x9, DisputeWindowExpiredError);
+codeToErrorMap.set(0xd, DisputeWindowExpiredError);
 nameToErrorMap.set("DisputeWindowExpired", DisputeWindowExpiredError);
-
-/** InvalidValue: Value is not valid for the request */
-export class InvalidValueError extends ProgramError {
-  override readonly name: string = "InvalidValue";
-
-  readonly code: number = 0xa; // 10
-
-  constructor(program: Program, cause?: Error) {
-    super("Value is not valid for the request", program, cause);
-  }
-}
-codeToErrorMap.set(0xa, InvalidValueError);
-nameToErrorMap.set("InvalidValue", InvalidValueError);
-
-/** InvalidDispute: Disputed value falls within range of acceptable deviation for asserted value */
-export class InvalidDisputeError extends ProgramError {
-  override readonly name: string = "InvalidDispute";
-
-  readonly code: number = 0xb; // 11
-
-  constructor(program: Program, cause?: Error) {
-    super(
-      "Disputed value falls within range of acceptable deviation for asserted value",
-      program,
-      cause,
-    );
-  }
-}
-codeToErrorMap.set(0xb, InvalidDisputeError);
-nameToErrorMap.set("InvalidDispute", InvalidDisputeError);
-
-/** DisputerIsAsserter: Disputer cannot be the same as the asserter */
-export class DisputerIsAsserterError extends ProgramError {
-  override readonly name: string = "DisputerIsAsserter";
-
-  readonly code: number = 0xc; // 12
-
-  constructor(program: Program, cause?: Error) {
-    super("Disputer cannot be the same as the asserter", program, cause);
-  }
-}
-codeToErrorMap.set(0xc, DisputerIsAsserterError);
-nameToErrorMap.set("DisputerIsAsserter", DisputerIsAsserterError);
-
-/** BondMismatch: Bond mint address does not match */
-export class BondMismatchError extends ProgramError {
-  override readonly name: string = "BondMismatch";
-
-  readonly code: number = 0xd; // 13
-
-  constructor(program: Program, cause?: Error) {
-    super("Bond mint address does not match", program, cause);
-  }
-}
-codeToErrorMap.set(0xd, BondMismatchError);
-nameToErrorMap.set("BondMismatch", BondMismatchError);
 
 /** VotingWindowNotExpired: Voting window has not expired */
 export class VotingWindowNotExpiredError extends ProgramError {
@@ -225,6 +221,110 @@ export class VotingWindowExpiredError extends ProgramError {
 }
 codeToErrorMap.set(0xf, VotingWindowExpiredError);
 nameToErrorMap.set("VotingWindowExpired", VotingWindowExpiredError);
+
+/** ArbitrationWindowNotExpired: Arbitration window has not expired */
+export class ArbitrationWindowNotExpiredError extends ProgramError {
+  override readonly name: string = "ArbitrationWindowNotExpired";
+
+  readonly code: number = 0x10; // 16
+
+  constructor(program: Program, cause?: Error) {
+    super("Arbitration window has not expired", program, cause);
+  }
+}
+codeToErrorMap.set(0x10, ArbitrationWindowNotExpiredError);
+nameToErrorMap.set("ArbitrationWindowNotExpired", ArbitrationWindowNotExpiredError);
+
+/** OracleAuthorityMismatch: Oracle authority address does not match */
+export class OracleAuthorityMismatchError extends ProgramError {
+  override readonly name: string = "OracleAuthorityMismatch";
+
+  readonly code: number = 0x11; // 17
+
+  constructor(program: Program, cause?: Error) {
+    super("Oracle authority address does not match", program, cause);
+  }
+}
+codeToErrorMap.set(0x11, OracleAuthorityMismatchError);
+nameToErrorMap.set("OracleAuthorityMismatch", OracleAuthorityMismatchError);
+
+/** ConfigAuthorityMismatch: Config authority address does not match */
+export class ConfigAuthorityMismatchError extends ProgramError {
+  override readonly name: string = "ConfigAuthorityMismatch";
+
+  readonly code: number = 0x12; // 18
+
+  constructor(program: Program, cause?: Error) {
+    super("Config authority address does not match", program, cause);
+  }
+}
+codeToErrorMap.set(0x12, ConfigAuthorityMismatchError);
+nameToErrorMap.set("ConfigAuthorityMismatch", ConfigAuthorityMismatchError);
+
+/** ConfigMismatch: Config address does not match */
+export class ConfigMismatchError extends ProgramError {
+  override readonly name: string = "ConfigMismatch";
+
+  readonly code: number = 0x13; // 19
+
+  constructor(program: Program, cause?: Error) {
+    super("Config address does not match", program, cause);
+  }
+}
+codeToErrorMap.set(0x13, ConfigMismatchError);
+nameToErrorMap.set("ConfigMismatch", ConfigMismatchError);
+
+/** CurrencyMintMismatch: Currency mint address does not match */
+export class CurrencyMintMismatchError extends ProgramError {
+  override readonly name: string = "CurrencyMintMismatch";
+
+  readonly code: number = 0x14; // 20
+
+  constructor(program: Program, cause?: Error) {
+    super("Currency mint address does not match", program, cause);
+  }
+}
+codeToErrorMap.set(0x14, CurrencyMintMismatchError);
+nameToErrorMap.set("CurrencyMintMismatch", CurrencyMintMismatchError);
+
+/** BondMintMismatch: Bond mint address does not match */
+export class BondMintMismatchError extends ProgramError {
+  override readonly name: string = "BondMintMismatch";
+
+  readonly code: number = 0x15; // 21
+
+  constructor(program: Program, cause?: Error) {
+    super("Bond mint address does not match", program, cause);
+  }
+}
+codeToErrorMap.set(0x15, BondMintMismatchError);
+nameToErrorMap.set("BondMintMismatch", BondMintMismatchError);
+
+/** StakeMintMismatch: Stake mint address does not match */
+export class StakeMintMismatchError extends ProgramError {
+  override readonly name: string = "StakeMintMismatch";
+
+  readonly code: number = 0x16; // 22
+
+  constructor(program: Program, cause?: Error) {
+    super("Stake mint address does not match", program, cause);
+  }
+}
+codeToErrorMap.set(0x16, StakeMintMismatchError);
+nameToErrorMap.set("StakeMintMismatch", StakeMintMismatchError);
+
+/** StakeVoterMismatch: Stake delegate does not match voter */
+export class StakeVoterMismatchError extends ProgramError {
+  override readonly name: string = "StakeVoterMismatch";
+
+  readonly code: number = 0x17; // 23
+
+  constructor(program: Program, cause?: Error) {
+    super("Stake delegate does not match voter", program, cause);
+  }
+}
+codeToErrorMap.set(0x17, StakeVoterMismatchError);
+nameToErrorMap.set("StakeVoterMismatch", StakeVoterMismatchError);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

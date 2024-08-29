@@ -7,4 +7,6 @@ publish = false
 [dependencies]
 solana-program = { workspace = true }
 
+spl-token-2022 = { workspace = true }
+
 common-macros = { path = "../common-macros" }

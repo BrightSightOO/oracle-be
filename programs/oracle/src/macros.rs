@@ -12,42 +12,32 @@ macro_rules! log {
     };
 }
 
-/// Print an error message to the log.
-macro_rules! err {
-    ($($args:tt)*) => {
-        ::solana_program::log::sol_log(&format!("Error: {}", format_args!($($args)*)))
-    };
-}
-
-/// Try to unwrap a [`Result`] similar to `?`, but supporting `const fn`.
-macro_rules! tri {
-    ($opt:expr) => {
-        match $opt {
-            Some(value) => value,
-            Err(err) => return Err(err),
-        }
-    };
-}
-
-/// Try to unwrap an [`Option`] similar to `?`, but supporting `const fn`.
-macro_rules! tri_opt {
-    ($opt:expr) => {
-        match $opt {
-            Some(value) => value,
-            None => return None,
-        }
-    };
-}
-
-/// Increments a number by 1.
-macro_rules! increment {
-    ($value:expr, $amount:expr $(,)?) => {
-        match ($value).checked_add($amount) {
+/// Adds numbers checking for overflow.
+macro_rules! checked_add {
+    ($left:expr, $right:expr $(,)?) => {
+        match ($left).checked_add($right) {
             Some(value) => Ok(value),
-            None => Err($crate::error::OracleError::ArithmeticOverflow),
+            None => Err(::solana_program::program_error::ProgramError::ArithmeticOverflow),
         }
     };
-    ($value:expr) => {
-        increment!($value, 1)
+}
+
+/// Subtracts numbers checking for overflow.
+macro_rules! checked_sub {
+    ($left:expr, $right:expr $(,)?) => {
+        match ($left).checked_sub($right) {
+            Some(value) => Ok(value),
+            None => Err(::solana_program::program_error::ProgramError::ArithmeticOverflow),
+        }
+    };
+}
+
+/// Multiplies numbers checking for overflow.
+macro_rules! checked_mul {
+    ($left:expr, $right:expr $(,)?) => {
+        match ($left).checked_mul($right) {
+            Some(value) => Ok(value),
+            None => Err(::solana_program::program_error::ProgramError::ArithmeticOverflow),
+        }
     };
 }

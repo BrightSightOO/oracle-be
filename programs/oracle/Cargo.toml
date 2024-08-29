@@ -9,14 +9,12 @@ crate-type = ["cdylib", "lib"]
 
 [features]
 no-entrypoint = []
-test-sbf = []
 
 [dependencies]
 common = { workspace = true }
 
 solana-program = { workspace = true }
 
-spl-token = { workspace = true }
 spl-token-2022 = { workspace = true }
 
 shank = "0.4.2"
@@ -29,9 +27,3 @@ num-derive = { workspace = true }
 
 [dev-dependencies]
 common-test = { workspace = true }
-
-# solana-sdk = { workspace = true }
-solana-program-test = { workspace = true }
-
-async-trait = { workspace = true }
-log = { workspace = true }

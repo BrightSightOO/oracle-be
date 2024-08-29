@@ -3,14 +3,14 @@ use std::collections::BTreeMap;
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::BorshSize;
 use shank::ShankAccount;
+use solana_program::clock::UnixTimestamp;
+use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
-
-use crate::error::OracleError;
 
 use super::{Account, AccountSized, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, ShankAccount)]
-pub struct Voting {
+#[derive(Clone, BorshDeserialize, BorshSerialize, ShankAccount)]
+pub struct VotingV1 {
     account_type: AccountType,
 
     /// The [`Request`]` this assertion is for.
@@ -19,9 +19,9 @@ pub struct Voting {
     pub request: Pubkey,
 
     /// The Unix timestamp when voting started.
-    pub start_timestamp: i64,
+    pub start_timestamp: UnixTimestamp,
     /// The Unix timestamp when voting ends.
-    pub end_timestamp: i64,
+    pub end_timestamp: UnixTimestamp,
 
     /// The number of votes that have been added.
     pub vote_count: u64,
@@ -32,43 +32,41 @@ pub struct Voting {
     pub votes: BTreeMap<u64, u64>,
 }
 
-impl Voting {
+impl VotingV1 {
     const BASE_SIZE: usize =
         AccountType::SIZE       // account_type
         + Pubkey::SIZE          // request
-        + i64::SIZE             // start_timestamp
-        + i64::SIZE             // end_timestamp
+        + UnixTimestamp::SIZE   // start_timestamp
+        + UnixTimestamp::SIZE   // end_timestamp
         + u64::SIZE             // vote_count
         + u64::SIZE             // mode_value
         + u32::SIZE             // votes.len()
         ;
 }
 
-impl Account for Voting {
-    const TYPE: AccountType = AccountType::Voting;
+impl Account for VotingV1 {
+    const TYPE: AccountType = AccountType::VotingV1;
 }
 
-impl AccountSized for Voting {
+impl AccountSized for VotingV1 {
     const IS_FIXED_SIZE: bool = false;
 
     fn serialized_size(&self) -> Option<usize> {
-        self.votes.len().checked_mul(u64::SIZE)?.checked_add(Self::BASE_SIZE)
+        self.votes.len().checked_mul(u64::SIZE + u64::SIZE)?.checked_add(Self::BASE_SIZE)
     }
 }
 
-impl TryFrom<InitVoting> for (Voting, usize) {
-    type Error = OracleError;
+impl TryFrom<InitVoting> for (VotingV1, usize) {
+    type Error = ProgramError;
 
-    fn try_from(params: InitVoting) -> Result<(Voting, usize), Self::Error> {
-        let InitVoting { request, start_timestamp } = params;
+    fn try_from(params: InitVoting) -> Result<(VotingV1, usize), Self::Error> {
+        let InitVoting { request, start_timestamp, voting_window } = params;
 
-        let end_timestamp = start_timestamp
-            .checked_add(crate::VOTING_WINDOW)
-            .ok_or(OracleError::ArithmeticOverflow)?;
+        let end_timestamp = checked_add!(start_timestamp, i64::from(voting_window))?;
 
         Ok((
-            Voting {
-                account_type: Voting::TYPE,
+            VotingV1 {
+                account_type: VotingV1::TYPE,
                 request,
                 start_timestamp,
                 end_timestamp,
@@ -76,12 +74,38 @@ impl TryFrom<InitVoting> for (Voting, usize) {
                 mode_value: 0,
                 votes: BTreeMap::new(),
             },
-            Voting::BASE_SIZE,
+            VotingV1::BASE_SIZE,
         ))
     }
 }
 
 pub(crate) struct InitVoting {
     pub request: Pubkey,
-    pub start_timestamp: i64,
+    pub start_timestamp: UnixTimestamp,
+
+    pub voting_window: u32,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn account_size() {
+        let init =
+            InitVoting { request: Pubkey::new_unique(), start_timestamp: 0, voting_window: 0 };
+
+        let (mut account, expected) = <(VotingV1, usize)>::try_from(init).unwrap();
+        let actual = common_test::serialized_len(&account).unwrap();
+
+        assert_eq!(expected, actual);
+
+        account.votes.insert(0, 10);
+        account.votes.insert(1, 5);
+
+        let expected = account.serialized_size().unwrap();
+        let actual = common_test::serialized_len(&account).unwrap();
+
+        assert_eq!(expected, actual);
+    }
 }

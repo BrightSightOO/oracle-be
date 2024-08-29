@@ -5,18 +5,20 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-pub(crate) mod r#assertion;
-pub(crate) mod r#currency;
-pub(crate) mod r#oracle;
-pub(crate) mod r#request;
-pub(crate) mod r#stake;
-pub(crate) mod r#vote;
-pub(crate) mod r#voting;
+pub(crate) mod r#assertion_v1;
+pub(crate) mod r#config_v1;
+pub(crate) mod r#currency_v1;
+pub(crate) mod r#oracle_v1;
+pub(crate) mod r#request_v1;
+pub(crate) mod r#stake_v1;
+pub(crate) mod r#vote_v1;
+pub(crate) mod r#voting_v1;
 
-pub use self::r#assertion::*;
-pub use self::r#currency::*;
-pub use self::r#oracle::*;
-pub use self::r#request::*;
-pub use self::r#stake::*;
-pub use self::r#vote::*;
-pub use self::r#voting::*;
+pub use self::r#assertion_v1::*;
+pub use self::r#config_v1::*;
+pub use self::r#currency_v1::*;
+pub use self::r#oracle_v1::*;
+pub use self::r#request_v1::*;
+pub use self::r#stake_v1::*;
+pub use self::r#vote_v1::*;
+pub use self::r#voting_v1::*;

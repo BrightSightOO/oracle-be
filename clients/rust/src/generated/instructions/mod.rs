@@ -5,18 +5,30 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-pub(crate) mod r#create_assertion;
-pub(crate) mod r#create_oracle;
-pub(crate) mod r#create_request;
-pub(crate) mod r#dispute_assertion;
-pub(crate) mod r#expire_assertion;
-pub(crate) mod r#finalize_voting;
-pub(crate) mod r#submit_vote;
+pub(crate) mod r#close_voting_v1;
+pub(crate) mod r#create_assertion_v1;
+pub(crate) mod r#create_config_v1;
+pub(crate) mod r#create_currency_v1;
+pub(crate) mod r#create_oracle_v1;
+pub(crate) mod r#create_request_v1;
+pub(crate) mod r#create_stake_v1;
+pub(crate) mod r#dispute_assertion_v1;
+pub(crate) mod r#resolve_assertion_v1;
+pub(crate) mod r#submit_vote_v1;
+pub(crate) mod r#update_config_v1;
+pub(crate) mod r#update_currency_v1;
+pub(crate) mod r#update_oracle_v1;
 
-pub use self::r#create_assertion::*;
-pub use self::r#create_oracle::*;
-pub use self::r#create_request::*;
-pub use self::r#dispute_assertion::*;
-pub use self::r#expire_assertion::*;
-pub use self::r#finalize_voting::*;
-pub use self::r#submit_vote::*;
+pub use self::r#close_voting_v1::*;
+pub use self::r#create_assertion_v1::*;
+pub use self::r#create_config_v1::*;
+pub use self::r#create_currency_v1::*;
+pub use self::r#create_oracle_v1::*;
+pub use self::r#create_request_v1::*;
+pub use self::r#create_stake_v1::*;
+pub use self::r#dispute_assertion_v1::*;
+pub use self::r#resolve_assertion_v1::*;
+pub use self::r#submit_vote_v1::*;
+pub use self::r#update_config_v1::*;
+pub use self::r#update_currency_v1::*;
+pub use self::r#update_oracle_v1::*;

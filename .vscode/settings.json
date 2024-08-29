@@ -29,7 +29,5 @@
 
     "Cargo.lock": true,
     "pnpm-lock.yaml": true
-  },
-
-  "rust-analyzer.cargo.features": ["test-sbf"]
+  }
 }

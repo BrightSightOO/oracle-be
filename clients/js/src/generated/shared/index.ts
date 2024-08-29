@@ -53,10 +53,10 @@ export function expectPda(value: PublicKey | Pda | Signer | null | undefined): P
  * Defines an instruction account to resolve.
  * @internal
  */
-export type ResolvedAccount<T = PublicKey | Pda | Signer | null> = {
+export interface ResolvedAccount<T = PublicKey | Pda | Signer | null> {
   isWritable: boolean;
   value: T;
-};
+}
 
 /**
  * Defines a set of instruction account to resolve.

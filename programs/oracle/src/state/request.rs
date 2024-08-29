@@ -1,7 +1,8 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use common::BorshSize;
 use shank::ShankAccount;
-use solana_program::entrypoint::ProgramResult;
+use solana_program::clock::UnixTimestamp;
+use solana_program::program_error::ProgramError;
 use solana_program::pubkey::Pubkey;
 
 use crate::error::OracleError;
@@ -9,13 +10,15 @@ use crate::pda;
 
 use super::{Account, AccountSized, AccountType};
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize, ShankAccount)]
-pub struct Request {
+#[derive(Clone, BorshDeserialize, BorshSerialize, ShankAccount)]
+pub struct RequestV1 {
     account_type: AccountType,
 
     /// Index of the request in the oracle.
     pub index: u64,
 
+    /// Config address.
+    pub config: Pubkey,
     /// Creator address.
     pub creator: Pubkey,
 
@@ -30,14 +33,24 @@ pub struct Request {
     pub bond_mint: Pubkey,
 
     /// Unix timestamp after which a value can be asserted.
-    pub assertion_timestamp: i64,
+    pub assertion_timestamp: UnixTimestamp,
     /// Unix timestamp at which the request was resolved.
-    pub resolve_timestamp: i64,
+    pub resolve_timestamp: UnixTimestamp,
 
     /// Request state.
     pub state: RequestState,
     /// Value of the resolved request.
     pub value: u64,
+
+    /// Arbitrator address.
+    ///
+    /// The arbitrator has the ability to override the result of voting. This
+    /// takes the form of a window after voting in which the result can be
+    /// changed.
+    ///
+    /// If the address is the default pubkey (`11111111111111111111111111111111`),
+    /// then the request is considered to have no arbitrator.
+    pub arbitrator: Pubkey,
 
     // Request data may have varying layouts when serialized. It is at the end
     // of the account to avoid interfering with GPA lookups.
@@ -45,7 +58,7 @@ pub struct Request {
     pub data: RequestData,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, BorshDeserialize, BorshSerialize, BorshSize)]
+#[derive(Clone, Copy, PartialEq, Eq, BorshDeserialize, BorshSerialize, BorshSize)]
 #[repr(u8)]
 pub enum RequestState {
     /// Request pending a proposal.
@@ -58,7 +71,7 @@ pub enum RequestState {
     Resolved,
 }
 
-#[derive(Clone, Debug, BorshDeserialize, BorshSerialize)]
+#[derive(Clone, BorshDeserialize, BorshSerialize)]
 pub enum RequestData {
     /// Yes/No request:
     /// - 0 = No
@@ -69,29 +82,41 @@ pub enum RequestData {
     },
 }
 
-impl Request {
+impl RequestV1 {
     const BASE_SIZE: usize =
         AccountType::SIZE       // account_type
         + u64::SIZE             // index
+        + Pubkey::SIZE          // config
         + Pubkey::SIZE          // creator
         + u64::SIZE             // bond
         + Pubkey::SIZE          // bond_mint
         + u64::SIZE             // reward
         + Pubkey::SIZE          // reward_mint
-        + i64::SIZE             // assertion_timestamp
-        + i64::SIZE             // resolve_timestamp
+        + UnixTimestamp::SIZE   // assertion_timestamp
+        + UnixTimestamp::SIZE   // resolve_timestamp
         + RequestState::SIZE    // state
         + u64::SIZE             // value
+        + Pubkey::SIZE          // arbitrator
         ;
 
-    pub fn assert_pda(&self, address: &Pubkey) -> ProgramResult {
-        pda::request::assert_pda(address, &self.index)?;
+    pub fn has_arbitrator(&self) -> bool {
+        !common::cmp_pubkeys(&self.arbitrator, &common::DEFAULT_PUBKEY)
+    }
+
+    pub fn assert_pda(&self, request: &Pubkey) -> Result<u8, ProgramError> {
+        pda::request::assert_pda(request, &self.index)
+    }
+
+    pub fn assert_config(&self, config: &Pubkey) -> Result<(), OracleError> {
+        if !common::cmp_pubkeys(&self.config, config) {
+            return Err(OracleError::ConfigMismatch);
+        }
         Ok(())
     }
 
-    pub fn validate_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
+    pub fn assert_bond_mint(&self, mint: &Pubkey) -> Result<(), OracleError> {
         if !common::cmp_pubkeys(&self.bond_mint, mint) {
-            return Err(OracleError::BondMismatch);
+            return Err(OracleError::BondMintMismatch);
         }
         Ok(())
     }
@@ -104,8 +129,8 @@ impl Request {
     }
 }
 
-impl Account for Request {
-    const TYPE: AccountType = AccountType::Request;
+impl Account for RequestV1 {
+    const TYPE: AccountType = AccountType::RequestV1;
 }
 
 impl RequestData {
@@ -116,13 +141,6 @@ impl RequestData {
         if valid { Ok(()) } else { Err(OracleError::InvalidValue) }
     }
 
-    pub fn validate_dispute(&self, asserted: u64, disputed: u64) -> Result<(), OracleError> {
-        let valid = match self {
-            Self::YesNo { .. } => asserted != disputed,
-        };
-        if valid { Ok(()) } else { Err(OracleError::InvalidDispute) }
-    }
-
     fn serialized_size(&self) -> Option<usize> {
         let variant_size = match self {
             Self::YesNo { question } => 4usize.checked_add(question.len())?,
@@ -131,7 +149,7 @@ impl RequestData {
     }
 }
 
-impl AccountSized for Request {
+impl AccountSized for RequestV1 {
     const IS_FIXED_SIZE: bool = false;
 
     fn serialized_size(&self) -> Option<usize> {
@@ -139,16 +157,27 @@ impl AccountSized for Request {
     }
 }
 
-impl TryFrom<InitRequest> for (Request, usize) {
-    type Error = OracleError;
+impl TryFrom<InitRequest> for (RequestV1, usize) {
+    type Error = ProgramError;
 
-    fn try_from(params: InitRequest) -> Result<(Request, usize), Self::Error> {
-        let InitRequest { index, creator, reward, reward_mint, bond, bond_mint, timestamp, data } =
-            params;
-
-        let request = Request {
-            account_type: Request::TYPE,
+    fn try_from(params: InitRequest) -> Result<(RequestV1, usize), Self::Error> {
+        let InitRequest {
             index,
+            config,
+            creator,
+            reward,
+            reward_mint,
+            bond,
+            bond_mint,
+            timestamp,
+            arbitrator,
+            data,
+        } = params;
+
+        let request = RequestV1 {
+            account_type: RequestV1::TYPE,
+            index,
+            config,
             creator,
             reward,
             reward_mint,
@@ -158,10 +187,11 @@ impl TryFrom<InitRequest> for (Request, usize) {
             resolve_timestamp: 0,
             state: RequestState::Requested,
             value: 0,
+            arbitrator,
             data,
         };
 
-        let space = request.serialized_size().ok_or(OracleError::ArithmeticOverflow)?;
+        let space = request.serialized_size().ok_or(ProgramError::ArithmeticOverflow)?;
 
         Ok((request, space))
     }
@@ -169,6 +199,8 @@ impl TryFrom<InitRequest> for (Request, usize) {
 
 pub(crate) struct InitRequest {
     pub index: u64,
+
+    pub config: Pubkey,
     pub creator: Pubkey,
 
     pub reward: u64,
@@ -177,7 +209,9 @@ pub(crate) struct InitRequest {
     pub bond: u64,
     pub bond_mint: Pubkey,
 
-    pub timestamp: i64,
+    pub timestamp: UnixTimestamp,
+    pub arbitrator: Pubkey,
+
     pub data: RequestData,
 }
 
@@ -187,7 +221,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn request_data_size() {
+    fn data_size() {
         let data = RequestData::YesNo { question: "example question?".to_owned() };
 
         let expected = data.serialized_size().unwrap();
@@ -197,19 +231,21 @@ mod tests {
     }
 
     #[test]
-    fn request_size() {
+    fn account_size() {
         let init = InitRequest {
-            creator: Pubkey::new_unique(),
             index: 0,
+            config: Pubkey::new_unique(),
+            creator: Pubkey::new_unique(),
             reward: 0,
             reward_mint: Pubkey::new_unique(),
             bond: 0,
             bond_mint: Pubkey::new_unique(),
             timestamp: 0,
+            arbitrator: common::DEFAULT_PUBKEY,
             data: RequestData::YesNo { question: "another example question?".to_owned() },
         };
 
-        let (request, expected) = <(Request, usize)>::try_from(init).unwrap();
+        let (request, expected) = <(RequestV1, usize)>::try_from(init).unwrap();
         let actual = common_test::serialized_len(&request).unwrap();
 
         assert_eq!(expected, actual);

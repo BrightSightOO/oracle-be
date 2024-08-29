@@ -19,7 +19,7 @@ const start = Date.now();
 
 console.log("generating client code...");
 
-const kinobi = k.createFromIdls([path.join(idlDir, "oracle.json")]);
+const kinobi = k.createFromIdl(path.join(idlDir, "oracle.json"), undefined, true);
 
 kinobi.update(
   k.updateProgramsVisitor({
@@ -29,24 +29,22 @@ kinobi.update(
   }),
 );
 
-kinobi.update(k.defaultVisitor());
-
 // Update accounts.
 kinobi.update(
   k.updateAccountsVisitor({
-    oracle: {
-      seeds: [k.constantPdaSeedNodeFromString("oracle")],
+    oracleV1: {
+      seeds: [k.constantPdaSeedNodeFromString("utf8", "oracle")],
     },
-    currency: {
+    currencyV1: {
       seeds: [
-        k.constantPdaSeedNodeFromString("currency"),
+        k.constantPdaSeedNodeFromString("utf8", "currency"),
         k.variablePdaSeedNode("mint", k.publicKeyTypeNode(), "The address of the currency mint."),
       ],
     },
-    request: {
+    requestV1: {
       size: null,
       seeds: [
-        k.constantPdaSeedNodeFromString("request"),
+        k.constantPdaSeedNodeFromString("utf8", "request"),
         k.variablePdaSeedNode(
           "index",
           k.numberTypeNode("u64"),
@@ -54,28 +52,28 @@ kinobi.update(
         ),
       ],
     },
-    assertion: {
+    assertionV1: {
       seeds: [
-        k.constantPdaSeedNodeFromString("assertion"),
+        k.constantPdaSeedNodeFromString("utf8", "assertion"),
         k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
       ],
     },
-    stake: {
+    stakeV1: {
       seeds: [
-        k.constantPdaSeedNodeFromString("stake"),
+        k.constantPdaSeedNodeFromString("utf8", "stake"),
         k.variablePdaSeedNode("wallet", k.publicKeyTypeNode(), "The address of the wallet."),
       ],
     },
-    voting: {
+    votingV1: {
       size: null,
       seeds: [
-        k.constantPdaSeedNodeFromString("voting"),
+        k.constantPdaSeedNodeFromString("utf8", "voting"),
         k.variablePdaSeedNode("request", k.publicKeyTypeNode(), "The address of the request."),
       ],
     },
-    vote: {
+    voteV1: {
       seeds: [
-        k.constantPdaSeedNodeFromString("vote"),
+        k.constantPdaSeedNodeFromString("utf8", "vote"),
         k.variablePdaSeedNode(
           "voting",
           k.publicKeyTypeNode(),
@@ -87,7 +85,7 @@ kinobi.update(
   }),
 );
 
-const ataPdaDefault = (mint = "mint", owner = "owner") =>
+const ataPdaValueNode = (mint = "mint", owner = "owner") =>
   k.pdaValueNode(k.pdaLinkNode("associatedToken", "mplToolbox"), [
     k.pdaSeedValueNode("mint", k.accountValueNode(mint)),
     k.pdaSeedValueNode("owner", k.accountValueNode(owner)),
@@ -99,26 +97,26 @@ kinobi.update(
     {
       account: "oracle",
       ignoreIfOptional: true,
-      defaultValue: k.pdaValueNode("oracle"),
+      defaultValue: k.pdaValueNode("oracleV1"),
     },
     {
       account: "assertion",
       ignoreIfOptional: true,
-      defaultValue: k.pdaValueNode("assertion", [
+      defaultValue: k.pdaValueNode("assertionV1", [
         k.pdaSeedValueNode("request", k.accountValueNode("request")),
       ]),
     },
     {
       account: "voting",
       ignoreIfOptional: true,
-      defaultValue: k.pdaValueNode("voting", [
+      defaultValue: k.pdaValueNode("votingV1", [
         k.pdaSeedValueNode("request", k.accountValueNode("request")),
       ]),
     },
     {
       account: "vote",
       ignoreIfOptional: true,
-      defaultValue: k.pdaValueNode("vote", [
+      defaultValue: k.pdaValueNode("voteV1", [
         k.pdaSeedValueNode("voting", k.accountValueNode("voting")),
         k.pdaSeedValueNode("stake", k.accountValueNode("stake")),
       ]),
@@ -129,11 +127,11 @@ kinobi.update(
 // Update instructions.
 kinobi.update(
   k.updateInstructionsVisitor({
-    createRequest: {
+    createRequestV1: {
       accounts: {
         // TODO: Default rewardMint to SOL/USDC?
         rewardSource: {
-          defaultValue: ataPdaDefault("rewardMint", "creator"),
+          defaultValue: ataPdaValueNode("rewardMint", "creator"),
         },
         rewardEscrow: {
           defaultValue: k.pdaValueNode(k.pdaLinkNode("reward", "hooked"), [
@@ -145,10 +143,10 @@ kinobi.update(
         },
       },
     },
-    createAssertion: {
+    createAssertionV1: {
       accounts: {
         bondSource: {
-          defaultValue: ataPdaDefault("bondMint", "asserter"),
+          defaultValue: ataPdaValueNode("bondMint", "asserter"),
         },
         bondEscrow: {
           defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond", "hooked"), [
@@ -156,7 +154,7 @@ kinobi.update(
           ]),
         },
         governanceSource: {
-          defaultValue: ataPdaDefault("governanceMint", "asserter"),
+          defaultValue: ataPdaValueNode("governanceMint", "asserter"),
         },
         governanceEscrow: {
           defaultValue: k.pdaValueNode(k.pdaLinkNode("assertGovernanceBond", "hooked"), [
@@ -165,15 +163,6 @@ kinobi.update(
         },
         asserter: {
           defaultValue: k.identityValueNode(),
-        },
-      },
-    },
-    submitVote: {
-      accounts: {
-        stake: {
-          defaultValue: k.pdaValueNode("stake", [
-            k.pdaSeedValueNode("wallet", k.accountValueNode("voter")),
-          ]),
         },
       },
     },
@@ -189,14 +178,29 @@ const accountType = (name) => ({
 // Set account discriminators.
 kinobi.update(
   k.setAccountDiscriminatorFromFieldVisitor({
-    oracle: accountType("Oracle"),
-    stake: accountType("Stake"),
-    request: accountType("Request"),
-    assertion: accountType("Assertion"),
-    currency: accountType("Currency"),
-    voting: accountType("Voting"),
-    vote: accountType("Vote"),
+    oracleV1: accountType("OracleV1"),
+    configV1: accountType("ConfigV1"),
+    stakeV1: accountType("StakeV1"),
+    requestV1: accountType("RequestV1"),
+    assertionV1: accountType("AssertionV1"),
+    currencyV1: accountType("CurrencyV1"),
+    votingV1: accountType("VotingV1"),
+    voteV1: accountType("VoteV1"),
   }),
+);
+
+// Fix UnixTimestamp type.
+kinobi.update(
+  k.bottomUpTransformerVisitor([
+    {
+      select: (node) => node.kind === "definedTypeLinkNode" && node.name === "unixTimestamp",
+      transform: (node) => {
+        k.assertIsNode(node, "definedTypeLinkNode");
+
+        return k.dateTimeTypeNode(k.numberTypeNode("i64"));
+      },
+    },
+  ]),
 );
 
 // Render Rust.
@@ -208,8 +212,8 @@ kinobi.update(
 
   kinobi.accept(
     k.renderRustVisitor(rustDir, {
-      formatCode: true,
       crateFolder: crateDir,
+      formatCode: true,
     }),
   );
 
