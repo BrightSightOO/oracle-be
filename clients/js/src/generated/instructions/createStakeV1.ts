@@ -10,11 +10,13 @@ import type { ResolvedAccount, ResolvedAccountsWithIndices } from "../shared";
 import type { Context, Pda, PublicKey, Signer, TransactionBuilder } from "@metaplex-foundation/umi";
 import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
+import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u64, u8 } from "@metaplex-foundation/umi/serializers";
 
+import { findStakePoolPda } from "../../hooked";
 import { findOracleV1Pda } from "../accounts";
-import { getAccountMetasAndSigners } from "../shared";
+import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 
 // Accounts.
 export type CreateStakeV1InstructionAccounts = {
@@ -25,11 +27,11 @@ export type CreateStakeV1InstructionAccounts = {
   /** Stake */
   mint: PublicKey | Pda;
   /** Stake source token account */
-  stakeSource: PublicKey | Pda;
+  stakeSource?: PublicKey | Pda;
   /** Stake pool token account */
-  stakePool: PublicKey | Pda;
+  stakePool?: PublicKey | Pda;
   /** Stake owner */
-  wallet: Signer;
+  wallet?: Signer;
   /** Payer */
   payer?: Signer;
   /** SPL token program */
@@ -67,7 +69,7 @@ export type CreateStakeV1InstructionArgs = CreateStakeV1InstructionDataArgs;
 
 // Instruction.
 export function createStakeV1(
-  context: Pick<Context, "eddsa" | "payer" | "programs">,
+  context: Pick<Context, "eddsa" | "identity" | "payer" | "programs">,
   input: CreateStakeV1InstructionAccounts & CreateStakeV1InstructionArgs,
 ): TransactionBuilder {
   // Program ID.
@@ -127,6 +129,20 @@ export function createStakeV1(
   // Default values.
   if (!resolvedAccounts.oracle.value) {
     resolvedAccounts.oracle.value = findOracleV1Pda(context);
+  }
+  if (!resolvedAccounts.wallet.value) {
+    resolvedAccounts.wallet.value = context.identity;
+  }
+  if (!resolvedAccounts.stakeSource.value) {
+    resolvedAccounts.stakeSource.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.mint.value),
+      owner: expectPublicKey(resolvedAccounts.wallet.value),
+    });
+  }
+  if (!resolvedAccounts.stakePool.value) {
+    resolvedAccounts.stakePool.value = findStakePoolPda(context, {
+      mint: expectPublicKey(resolvedAccounts.mint.value),
+    });
   }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;

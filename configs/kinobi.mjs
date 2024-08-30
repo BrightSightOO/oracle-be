@@ -87,6 +87,11 @@ kinobi.update(
 kinobi.update(
   k.setInstructionAccountDefaultValuesVisitor([
     {
+      account: "wallet",
+      ignoreIfOptional: true,
+      defaultValue: k.identityValueNode(),
+    },
+    {
       account: "oracle",
       ignoreIfOptional: true,
       defaultValue: k.pdaValueNode("oracleV1"),
@@ -186,6 +191,18 @@ kinobi.update(
         },
         asserter: {
           defaultValue: k.identityValueNode(),
+        },
+      },
+    },
+    createStakeV1: {
+      accounts: {
+        stakeSource: {
+          defaultValue: ataPdaValueNode("mint", "wallet"),
+        },
+        stakePool: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("stakePool", "hooked"), [
+            k.pdaSeedValueNode("mint", k.accountValueNode("mint")),
+          ]),
         },
       },
     },
