@@ -29,22 +29,24 @@ impl CurrencyV1 {
     /// Values are positional and appear in the following order:
     ///
     ///   0. `CurrencyV1::PREFIX`
-    ///   1. mint (`Pubkey`)
+    ///   1. config (`Pubkey`)
+    ///   2. mint (`Pubkey`)
     pub const PREFIX: &'static [u8] = "currency".as_bytes();
 
     pub fn create_pda(
+        config: Pubkey,
         mint: Pubkey,
         bump: u8,
     ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
         solana_program::pubkey::Pubkey::create_program_address(
-            &["currency".as_bytes(), mint.as_ref(), &[bump]],
+            &["currency".as_bytes(), config.as_ref(), mint.as_ref(), &[bump]],
             &crate::OPTIMISTIC_ORACLE_ID,
         )
     }
 
-    pub fn find_pda(mint: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
+    pub fn find_pda(config: &Pubkey, mint: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
         solana_program::pubkey::Pubkey::find_program_address(
-            &["currency".as_bytes(), mint.as_ref()],
+            &["currency".as_bytes(), config.as_ref(), mint.as_ref()],
             &crate::OPTIMISTIC_ORACLE_ID,
         )
     }

@@ -31,8 +31,8 @@ import {
 } from "@metaplex-foundation/umi/serializers";
 
 import { findRewardPda } from "../../hooked";
-import { findOracleV1Pda } from "../accounts";
-import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
+import { findCurrencyV1Pda, findOracleV1Pda } from "../accounts";
+import { expectPublicKey, expectSome, getAccountMetasAndSigners } from "../shared";
 import { getRequestDataSerializer } from "../types";
 
 // Accounts.
@@ -44,9 +44,9 @@ export type CreateRequestV1InstructionAccounts = {
   /** Request */
   request: PublicKey | Pda;
   /** Reward currency */
-  rewardCurrency: PublicKey | Pda;
+  rewardCurrency?: PublicKey | Pda;
   /** Bond currency */
-  bondCurrency: PublicKey | Pda;
+  bondCurrency?: PublicKey | Pda;
   /** Reward mint */
   rewardMint: PublicKey | Pda;
   /** Reward source token account */
@@ -101,8 +101,15 @@ export function getCreateRequestV1InstructionDataSerializer(): Serializer<
   );
 }
 
+// Extra Args.
+export type CreateRequestV1InstructionExtraArgs = {
+  /** Bond mint */
+  bondMint: PublicKey;
+};
+
 // Args.
-export type CreateRequestV1InstructionArgs = CreateRequestV1InstructionDataArgs;
+export type CreateRequestV1InstructionArgs = CreateRequestV1InstructionDataArgs &
+  CreateRequestV1InstructionExtraArgs;
 
 // Instruction.
 export function createRequestV1(
@@ -186,6 +193,18 @@ export function createRequestV1(
   if (!resolvedAccounts.oracle.value) {
     resolvedAccounts.oracle.value = findOracleV1Pda(context);
   }
+  if (!resolvedAccounts.rewardCurrency.value) {
+    resolvedAccounts.rewardCurrency.value = findCurrencyV1Pda(context, {
+      config: expectPublicKey(resolvedAccounts.config.value),
+      mint: expectPublicKey(resolvedAccounts.rewardMint.value),
+    });
+  }
+  if (!resolvedAccounts.bondCurrency.value) {
+    resolvedAccounts.bondCurrency.value = findCurrencyV1Pda(context, {
+      config: expectPublicKey(resolvedAccounts.config.value),
+      mint: expectSome(resolvedArgs.bondMint),
+    });
+  }
   if (!resolvedAccounts.creator.value) {
     resolvedAccounts.creator.value = context.identity;
   }
@@ -227,7 +246,9 @@ export function createRequestV1(
   const [keys, signers] = getAccountMetasAndSigners(orderedAccounts, "programId", programId);
 
   // Data.
-  const data = getCreateRequestV1InstructionDataSerializer().serialize(resolvedArgs);
+  const data = getCreateRequestV1InstructionDataSerializer().serialize(
+    resolvedArgs as CreateRequestV1InstructionDataArgs,
+  );
 
   // Bytes Created On Chain.
   const bytesCreatedOnChain = 0;

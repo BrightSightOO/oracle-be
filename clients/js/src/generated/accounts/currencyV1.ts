@@ -151,6 +151,8 @@ export function getCurrencyV1Size(): number {
 export function findCurrencyV1Pda(
   context: Pick<Context, "eddsa" | "programs">,
   seeds: {
+    /** The address of the config. */
+    config: PublicKey;
     /** The address of the currency mint. */
     mint: PublicKey;
   },
@@ -161,6 +163,7 @@ export function findCurrencyV1Pda(
   );
   return context.eddsa.findPda(programId, [
     string({ size: "variable" }).serialize("currency"),
+    publicKeySerializer().serialize(seeds.config),
     publicKeySerializer().serialize(seeds.mint),
   ]);
 }

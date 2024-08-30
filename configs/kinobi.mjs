@@ -35,6 +35,7 @@ kinobi.update(
     currencyV1: {
       seeds: [
         k.constantPdaSeedNodeFromString("utf8", "currency"),
+        k.variablePdaSeedNode("config", k.publicKeyTypeNode(), "The address of the config."),
         k.variablePdaSeedNode("mint", k.publicKeyTypeNode(), "The address of the currency mint."),
       ],
     },
@@ -91,6 +92,14 @@ kinobi.update(
       defaultValue: k.pdaValueNode("oracleV1"),
     },
     {
+      account: "currency",
+      ignoreIfOptional: true,
+      defaultValue: k.pdaValueNode("currencyV1", [
+        k.pdaSeedValueNode("config", k.accountValueNode("config")),
+        k.pdaSeedValueNode("mint", k.accountValueNode("mint")),
+      ]),
+    },
+    {
       account: "assertion",
       ignoreIfOptional: true,
       defaultValue: k.pdaValueNode("assertionV1", [
@@ -126,6 +135,18 @@ kinobi.update(
   k.updateInstructionsVisitor({
     createRequestV1: {
       accounts: {
+        bondCurrency: {
+          defaultValue: k.pdaValueNode("currencyV1", [
+            k.pdaSeedValueNode("config", k.accountValueNode("config")),
+            k.pdaSeedValueNode("mint", k.argumentValueNode("bondMint")),
+          ]),
+        },
+        rewardCurrency: {
+          defaultValue: k.pdaValueNode("currencyV1", [
+            k.pdaSeedValueNode("config", k.accountValueNode("config")),
+            k.pdaSeedValueNode("mint", k.accountValueNode("rewardMint")),
+          ]),
+        },
         rewardSource: {
           defaultValue: ataPdaValueNode("rewardMint", "creator"),
         },
@@ -136,6 +157,12 @@ kinobi.update(
         },
         creator: {
           defaultValue: k.identityValueNode(),
+        },
+      },
+      arguments: {
+        bondMint: {
+          docs: ["Bond mint"],
+          type: k.publicKeyTypeNode(),
         },
       },
     },

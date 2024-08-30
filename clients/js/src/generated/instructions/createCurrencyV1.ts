@@ -14,7 +14,8 @@ import type { Serializer } from "@metaplex-foundation/umi/serializers";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
-import { getAccountMetasAndSigners } from "../shared";
+import { findCurrencyV1Pda } from "../accounts";
+import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 import { getBoundsSerializer } from "../types";
 
 // Accounts.
@@ -22,7 +23,7 @@ export type CreateCurrencyV1InstructionAccounts = {
   /** Config */
   config: PublicKey | Pda;
   /** Currency */
-  currency: PublicKey | Pda;
+  currency?: PublicKey | Pda;
   /** Mint */
   mint: PublicKey | Pda;
   /** Oracle authority */
@@ -69,7 +70,7 @@ export type CreateCurrencyV1InstructionArgs = CreateCurrencyV1InstructionDataArg
 
 // Instruction.
 export function createCurrencyV1(
-  context: Pick<Context, "identity" | "payer" | "programs">,
+  context: Pick<Context, "eddsa" | "identity" | "payer" | "programs">,
   input: CreateCurrencyV1InstructionAccounts & CreateCurrencyV1InstructionArgs,
 ): TransactionBuilder {
   // Program ID.
@@ -117,6 +118,12 @@ export function createCurrencyV1(
   const resolvedArgs: CreateCurrencyV1InstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.currency.value) {
+    resolvedAccounts.currency.value = findCurrencyV1Pda(context, {
+      config: expectPublicKey(resolvedAccounts.config.value),
+      mint: expectPublicKey(resolvedAccounts.mint.value),
+    });
+  }
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity.publicKey;
   }
