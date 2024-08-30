@@ -1,8 +1,12 @@
-# Optimistic Oracle
+<h1 align="center">
+  Optimistic Oracle
+</h1>
+<p align="center">
+  A source of truth for on-chain data.
+</p>
 
-Program ID: `DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge`
-
-The optimistic oracle serves as a source of truth for on-chain data.
+> [!WARNING]
+> This project has not been formally audited – use in production at your own risk.
 
 ## How it works
 
@@ -39,39 +43,47 @@ The optimistic oracle serves as a source of truth for on-chain data.
 
      The correct party amongst the asserter and disputer may claim both bonds.
 
-## Developers
+## Building
 
-### Building
+From the root directory of the repository:
 
-To build the program, run the command:
+- Install the required packages:
 
-```
-$ pnpm programs:build
-```
-
-The resulting binary will be in the `.bin` directory.
-
-### Testing
-
-To test the program, run the command:
-
-```
-$ pnpm programs:test
+```sh
+pnpm install
 ```
 
-### Generating clients
+- Build the program:
 
-To update the generated client code, run the command:
-
-```
-$ pnpm generate
+```sh
+pnpm programs:build
 ```
 
-### Local validator
+This will create program binaries in the `<ROOT>/.bin` directory.
 
-To run a local test validator with the program, first build the program, then
-run the command:
+## Programs
 
-```
-$ pnpm validator
-```
+This project contains the following programs:
+
+- [Optimistic Oracle](./programs/oracle) `DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge`
+
+You will need a Rust version compatible with BPF to compile the programs,
+currently we recommend using Rust 1.75.0.
+
+## Clients
+
+This project contains the following clients:
+
+- [JavaScript (UMI)](./clients/js)
+- [Rust](./clients/rust)
+
+## License
+
+This project is licensed under either of [Apache License, Version 2.0](LICENSE-APACHE)
+or [MIT License](LICENSE-MIT) at your option.
+
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
+dual licensed as above, without any additional terms or conditions.
