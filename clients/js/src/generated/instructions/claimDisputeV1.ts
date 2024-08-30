@@ -10,9 +10,11 @@ import type { ResolvedAccount, ResolvedAccountsWithIndices } from "../shared";
 import type { Context, Pda, PublicKey, Signer, TransactionBuilder } from "@metaplex-foundation/umi";
 import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
+import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
+import { findDisputeBondPda, findRewardPda } from "../../hooked";
 import { findAssertionV1Pda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 
@@ -25,17 +27,17 @@ export type ClaimDisputeV1InstructionAccounts = {
   /** Bond mint */
   bondMint: PublicKey | Pda;
   /** Reclaimed bond destination token account */
-  bondDestination: PublicKey | Pda;
+  bondDestination?: PublicKey | Pda;
   /** Disputer bond escrow token account */
-  bondEscrow: PublicKey | Pda;
+  bondEscrow?: PublicKey | Pda;
   /** Reward mint */
   rewardMint: PublicKey | Pda;
   /** Reward destination token account */
-  rewardDestination: PublicKey | Pda;
+  rewardDestination?: PublicKey | Pda;
   /** Reward escrow token account */
-  rewardEscrow: PublicKey | Pda;
+  rewardEscrow?: PublicKey | Pda;
   /** Disputer */
-  disputer: Signer;
+  disputer?: Signer;
   /** SPL token program */
   tokenProgram?: PublicKey | Pda;
   /** System program */
@@ -61,7 +63,7 @@ export function getClaimDisputeV1InstructionDataSerializer(): Serializer<
 
 // Instruction.
 export function claimDisputeV1(
-  context: Pick<Context, "eddsa" | "programs">,
+  context: Pick<Context, "eddsa" | "identity" | "programs">,
   input: ClaimDisputeV1InstructionAccounts,
 ): TransactionBuilder {
   // Program ID.
@@ -132,6 +134,31 @@ export function claimDisputeV1(
   // Default values.
   if (!resolvedAccounts.assertion.value) {
     resolvedAccounts.assertion.value = findAssertionV1Pda(context, {
+      request: expectPublicKey(resolvedAccounts.request.value),
+    });
+  }
+  if (!resolvedAccounts.disputer.value) {
+    resolvedAccounts.disputer.value = context.identity;
+  }
+  if (!resolvedAccounts.bondDestination.value) {
+    resolvedAccounts.bondDestination.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.bondMint.value),
+      owner: expectPublicKey(resolvedAccounts.disputer.value),
+    });
+  }
+  if (!resolvedAccounts.bondEscrow.value) {
+    resolvedAccounts.bondEscrow.value = findDisputeBondPda(context, {
+      request: expectPublicKey(resolvedAccounts.request.value),
+    });
+  }
+  if (!resolvedAccounts.rewardDestination.value) {
+    resolvedAccounts.rewardDestination.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.rewardMint.value),
+      owner: expectPublicKey(resolvedAccounts.disputer.value),
+    });
+  }
+  if (!resolvedAccounts.rewardEscrow.value) {
+    resolvedAccounts.rewardEscrow.value = findRewardPda(context, {
       request: expectPublicKey(resolvedAccounts.request.value),
     });
   }

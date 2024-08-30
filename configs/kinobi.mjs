@@ -138,6 +138,78 @@ const ataPdaValueNode = (mint = "mint", owner = "owner") =>
 // Update instructions.
 kinobi.update(
   k.updateInstructionsVisitor({
+    claimAssertionV1: {
+      accounts: {
+        bondDestination: {
+          defaultValue: ataPdaValueNode("bondMint", "asserter"),
+        },
+        bondEscrow: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond", "hooked"), [
+            k.pdaSeedValueNode("request", k.accountValueNode("request")),
+          ]),
+        },
+        rewardDestination: {
+          defaultValue: ataPdaValueNode("rewardMint", "asserter"),
+        },
+        rewardEscrow: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("reward", "hooked"), [
+            k.pdaSeedValueNode("request", k.accountValueNode("request")),
+          ]),
+        },
+        asserter: {
+          defaultValue: k.identityValueNode(),
+        },
+      },
+    },
+    claimDisputeV1: {
+      accounts: {
+        bondDestination: {
+          defaultValue: ataPdaValueNode("bondMint", "disputer"),
+        },
+        bondEscrow: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("disputeBond", "hooked"), [
+            k.pdaSeedValueNode("request", k.accountValueNode("request")),
+          ]),
+        },
+        rewardDestination: {
+          defaultValue: ataPdaValueNode("rewardMint", "disputer"),
+        },
+        rewardEscrow: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("reward", "hooked"), [
+            k.pdaSeedValueNode("request", k.accountValueNode("request")),
+          ]),
+        },
+        disputer: {
+          defaultValue: k.identityValueNode(),
+        },
+      },
+    },
+    claimVoteV1: {
+      // TODO: Conditional bondEscrow based on whether asserter/disputer correct.
+      accounts: {
+        bondDestination: {
+          defaultValue: ataPdaValueNode("bondMint", "voter"),
+        },
+        voter: {
+          defaultValue: k.identityValueNode(),
+        },
+      },
+    },
+    createAssertionV1: {
+      accounts: {
+        bondSource: {
+          defaultValue: ataPdaValueNode("bondMint", "asserter"),
+        },
+        bondEscrow: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond", "hooked"), [
+            k.pdaSeedValueNode("request", k.accountValueNode("request")),
+          ]),
+        },
+        asserter: {
+          defaultValue: k.identityValueNode(),
+        },
+      },
+    },
     createRequestV1: {
       accounts: {
         bondCurrency: {
@@ -171,29 +243,6 @@ kinobi.update(
         },
       },
     },
-    createAssertionV1: {
-      accounts: {
-        bondSource: {
-          defaultValue: ataPdaValueNode("bondMint", "asserter"),
-        },
-        bondEscrow: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertBond", "hooked"), [
-            k.pdaSeedValueNode("request", k.accountValueNode("request")),
-          ]),
-        },
-        governanceSource: {
-          defaultValue: ataPdaValueNode("governanceMint", "asserter"),
-        },
-        governanceEscrow: {
-          defaultValue: k.pdaValueNode(k.pdaLinkNode("assertGovernanceBond", "hooked"), [
-            k.pdaSeedValueNode("request", k.accountValueNode("request")),
-          ]),
-        },
-        asserter: {
-          defaultValue: k.identityValueNode(),
-        },
-      },
-    },
     createStakeV1: {
       accounts: {
         stakeSource: {
@@ -203,6 +252,28 @@ kinobi.update(
           defaultValue: k.pdaValueNode(k.pdaLinkNode("stakePool", "hooked"), [
             k.pdaSeedValueNode("mint", k.accountValueNode("mint")),
           ]),
+        },
+      },
+    },
+    disputeAssertionV1: {
+      accounts: {
+        bondSource: {
+          defaultValue: ataPdaValueNode("bondMint", "disputer"),
+        },
+        bondEscrow: {
+          defaultValue: k.pdaValueNode(k.pdaLinkNode("disputeBond", "hooked"), [
+            k.pdaSeedValueNode("request", k.accountValueNode("request")),
+          ]),
+        },
+        disputer: {
+          defaultValue: k.identityValueNode(),
+        },
+      },
+    },
+    submitVoteV1: {
+      accounts: {
+        voter: {
+          defaultValue: k.identityValueNode(),
         },
       },
     },

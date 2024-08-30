@@ -29,7 +29,7 @@ export type SubmitVoteV1InstructionAccounts = {
   /** Stake */
   stake: PublicKey | Pda;
   /** Voter */
-  voter: Signer;
+  voter?: Signer;
   /** Payer */
   payer?: Signer;
   /** System program */
@@ -65,7 +65,7 @@ export type SubmitVoteV1InstructionArgs = SubmitVoteV1InstructionDataArgs;
 
 // Instruction.
 export function submitVoteV1(
-  context: Pick<Context, "eddsa" | "payer" | "programs">,
+  context: Pick<Context, "eddsa" | "identity" | "payer" | "programs">,
   input: SubmitVoteV1InstructionAccounts & SubmitVoteV1InstructionArgs,
 ): TransactionBuilder {
   // Program ID.
@@ -128,6 +128,9 @@ export function submitVoteV1(
       voting: expectPublicKey(resolvedAccounts.voting.value),
       stake: expectPublicKey(resolvedAccounts.stake.value),
     });
+  }
+  if (!resolvedAccounts.voter.value) {
+    resolvedAccounts.voter.value = context.identity;
   }
   if (!resolvedAccounts.payer.value) {
     resolvedAccounts.payer.value = context.payer;

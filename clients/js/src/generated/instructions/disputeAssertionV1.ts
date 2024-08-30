@@ -10,9 +10,11 @@ import type { ResolvedAccount, ResolvedAccountsWithIndices } from "../shared";
 import type { Context, Pda, PublicKey, Signer, TransactionBuilder } from "@metaplex-foundation/umi";
 import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
+import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
+import { findDisputeBondPda } from "../../hooked";
 import { findAssertionV1Pda, findOracleV1Pda, findVotingV1Pda } from "../accounts";
 import { expectPublicKey, getAccountMetasAndSigners } from "../shared";
 
@@ -31,11 +33,11 @@ export type DisputeAssertionV1InstructionAccounts = {
   /** Bond mint */
   bondMint: PublicKey | Pda;
   /** Bond source token account */
-  bondSource: PublicKey | Pda;
+  bondSource?: PublicKey | Pda;
   /** Bond escrow token account */
-  bondEscrow: PublicKey | Pda;
+  bondEscrow?: PublicKey | Pda;
   /** Disputer */
-  disputer: Signer;
+  disputer?: Signer;
   /** Payer */
   payer?: Signer;
   /** SPL token program */
@@ -67,7 +69,7 @@ export function getDisputeAssertionV1InstructionDataSerializer(): Serializer<
 
 // Instruction.
 export function disputeAssertionV1(
-  context: Pick<Context, "eddsa" | "payer" | "programs">,
+  context: Pick<Context, "eddsa" | "identity" | "payer" | "programs">,
   input: DisputeAssertionV1InstructionAccounts,
 ): TransactionBuilder {
   // Program ID.
@@ -151,6 +153,20 @@ export function disputeAssertionV1(
   }
   if (!resolvedAccounts.voting.value) {
     resolvedAccounts.voting.value = findVotingV1Pda(context, {
+      request: expectPublicKey(resolvedAccounts.request.value),
+    });
+  }
+  if (!resolvedAccounts.disputer.value) {
+    resolvedAccounts.disputer.value = context.identity;
+  }
+  if (!resolvedAccounts.bondSource.value) {
+    resolvedAccounts.bondSource.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.bondMint.value),
+      owner: expectPublicKey(resolvedAccounts.disputer.value),
+    });
+  }
+  if (!resolvedAccounts.bondEscrow.value) {
+    resolvedAccounts.bondEscrow.value = findDisputeBondPda(context, {
       request: expectPublicKey(resolvedAccounts.request.value),
     });
   }

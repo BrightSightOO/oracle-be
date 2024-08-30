@@ -10,6 +10,7 @@ import type { ResolvedAccount, ResolvedAccountsWithIndices } from "../shared";
 import type { Context, Pda, PublicKey, Signer, TransactionBuilder } from "@metaplex-foundation/umi";
 import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
+import { findAssociatedTokenPda } from "@metaplex-foundation/mpl-toolbox";
 import { transactionBuilder } from "@metaplex-foundation/umi";
 import { mapSerializer, struct, u8 } from "@metaplex-foundation/umi/serializers";
 
@@ -31,11 +32,11 @@ export type ClaimVoteV1InstructionAccounts = {
   /** Bond mint */
   bondMint: PublicKey | Pda;
   /** Bond destination token account */
-  bondDestination: PublicKey | Pda;
+  bondDestination?: PublicKey | Pda;
   /** Bond escrow token account of incorrect asserter/disputer */
   bondEscrow: PublicKey | Pda;
   /** Voter */
-  voter: Signer;
+  voter?: Signer;
   /** SPL token program */
   tokenProgram?: PublicKey | Pda;
   /** System program */
@@ -61,7 +62,7 @@ export function getClaimVoteV1InstructionDataSerializer(): Serializer<
 
 // Instruction.
 export function claimVoteV1(
-  context: Pick<Context, "eddsa" | "programs">,
+  context: Pick<Context, "eddsa" | "identity" | "programs">,
   input: ClaimVoteV1InstructionAccounts,
 ): TransactionBuilder {
   // Program ID.
@@ -140,6 +141,15 @@ export function claimVoteV1(
     resolvedAccounts.vote.value = findVoteV1Pda(context, {
       voting: expectPublicKey(resolvedAccounts.voting.value),
       stake: expectPublicKey(resolvedAccounts.stake.value),
+    });
+  }
+  if (!resolvedAccounts.voter.value) {
+    resolvedAccounts.voter.value = context.identity;
+  }
+  if (!resolvedAccounts.bondDestination.value) {
+    resolvedAccounts.bondDestination.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.bondMint.value),
+      owner: expectPublicKey(resolvedAccounts.voter.value),
     });
   }
   if (!resolvedAccounts.tokenProgram.value) {
