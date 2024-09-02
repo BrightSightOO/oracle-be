@@ -8,6 +8,15 @@
     "@metaplex-foundation/umi": "^0.9.2"
   },
   "devDependencies": {
-    "@metaplex-foundation/umi": "^0.9.2"
+    "@metaplex-foundation/umi": "^0.9.2",
+    "@metaplex-foundation/umi-bundle-defaults": "^0.9.2",
+    "@types/prompts": "^2.4.9",
+    "colorette": "^2.0.20",
+    "prompts": "^2.4.2",
+    "tsx": "^4.19.0"
+  },
+  "scripts": {
+    "create-oracle": "tsx --no-warnings ./scripts/create-oracle.ts",
+    "fetch-account": "tsx --no-warnings ./scripts/fetch-account.ts"
   }
 }

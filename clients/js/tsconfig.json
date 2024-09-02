@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "lib": ["es2020"],
-    "target": "es2020",
-    "module": "es2020",
+    "lib": ["es2022"],
+    "target": "es2022",
+    "module": "es2022",
 
     "moduleResolution": "bundler",
     "esModuleInterop": true,
@@ -22,5 +22,5 @@
 
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src", "scripts"]
 }
