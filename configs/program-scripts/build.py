@@ -1,18 +1,43 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import shlex
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Generator, List, Tuple
+from typing import Generator, List, Literal, Optional, Tuple, Union
+
+import requests
 
 script = Path(__file__)
 
 root_dir = script.parent.parent.parent
 programs_dir = root_dir / "programs"
 output_dir = root_dir / ".bin"
+
+
+def get_latest_platform_tools() -> Optional[str]:
+    try:
+        res = requests.get("http://api.github.com/repos/anza-xyz/platform-tools/tags")
+        data = json.loads(res.text)
+    except requests.RequestException | json.JSONDecodeError:
+        return None
+
+    try:
+        return data[0]["name"]
+    except KeyError:
+        return None
+
+
+def get_tools_version_args() -> Union[Tuple[Literal["--tools-version"], str], Tuple[()]]:
+    version = get_latest_platform_tools()
+
+    if version is None:
+        return ()
+    else:
+        return ("--tools-version", version)
 
 
 def get_program_dirs() -> Generator[Path, None, None]:
@@ -35,8 +60,10 @@ def build(program: Path, args: List[str]):
     if cargo is None:
         raise RuntimeError("cargo executable not found")
 
+    tools_version = get_tools_version_args()
+
     return subprocess.check_call(
-        [cargo, "build-sbf", "--sbf-out-dir", output_dir, *args],
+        [cargo, "build-sbf", "--sbf-out-dir", output_dir, *tools_version, *args],
         cwd=program,
     )
 

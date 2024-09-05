@@ -10,7 +10,9 @@ import sys
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import AnyStr, Dict, Generator, List, Optional, Tuple
+from typing import AnyStr, Dict, Generator, List, Literal, Optional, Tuple, Union
+
+import requests
 
 script = Path(__file__)
 
@@ -27,6 +29,28 @@ LOG_RE = re.compile(f"^.+ ({'|'.join(LEVELS)})( *) (.+)] ?(?:({'|'.join(PROGRAM_
 
 ENABLE_COLOR = os.getenv("NO_COLOR") is None and os.getenv("TERM") != "dumb" and sys.stdout.isatty()
 STYLE_RESET = "\x1b[0m"
+
+
+def get_latest_platform_tools() -> Optional[str]:
+    try:
+        res = requests.get("http://api.github.com/repos/anza-xyz/platform-tools/tags")
+        data = json.loads(res.text)
+    except requests.RequestException | json.JSONDecodeError:
+        return None
+
+    try:
+        return data[0]["name"]
+    except KeyError:
+        return None
+
+
+def get_tools_version_args() -> Union[Tuple[Literal["--tools-version"], str], Tuple[()]]:
+    version = get_latest_platform_tools()
+
+    if version is None:
+        return ()
+    else:
+        return ("--tools-version", version)
 
 
 def get_program_dirs() -> Generator[Path, None, None]:
@@ -224,11 +248,14 @@ def main(args: List[str]):
     # if "RUST_BACKTRACE" not in env or env["RUST_BACKTRACE"] == "":
     #     env["RUST_BACKTRACE"] = "1"
 
+    tools_version = get_tools_version_args()
+
     cmd = [
         cargo,
         "test-sbf",
         "--sbf-out-dir",
         output_dir,
+        *tools_version,
         *cargo_args,
         "--",
         "--test-threads",
