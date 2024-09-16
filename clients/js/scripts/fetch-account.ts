@@ -11,7 +11,6 @@ import type {
 import type { RpcAccount } from "@metaplex-foundation/umi";
 
 import { isPublicKey } from "@metaplex-foundation/umi";
-import { bold } from "colorette";
 
 import {
   AccountType,
@@ -27,35 +26,86 @@ import {
   getOptimisticOracleProgramId,
 } from "../src";
 
-import { MAINNET_URL, createUmi, error } from "./_utils";
+import { createUmi, logger, parseCliArgs, readCliConfig } from "./utils";
 
-const args = process.argv.slice(2);
+const argv = parseCliArgs(
+  {
+    config: {
+      type: "string",
+      desc: "Configuration file to use",
+    },
+    url: {
+      type: "string",
+      alias: "u",
+      desc: "URL for Solana's JSON RPC or moniker",
+      valueName: "URL",
+    },
+    ws: {
+      type: "string",
+      desc: "WebSocket URL for the solana cluster",
+      valueName: "URL",
+    },
+    verbose: {
+      type: "boolean",
+      alias: "v",
+      default: false,
+      desc: "Increase verbosity of output",
+    },
+  },
+  [{ name: "address", required: true }],
+);
 
-const address = args[0]?.trim();
+let { url: rpcUrl } = argv;
 
-if (address === undefined) {
-  error("Missing account address argument");
-} else if (!isPublicKey(address)) {
-  error(`'${address}' is not a valid address`);
+const [address] = argv._;
+
+if (!isPublicKey(address)) {
+  logger.error(`Address [${address}] is not a valid public key`);
+
+  process.exit(1);
 }
 
-const rpcUrl = process.env.RPC_URL ?? MAINNET_URL;
-const umi = createUmi(rpcUrl);
+if (rpcUrl === undefined) {
+  const config = await readCliConfig(argv.config);
 
-console.log(`${bold("Cluster:")} ${umi.rpc.getCluster()}`);
-console.log(`${bold("Endpoint:")} ${umi.rpc.getEndpoint()}`);
-console.log();
+  rpcUrl ??= config.rpcUrl;
+}
+
+const umi = createUmi(rpcUrl, argv.ws);
+
+//////////////////////////////////////////////////
+
+logger.entry("Cluster", umi.rpc.getCluster());
+logger.entry("Endpoint", umi.rpc.getEndpoint());
+logger.newline();
+
+//////////////////////////////////////////////////
 
 const account = await umi.rpc.getAccount(address);
 
 if (!account.exists) {
-  error(`Account [${address}] does not exist`);
+  logger.error(`Account [${address}] does not exist`);
+
+  process.exit(1);
 }
 
-const data = deserializeAccount(account);
+const { accountType, publicKey, header, ...data } = deserializeAccount(account);
 
-console.log(bold(AccountType[data.accountType]));
-console.dir(data, { colors: true, depth: null });
+if (argv.verbose) {
+  logger.entry("Address", publicKey);
+  logger.group("Header", (group) => {
+    for (const [key, value] of Object.entries(header)) {
+      group.entry(key, value);
+    }
+  });
+  logger.newline();
+}
+
+logger.group(AccountType[accountType], (group) => {
+  for (const [key, value] of Object.entries(data)) {
+    group.entry(key, value);
+  }
+});
 
 process.exit(0);
 
@@ -63,7 +113,9 @@ function deserializeAccount(
   account: RpcAccount,
 ): OracleV1 | ConfigV1 | StakeV1 | RequestV1 | AssertionV1 | CurrencyV1 | VotingV1 | VoteV1 {
   if (account.owner !== getOptimisticOracleProgramId(umi)) {
-    error(`Account [${account.publicKey}] is not owned by the optimistic oracle program`);
+    logger.error(`Account [${account.publicKey}] is not owned by the optimistic oracle program`);
+
+    process.exit(1);
   }
 
   let accountType: AccountType;
@@ -74,7 +126,9 @@ function deserializeAccount(
     if (kind === undefined) {
       accountType = AccountType.Uninitialized;
     } else {
-      error(`Unknown account type: 0x${kind.toString(16)}`);
+      logger.error(`Account type [0x${kind.toString(16)}] is not recognized`);
+
+      process.exit(1);
     }
   }
 
@@ -97,6 +151,8 @@ function deserializeAccount(
       return deserializeVoteV1(account);
 
     case AccountType.Uninitialized:
-      error("Account is uninitialized");
+      logger.error("Account is uninitialized");
+
+      process.exit(1);
   }
 }

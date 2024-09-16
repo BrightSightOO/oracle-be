@@ -1,18 +1,26 @@
-import type { Mint } from "@metaplex-foundation/mpl-toolbox";
-import type { PublicKey } from "@metaplex-foundation/umi";
+import type { Amount, PublicKey } from "@metaplex-foundation/umi";
 
-import { safeFetchMint } from "@metaplex-foundation/mpl-toolbox";
 import {
   amountToString,
+  createAmount,
+  displayAmount,
+  generateSigner,
   isZeroAmount,
   keypairIdentity,
-  unwrapOption,
 } from "@metaplex-foundation/umi";
 import { base58 } from "@metaplex-foundation/umi/serializers";
 
-import { createOracleV1 } from "../src";
+import { createConfigV1 } from "../src";
 
-import { createUmi, logger, parseCliArgs, readCliConfig, readKeypair, spinner } from "./utils";
+import {
+  createUmi,
+  formatDuration,
+  logger,
+  parseCliArgs,
+  readCliConfig,
+  readKeypair,
+  spinner,
+} from "./utils";
 import * as prompt from "./utils/prompt";
 
 const argv = parseCliArgs({
@@ -75,12 +83,16 @@ logger.newline();
 
 //////////////////////////////////////////////////
 
-type OracleArgs = {
+type ConfigArgs = {
   authority: PublicKey;
-  governanceMint: PublicKey;
+  bondFeeBps: Amount<"%", 2>;
+  disputeWindow: number;
+  votingWindow: number;
+  arbitrationWindow: number;
 };
 
-let args: OracleArgs;
+let args: ConfigArgs;
+
 try {
   args = {
     authority: await prompt.publicKey({
@@ -88,8 +100,34 @@ try {
       default: umi.identity.publicKey,
       required: true,
     }),
-    governanceMint: await prompt.publicKey({
-      message: "Governance Token:",
+    bondFeeBps: await prompt.amount({
+      message: "Bond fee (%):",
+      identifier: "%",
+      decimals: 2,
+      default: createAmount(0n, "%", 2),
+      min: createAmount(0n, "%", 2),
+      max: createAmount(10_000n, "%", 2),
+      required: true,
+    }),
+    disputeWindow: await prompt.integer({
+      message: "Dispute window (secs):",
+      default: 24 * 60 * 60,
+      min: 0,
+      max: 0xffffffff,
+      required: true,
+    }),
+    votingWindow: await prompt.integer({
+      message: "Voting window (secs):",
+      default: 24 * 60 * 60,
+      min: 0,
+      max: 0xffffffff,
+      required: true,
+    }),
+    arbitrationWindow: await prompt.integer({
+      message: "Arbitration window (secs):",
+      default: 12 * 60 * 60,
+      min: 0,
+      max: 0xffffffff,
       required: true,
     }),
   };
@@ -103,37 +141,17 @@ try {
 
   process.exit(1);
 }
-logger.newline();
 
 //////////////////////////////////////////////////
 
-let mint: Mint | null;
-try {
-  mint = await safeFetchMint(umi, args.governanceMint);
-} catch (err) {
-  if (!(err instanceof Error) || err.name !== "UnexpectedAccountError") {
-    throw err;
-  }
-
-  logger.error(`Invalid governance token, account [${args.governanceMint}] is not a mint`);
-
-  process.exit(1);
-}
-
+logger.newline();
 logger.log("Proceeding will create a config with the following parameters.");
 logger.newline();
 logger.entry("Authority", args.authority);
-logger.entry("Governance Token", args.governanceMint);
-logger.newline();
-if (mint !== null) {
-  logger.group("Governance Token", (group) => {
-    group.entry("Mint Authority", unwrapOption(mint.mintAuthority) ?? "None");
-    group.entry("Freeze Authority", unwrapOption(mint.freezeAuthority) ?? "None");
-    group.entry("Decimals", mint.decimals);
-  });
-} else {
-  logger.warn("Governance token mint doesn't exist");
-}
+logger.entry("Bond fee", displayAmount(args.bondFeeBps));
+logger.entry("Dispute window", formatDuration(args.disputeWindow));
+logger.entry("Voting window", formatDuration(args.votingWindow));
+logger.entry("Arbitration window", formatDuration(args.arbitrationWindow));
 logger.newline();
 
 let confirm: boolean;
@@ -145,9 +163,9 @@ try {
   }
   confirm = false;
 }
-logger.newline();
 
 if (!confirm) {
+  logger.newline();
   logger.log("Cancelled.");
 
   process.exit(1);
@@ -155,10 +173,18 @@ if (!confirm) {
 
 //////////////////////////////////////////////////
 
-const builder = createOracleV1(umi, {
+const config = generateSigner(umi);
+
+const builder = createConfigV1(umi, {
+  config,
   authority: args.authority,
-  governanceMint: args.governanceMint,
+  bondFeeBps: Number(args.bondFeeBps.basisPoints),
+  disputeWindow: args.disputeWindow,
+  votingWindow: args.votingWindow,
+  arbitrationWindow: args.arbitrationWindow,
 });
+
+logger.newline();
 
 const result = await spinner("Sending transaction...", builder.sendAndConfirm(umi));
 
@@ -166,6 +192,7 @@ const [signature] = base58.deserialize(result.signature);
 const error = result.result.value.err;
 
 logger.newline();
+logger.entry("Config", config.publicKey);
 logger.entry("Signature", signature);
 
 if (error !== null) {

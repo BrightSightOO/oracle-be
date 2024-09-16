@@ -49,6 +49,7 @@ module.exports = {
 
         "@typescript-eslint/no-empty-interface": ["error", { allowSingleExtends: true }],
         "@typescript-eslint/no-namespace": ["error", { allowDeclarations: true }],
+        "@typescript-eslint/no-non-null-assertion": "off",
 
         "@typescript-eslint/prefer-literal-enum-member": [
           "error",
