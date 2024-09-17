@@ -1,7 +1,7 @@
 import type { Theme } from "./theme";
 import type { DeepPartial } from "../types";
 import type { Status } from "@inquirer/core";
-import type { CancelablePromise, Context } from "@inquirer/type";
+import type { Context } from "@inquirer/type";
 
 import {
   createPrompt,
@@ -119,7 +119,7 @@ function validateInt(
 export const integer: <C extends IntegerConfig>(
   config: C,
   context?: Context,
-) => CancelablePromise<Result<C>> = createPrompt((config, done) => {
+) => Promise<Result<C>> = createPrompt((config, done) => {
   type Result = Parameters<typeof done>[0];
 
   const { bigint = false, required = false, validate } = config;

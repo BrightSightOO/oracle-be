@@ -1,7 +1,7 @@
 import type { Theme } from "./theme";
 import type { DeepPartial } from "../types";
 import type { Status } from "@inquirer/core";
-import type { CancelablePromise, Context } from "@inquirer/type";
+import type { Context } from "@inquirer/type";
 import type { PublicKey, PublicKeyInput } from "@metaplex-foundation/umi";
 
 import {
@@ -34,7 +34,7 @@ type PublicKeyConfig = {
 export const publicKey: <C extends PublicKeyConfig>(
   config: C,
   context?: Context,
-) => CancelablePromise<Result<C>> = createPrompt((config, done) => {
+) => Promise<Result<C>> = createPrompt((config, done) => {
   type Result = Parameters<typeof done>[0];
 
   const { required = false, validate } = config;

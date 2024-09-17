@@ -1,7 +1,7 @@
 import type { Theme } from "./theme";
 import type { DeepPartial } from "../types";
 import type { Status } from "@inquirer/core";
-import type { CancelablePromise, Context } from "@inquirer/type";
+import type { Context } from "@inquirer/type";
 import type { Amount } from "@metaplex-foundation/umi";
 
 import {
@@ -71,10 +71,14 @@ function validateAmount<I extends string, D extends number>(
   return true;
 }
 
-export const amount: <I extends string, D extends number, C extends AmountConfig<I, D>>(
+export const amount: <
+  C extends AmountConfig<I, D>,
+  I extends string = C["identifier"],
+  D extends number = C["decimals"],
+>(
   config: C,
   context?: Context,
-) => CancelablePromise<Result<C, I, D>> = createPrompt((config, done) => {
+) => Promise<Result<C, I, D>> = createPrompt((config, done) => {
   type Result = Parameters<typeof done>[0];
 
   const { identifier, decimals, required = false, validate } = config;
