@@ -144,9 +144,12 @@ try {
 
 //////////////////////////////////////////////////
 
+const config = generateSigner(umi);
+
 logger.newline();
 logger.log("Proceeding will create a config with the following parameters.");
 logger.newline();
+logger.entry("Config", config.publicKey);
 logger.entry("Authority", args.authority);
 logger.entry("Bond fee", displayAmount(args.bondFeeBps));
 logger.entry("Dispute window", formatDuration(args.disputeWindow));
@@ -173,8 +176,6 @@ if (!confirm) {
 
 //////////////////////////////////////////////////
 
-const config = generateSigner(umi);
-
 const builder = createConfigV1(umi, {
   config,
   authority: args.authority,
@@ -191,8 +192,6 @@ const result = await spinner("Sending transaction...", builder.sendAndConfirm(um
 const [signature] = base58.deserialize(result.signature);
 const error = result.result.value.err;
 
-logger.newline();
-logger.entry("Config", config.publicKey);
 logger.entry("Signature", signature);
 
 if (error !== null) {
