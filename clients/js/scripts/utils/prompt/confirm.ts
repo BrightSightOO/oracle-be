@@ -60,7 +60,7 @@ export const confirm = createPrompt<boolean, PublicKeyConfig>((config, done) => 
     done(result);
   });
 
-  const message = theme.style.message(config.message);
+  const message = theme.style.message(config.message, status);
   const defaultHint = theme.style.defaultAnswer(`(${defaultValue ? "Y/n" : "y/N"})`);
   const formattedValue = status === "done" ? theme.style.answer(value) : value;
 

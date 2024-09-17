@@ -1,22 +1,98 @@
 import type { DeepPartial } from "../types";
+import type { Status } from "@inquirer/core";
 
-import { bold, cyan, dim, green, isColorSupported, italic, red } from "colorette";
+import { blue, bold, cyan, dim, green, isColorSupported, italic, red } from "colorette";
 
 import * as spinner from "../spinner";
 
 type DefaultTheme = {
-  prefix: string;
+  /**
+   * Prefix to prepend to the message. If a function is provided, it will be
+   * called with the current status of the prompt, and the return value will be
+   * used as the prefix.
+   *
+   * @remarks
+   * If `status === 'loading'`, this property is ignored and the spinner (styled
+   * by the `spinner` property) will be displayed instead.
+   */
+  prefix: string | Omit<Record<Status, string>, "loading">;
+
+  /**
+   * Configuration for the spinner that is displayed when the prompt is in the
+   * `'loading'` state.
+   *
+   * We recommend the use of {@link https://github.com/sindresorhus/cli-spinners|cli-spinners} for a list of available spinners.
+   */
   spinner: {
+    /**
+     * The time interval between frames, in milliseconds.
+     */
     interval: number;
+
+    /**
+     * A list of frames to show for the spinner.
+     */
     frames: Array<string>;
   };
+  /**
+   * Object containing functions to style different parts of the prompt.
+   */
   style: {
+    /**
+     * Style to apply to the user's answer once it has been submitted.
+     *
+     * @param text - The user's answer.
+     * @returns The styled answer.
+     */
     answer: (text: string) => string;
-    message: (text: string) => string;
+
+    /**
+     * Style to apply to the message displayed to the user.
+     *
+     * @param text - The message to style.
+     * @param status - The current status of the prompt.
+     * @returns The styled message.
+     */
+    message: (text: string, status: Status) => string;
+
+    /**
+     * Style to apply to error messages.
+     *
+     * @param text - The error message.
+     * @returns The styled error message.
+     */
     error: (text: string) => string;
+
+    /**
+     * Style to apply to the default answer when one is provided.
+     *
+     * @param text - The default answer.
+     * @returns The styled default answer.
+     */
     defaultAnswer: (text: string) => string;
+
+    /**
+     * Style to apply to help text.
+     *
+     * @param text - The help text.
+     * @returns The styled help text.
+     */
     help: (text: string) => string;
+
+    /**
+     * Style to apply to highlighted text.
+     *
+     * @param text - The text to highlight.
+     * @returns The highlighted text.
+     */
     highlight: (text: string) => string;
+
+    /**
+     * Style to apply to keyboard keys referred to in help texts.
+     *
+     * @param text - The key to style.
+     * @returns The styled key.
+     */
     key: (text: string) => string;
   };
 };
@@ -25,7 +101,10 @@ export type Theme<Extension extends Record<string, unknown> = Record<never, neve
   Extension;
 
 export const defaultTheme: DefaultTheme = {
-  prefix: green("?"),
+  prefix: {
+    idle: blue("?"),
+    done: green("✔"),
+  },
   spinner: {
     interval: spinner.interval,
     frames: spinner.frames,
@@ -33,11 +112,11 @@ export const defaultTheme: DefaultTheme = {
   style: {
     answer: cyan,
     message: bold,
-    error: (text: string): string => `> ${red(italic(text))}`,
-    defaultAnswer: isColorSupported ? dim : (text: string) => `(${text})`,
+    error: (text) => `! ${red(italic(text))}`,
+    defaultAnswer: isColorSupported ? dim : (text) => `(${text})`,
     help: dim,
     highlight: cyan,
-    key: (text: string): string => cyan(bold(`<${text}>`)),
+    key: (text) => cyan(bold(`<${text}>`)),
   },
 };
 

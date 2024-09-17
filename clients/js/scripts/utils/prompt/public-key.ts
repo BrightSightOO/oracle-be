@@ -18,7 +18,10 @@ import { isPublicKey, publicKey as toPublicKey } from "@metaplex-foundation/umi"
 import { makeTheme } from "./theme";
 
 type MaybePromise<T> = T | Promise<T>;
-type MaybeRequired<R, T> = R extends true ? T : T | undefined;
+
+type Result<C extends PublicKeyConfig> = C["required"] extends true
+  ? PublicKey
+  : PublicKey | undefined;
 
 type PublicKeyConfig = {
   message: string;
@@ -31,7 +34,7 @@ type PublicKeyConfig = {
 export const publicKey: <C extends PublicKeyConfig>(
   config: C,
   context?: Context,
-) => CancelablePromise<MaybeRequired<C["required"], PublicKey>> = createPrompt((config, done) => {
+) => CancelablePromise<Result<C>> = createPrompt((config, done) => {
   type Result = Parameters<typeof done>[0];
 
   const { required = false, validate } = config;
@@ -113,7 +116,7 @@ export const publicKey: <C extends PublicKeyConfig>(
     }
   });
 
-  const message = theme.style.message(config.message);
+  const message = theme.style.message(config.message, status);
 
   let displayValue = value;
   if (status === "done") {

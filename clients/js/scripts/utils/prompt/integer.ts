@@ -15,39 +15,46 @@ import {
 import { makeTheme } from "./theme";
 
 type MaybePromise<T> = T | Promise<T>;
-type MaybeRequired<R, T> = R extends true ? T : T | undefined;
 
-type IntegerConfig<I extends number | bigint = number | bigint> = {
+type IntType<C extends IntegerConfig> = "bigint" extends keyof C
+  ? boolean extends C["bigint"]
+    ? number | bigint
+    : C["bigint"] extends true
+      ? bigint
+      : number
+  : number;
+
+type Result<C extends IntegerConfig> = C["required"] extends true
+  ? IntType<C>
+  : IntType<C> | undefined;
+
+type IntegerConfig = {
   message: string;
   required?: boolean | undefined;
   theme?: DeepPartial<Theme> | undefined;
-} & (I extends number
-  ? {
+} & (
+  | {
       default?: number | undefined;
       min?: number | undefined;
       max?: number | undefined;
       bigint?: false | undefined;
       validate?: (value: number | undefined) => MaybePromise<boolean | string>;
     }
-  : I extends bigint
-    ? {
-        default?: number | bigint | undefined;
-        min?: number | bigint | undefined;
-        max?: number | bigint | undefined;
-        bigint: true;
-        validate?: (value: number | undefined) => MaybePromise<boolean | string>;
-      }
-    : {
-        default?: number | bigint | undefined;
-        min?: number | bigint | undefined;
-        max?: number | bigint | undefined;
-        bigint?: boolean | undefined;
-        validate?: (value: number | bigint | undefined) => MaybePromise<boolean | string>;
-      });
-
-type IntType<C extends { bigint?: boolean | undefined }> = C extends { bigint: true }
-  ? bigint
-  : number;
+  | {
+      default?: number | bigint | undefined;
+      min?: number | bigint | undefined;
+      max?: number | bigint | undefined;
+      bigint: true;
+      validate?: (value: number | undefined) => MaybePromise<boolean | string>;
+    }
+  | {
+      default?: number | bigint | undefined;
+      min?: number | bigint | undefined;
+      max?: number | bigint | undefined;
+      bigint?: boolean | undefined;
+      validate?: (value: number | bigint | undefined) => MaybePromise<boolean | string>;
+    }
+);
 
 function toSafeInt(value: number | bigint, bigint: true): bigint;
 function toSafeInt(value: number | bigint, bigint: false): number;
@@ -112,7 +119,7 @@ function validateInt(
 export const integer: <C extends IntegerConfig>(
   config: C,
   context?: Context,
-) => CancelablePromise<MaybeRequired<C["required"], IntType<C>>> = createPrompt((config, done) => {
+) => CancelablePromise<Result<C>> = createPrompt((config, done) => {
   type Result = Parameters<typeof done>[0];
 
   const { bigint = false, required = false, validate } = config;
@@ -145,7 +152,7 @@ export const integer: <C extends IntegerConfig>(
       setStatus("loading");
 
       const input = value || defaultValue;
-      const result = parseInt(input, bigint) as Result;
+      const result = parseInt(input, bigint);
 
       let isValid: boolean | string = input === "";
       if (required || result !== undefined) {
@@ -159,7 +166,7 @@ export const integer: <C extends IntegerConfig>(
       if (isValid === true) {
         setValue(result?.toString() ?? "");
         setStatus("done");
-        done(result);
+        done(result as Result);
       } else {
         // Reset readline value to the previous value. On line event, the value
         // get cleared, forcing the user to re-enter the value instead of fixing it.
@@ -182,7 +189,7 @@ export const integer: <C extends IntegerConfig>(
 
       if (isInt.test(rl.line)) {
         const input = rl.line;
-        const result = parseInt(input, bigint) as Result;
+        const result = parseInt(input, bigint);
 
         let isValid: boolean | string = input === "";
         if (required || result !== undefined) {
@@ -203,7 +210,7 @@ export const integer: <C extends IntegerConfig>(
     }
   });
 
-  const message = theme.style.message(config.message);
+  const message = theme.style.message(config.message, status);
 
   let displayValue = value;
   if (status === "done") {

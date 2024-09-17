@@ -173,6 +173,7 @@ module.exports = {
     "no-useless-constructor": "error",
     "object-shorthand": "error",
     "operator-assignment": ["error", "always"],
+    "prefer-const": ["error", { destructuring: "all" }],
     "prefer-template": "error",
     radix: "error",
     "sort-imports": ["error", { ignoreDeclarationSort: true }],

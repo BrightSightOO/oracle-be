@@ -12,8 +12,19 @@ import { base58 } from "@metaplex-foundation/umi/serializers";
 
 import { createOracleV1 } from "../src";
 
-import { createUmi, logger, parseCliArgs, readCliConfig, readKeypair, spinner } from "./utils";
+import {
+  cancel,
+  createUmi,
+  installErrorHandler,
+  logger,
+  parseCliArgs,
+  readCliConfig,
+  readKeypair,
+  spinner,
+} from "./utils";
 import * as prompt from "./utils/prompt";
+
+installErrorHandler();
 
 const argv = parseCliArgs({
   config: {
@@ -80,29 +91,18 @@ type OracleArgs = {
   governanceMint: PublicKey;
 };
 
-let args: OracleArgs;
-try {
-  args = {
-    authority: await prompt.publicKey({
-      message: "Authority:",
-      default: umi.identity.publicKey,
-      required: true,
-    }),
-    governanceMint: await prompt.publicKey({
-      message: "Governance Token:",
-      required: true,
-    }),
-  };
-} catch (err) {
-  if (!prompt.isCancelError(err)) {
-    throw err;
-  }
+const args: OracleArgs = {
+  authority: await prompt.publicKey({
+    message: "Authority:",
+    default: umi.identity.publicKey,
+    required: true,
+  }),
+  governanceMint: await prompt.publicKey({
+    message: "Governance Token:",
+    required: true,
+  }),
+};
 
-  logger.newline();
-  logger.log("Cancelled.");
-
-  process.exit(1);
-}
 logger.newline();
 
 //////////////////////////////////////////////////
@@ -136,22 +136,11 @@ if (mint !== null) {
 }
 logger.newline();
 
-let confirm: boolean;
-try {
-  confirm = await prompt.confirm({ message: "Send transaction?" });
-} catch (err) {
-  if (!prompt.isCancelError(err)) {
-    throw err;
-  }
-  confirm = false;
+if (!(await prompt.confirm({ message: "Send transaction?" }))) {
+  cancel();
 }
+
 logger.newline();
-
-if (!confirm) {
-  logger.log("Cancelled.");
-
-  process.exit(1);
-}
 
 //////////////////////////////////////////////////
 
@@ -165,7 +154,6 @@ const result = await spinner("Sending transaction...", builder.sendAndConfirm(um
 const [signature] = base58.deserialize(result.signature);
 const error = result.result.value.err;
 
-logger.newline();
 logger.entry("Signature", signature);
 
 if (error !== null) {

@@ -26,7 +26,9 @@ import {
   getOptimisticOracleProgramId,
 } from "../src";
 
-import { createUmi, logger, parseCliArgs, readCliConfig } from "./utils";
+import { createUmi, installErrorHandler, logger, parseCliArgs, readCliConfig } from "./utils";
+
+installErrorHandler();
 
 const argv = parseCliArgs(
   {
@@ -60,9 +62,7 @@ let { url: rpcUrl } = argv;
 const [address] = argv._;
 
 if (!isPublicKey(address)) {
-  logger.error(`Address [${address}] is not a valid public key`);
-
-  process.exit(1);
+  logger.bail(`Address [${address}] is not a valid public key`);
 }
 
 if (rpcUrl === undefined) {
@@ -84,9 +84,7 @@ logger.newline();
 const account = await umi.rpc.getAccount(address);
 
 if (!account.exists) {
-  logger.error(`Account [${address}] does not exist`);
-
-  process.exit(1);
+  logger.bail(`Account [${address}] does not exist`);
 }
 
 const { accountType, publicKey, header, ...data } = deserializeAccount(account);
@@ -113,9 +111,7 @@ function deserializeAccount(
   account: RpcAccount,
 ): OracleV1 | ConfigV1 | StakeV1 | RequestV1 | AssertionV1 | CurrencyV1 | VotingV1 | VoteV1 {
   if (account.owner !== getOptimisticOracleProgramId(umi)) {
-    logger.error(`Account [${account.publicKey}] is not owned by the optimistic oracle program`);
-
-    process.exit(1);
+    logger.bail(`Account [${account.publicKey}] is not owned by the optimistic oracle program`);
   }
 
   let accountType: AccountType;
@@ -126,9 +122,7 @@ function deserializeAccount(
     if (kind === undefined) {
       accountType = AccountType.Uninitialized;
     } else {
-      logger.error(`Account type [0x${kind.toString(16)}] is not recognized`);
-
-      process.exit(1);
+      logger.bail(`Account type [0x${kind.toString(16)}] is not recognized`);
     }
   }
 
@@ -151,8 +145,6 @@ function deserializeAccount(
       return deserializeVoteV1(account);
 
     case AccountType.Uninitialized:
-      logger.error("Account is uninitialized");
-
-      process.exit(1);
+      logger.bail("Account is uninitialized");
   }
 }

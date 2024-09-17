@@ -2,13 +2,14 @@ import { inspect } from "node:util";
 
 import { bold, red, yellow } from "colorette";
 
-type GroupCallback = (group: Omit<Logger, "error">) => void;
+type GroupCallback = (group: Omit<Logger, "error" | "bail">) => void;
 
 type Logger = {
   newline(): void;
   log(message: unknown): void;
   warn(message: unknown): void;
   error(message: unknown): void;
+  bail(message: unknown, exitCode?: number): never;
   entry(label: string, message: unknown): void;
   group(callback: GroupCallback): void;
   group(label: string, callback: GroupCallback): void;
@@ -44,6 +45,11 @@ export const logger: Logger = {
   },
   error(message) {
     console.log(`${bold(`${red("error")}:`)} ${stringify(message)}`);
+  },
+  bail(message, exitCode = 1) {
+    this.error(message);
+
+    process.exit(exitCode);
   },
   entry(label, message) {
     console.log(`${bold(`${label}:`)} ${stringify(message)}`);
