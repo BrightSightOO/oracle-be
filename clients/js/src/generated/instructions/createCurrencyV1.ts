@@ -8,7 +8,7 @@
 
 import type { ResolvedAccount, ResolvedAccountsWithIndices } from "../shared";
 import type { Bounds, BoundsArgs } from "../types";
-import type { Context, Pda, PublicKey, TransactionBuilder } from "@metaplex-foundation/umi";
+import type { Context, Pda, PublicKey, Signer, TransactionBuilder } from "@metaplex-foundation/umi";
 import type { Serializer } from "@metaplex-foundation/umi/serializers";
 
 import { transactionBuilder } from "@metaplex-foundation/umi";
@@ -27,9 +27,9 @@ export type CreateCurrencyV1InstructionAccounts = {
   /** Mint */
   mint: PublicKey | Pda;
   /** Config authority */
-  authority?: PublicKey | Pda;
+  authority?: Signer;
   /** Payer */
-  payer?: PublicKey | Pda;
+  payer?: Signer;
   /** SPL token program */
   tokenProgram?: PublicKey | Pda;
   /** System program */
@@ -99,7 +99,7 @@ export function createCurrencyV1(
     },
     payer: {
       index: 4,
-      isWritable: false as boolean,
+      isWritable: true as boolean,
       value: input.payer ?? null,
     },
     tokenProgram: {
@@ -125,10 +125,10 @@ export function createCurrencyV1(
     });
   }
   if (!resolvedAccounts.authority.value) {
-    resolvedAccounts.authority.value = context.identity.publicKey;
+    resolvedAccounts.authority.value = context.identity;
   }
   if (!resolvedAccounts.payer.value) {
-    resolvedAccounts.payer.value = context.payer.publicKey;
+    resolvedAccounts.payer.value = context.payer;
   }
   if (!resolvedAccounts.tokenProgram.value) {
     resolvedAccounts.tokenProgram.value = context.programs.getPublicKey(

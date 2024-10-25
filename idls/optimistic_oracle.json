@@ -188,15 +188,15 @@
         {
           "name": "authority",
           "isMut": false,
-          "isSigner": false,
+          "isSigner": true,
           "docs": [
             "Config authority"
           ]
         },
         {
           "name": "payer",
-          "isMut": false,
-          "isSigner": false,
+          "isMut": true,
+          "isSigner": true,
           "docs": [
             "Payer"
           ]

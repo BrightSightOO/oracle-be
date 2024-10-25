@@ -43,9 +43,8 @@ impl CreateCurrencyV1 {
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.config, false));
         accounts.push(solana_program::instruction::AccountMeta::new(self.currency, false));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.mint, false));
-        accounts
-            .push(solana_program::instruction::AccountMeta::new_readonly(self.authority, false));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.payer, false));
+        accounts.push(solana_program::instruction::AccountMeta::new_readonly(self.authority, true));
+        accounts.push(solana_program::instruction::AccountMeta::new(self.payer, true));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             self.token_program,
             false,
@@ -98,8 +97,8 @@ pub struct CreateCurrencyV1InstructionArgs {
 ///   0. `[]` config
 ///   1. `[writable]` currency
 ///   2. `[]` mint
-///   3. `[]` authority
-///   4. `[]` payer
+///   3. `[signer]` authority
+///   4. `[writable, signer]` payer
 ///   5. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
 ///   6. `[optional]` system_program (default to `11111111111111111111111111111111`)
 #[derive(Clone, Debug, Default)]
@@ -307,10 +306,9 @@ impl<'a, 'b> CreateCurrencyV1Cpi<'a, 'b> {
             .push(solana_program::instruction::AccountMeta::new_readonly(*self.mint.key, false));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.authority.key,
-            false,
+            true,
         ));
-        accounts
-            .push(solana_program::instruction::AccountMeta::new_readonly(*self.payer.key, false));
+        accounts.push(solana_program::instruction::AccountMeta::new(*self.payer.key, true));
         accounts.push(solana_program::instruction::AccountMeta::new_readonly(
             *self.token_program.key,
             false,
@@ -363,8 +361,8 @@ impl<'a, 'b> CreateCurrencyV1Cpi<'a, 'b> {
 ///   0. `[]` config
 ///   1. `[writable]` currency
 ///   2. `[]` mint
-///   3. `[]` authority
-///   4. `[]` payer
+///   3. `[signer]` authority
+///   4. `[writable, signer]` payer
 ///   5. `[]` token_program
 ///   6. `[]` system_program
 #[derive(Clone, Debug)]
