@@ -173,9 +173,7 @@ logger.entry("Signature", signature);
 
 if (error !== null) {
   logger.newline();
-  logger.error(error);
-
-  process.exit(1);
+  logger.bail(error);
 }
 
 process.exit(0);

@@ -78,9 +78,7 @@ logger.newline();
   logger.newline();
 
   if (isZeroAmount(balance)) {
-    logger.error("Wallet balance is empty, are you using the correct wallet?");
-
-    process.exit(1);
+    logger.bail("Wallet balance is empty, are you using the correct wallet?");
   }
 }
 
@@ -115,9 +113,7 @@ try {
     throw err;
   }
 
-  logger.error(`Invalid governance token, account [${args.governanceMint}] is not a mint`);
-
-  process.exit(1);
+  logger.bail(`Invalid governance token, account [${args.governanceMint}] is not a mint`);
 }
 
 logger.log("Proceeding will create a config with the following parameters.");
@@ -158,9 +154,7 @@ logger.entry("Signature", signature);
 
 if (error !== null) {
   logger.newline();
-  logger.error(error);
-
-  process.exit(1);
+  logger.bail(error);
 }
 
 process.exit(0);

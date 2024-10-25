@@ -21,6 +21,7 @@
   "scripts": {
     "create-oracle": "tsx --no-warnings ./scripts/create-oracle.ts",
     "create-config": "tsx --no-warnings ./scripts/create-config.ts",
+    "create-currency": "tsx --no-warnings ./scripts/create-currency.ts",
     "update-config": "tsx --no-warnings ./scripts/update-config.ts",
     "fetch-account": "tsx --no-warnings ./scripts/fetch-account.ts"
   }
