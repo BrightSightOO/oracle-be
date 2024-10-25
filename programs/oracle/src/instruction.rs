@@ -34,7 +34,7 @@ pub enum OracleInstruction {
     #[account(0, name = "config", desc = "Config")]
     #[account(1, writable, name = "currency", desc = "Currency")]
     #[account(2, name = "mint", desc = "Mint")]
-    #[account(3, name = "authority", desc = "Oracle authority")]
+    #[account(3, name = "authority", desc = "Config authority")]
     #[account(4, name = "payer", desc = "Payer")]
     #[account(5, name = "token_program", desc = "SPL token program")]
     #[account(6, name = "system_program", desc = "System program")]
@@ -43,7 +43,7 @@ pub enum OracleInstruction {
     /// Updates a currency.
     #[account(0, name = "config", desc = "Config")]
     #[account(1, writable, name = "currency", desc = "Currency")]
-    #[account(2, name = "authority", desc = "Oracle authority")]
+    #[account(2, name = "authority", desc = "Config authority")]
     UpdateCurrencyV1(UpdateCurrencyV1Args),
 
     /// Creates a new request.

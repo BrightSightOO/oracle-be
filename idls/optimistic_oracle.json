@@ -190,7 +190,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Oracle authority"
+            "Config authority"
           ]
         },
         {
@@ -255,7 +255,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Oracle authority"
+            "Config authority"
           ]
         }
       ],

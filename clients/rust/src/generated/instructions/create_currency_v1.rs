@@ -16,7 +16,7 @@ pub struct CreateCurrencyV1 {
     pub currency: solana_program::pubkey::Pubkey,
     /// Mint
     pub mint: solana_program::pubkey::Pubkey,
-    /// Oracle authority
+    /// Config authority
     pub authority: solana_program::pubkey::Pubkey,
     /// Payer
     pub payer: solana_program::pubkey::Pubkey,
@@ -138,7 +138,7 @@ impl CreateCurrencyV1Builder {
         self.mint = Some(mint);
         self
     }
-    /// Oracle authority
+    /// Config authority
     #[inline(always)]
     pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
         self.authority = Some(authority);
@@ -224,7 +224,7 @@ pub struct CreateCurrencyV1CpiAccounts<'a, 'b> {
     pub currency: &'b solana_program::account_info::AccountInfo<'a>,
     /// Mint
     pub mint: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Oracle authority
+    /// Config authority
     pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
@@ -244,7 +244,7 @@ pub struct CreateCurrencyV1Cpi<'a, 'b> {
     pub currency: &'b solana_program::account_info::AccountInfo<'a>,
     /// Mint
     pub mint: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Oracle authority
+    /// Config authority
     pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// Payer
     pub payer: &'b solana_program::account_info::AccountInfo<'a>,
@@ -413,7 +413,7 @@ impl<'a, 'b> CreateCurrencyV1CpiBuilder<'a, 'b> {
         self.instruction.mint = Some(mint);
         self
     }
-    /// Oracle authority
+    /// Config authority
     #[inline(always)]
     pub fn authority(
         &mut self,

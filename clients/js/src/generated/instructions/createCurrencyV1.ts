@@ -26,7 +26,7 @@ export type CreateCurrencyV1InstructionAccounts = {
   currency?: PublicKey | Pda;
   /** Mint */
   mint: PublicKey | Pda;
-  /** Oracle authority */
+  /** Config authority */
   authority?: PublicKey | Pda;
   /** Payer */
   payer?: PublicKey | Pda;

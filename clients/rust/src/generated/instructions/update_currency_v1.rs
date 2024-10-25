@@ -14,7 +14,7 @@ pub struct UpdateCurrencyV1 {
     pub config: solana_program::pubkey::Pubkey,
     /// Currency
     pub currency: solana_program::pubkey::Pubkey,
-    /// Oracle authority
+    /// Config authority
     pub authority: solana_program::pubkey::Pubkey,
 }
 
@@ -106,7 +106,7 @@ impl UpdateCurrencyV1Builder {
         self.currency = Some(currency);
         self
     }
-    /// Oracle authority
+    /// Config authority
     #[inline(always)]
     pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
         self.authority = Some(authority);
@@ -162,7 +162,7 @@ pub struct UpdateCurrencyV1CpiAccounts<'a, 'b> {
     pub config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Currency
     pub currency: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Oracle authority
+    /// Config authority
     pub authority: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
@@ -174,7 +174,7 @@ pub struct UpdateCurrencyV1Cpi<'a, 'b> {
     pub config: &'b solana_program::account_info::AccountInfo<'a>,
     /// Currency
     pub currency: &'b solana_program::account_info::AccountInfo<'a>,
-    /// Oracle authority
+    /// Config authority
     pub authority: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
     pub __args: UpdateCurrencyV1InstructionArgs,
@@ -303,7 +303,7 @@ impl<'a, 'b> UpdateCurrencyV1CpiBuilder<'a, 'b> {
         self.instruction.currency = Some(currency);
         self
     }
-    /// Oracle authority
+    /// Config authority
     #[inline(always)]
     pub fn authority(
         &mut self,

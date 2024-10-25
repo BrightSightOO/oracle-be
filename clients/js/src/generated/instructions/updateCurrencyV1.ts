@@ -23,7 +23,7 @@ export type UpdateCurrencyV1InstructionAccounts = {
   config: PublicKey | Pda;
   /** Currency */
   currency: PublicKey | Pda;
-  /** Oracle authority */
+  /** Config authority */
   authority?: PublicKey | Pda;
 };
 
