@@ -38,4 +38,37 @@ In order the generate the clients, run the following command.
 pnpm generate
 ```
 
-You will need run `pnpm generate` to regenerate the clients when something changes in the programs.
+You will need run `pnpm generate` to regenerate the clients when something
+changes in the programs.
+
+## Deploying programs
+
+First build the program by running the following command.
+
+```sh
+pnpm programs:build
+```
+
+Then to generate a keypair for the program buffer account, run the following command.
+
+```sh
+solana-keygen new --no-bip39-passphrase --outfile buffer.json
+```
+
+Then to deploy using the buffer account, run the following command.
+
+```sh
+solana program deploy --use-rpc \
+    --url "${RPC_URL}" \
+    --keypair /path/to/authority-keypair.json \
+    --program-id /path/to/program-keypair.json \
+    --buffer ./buffer.json \
+    .bin/oracle_program.so
+```
+
+Once the program successfully deploys, to remove the buffer keypair file, run
+the following command:
+
+```sh
+rm ./buffer.json
+```
