@@ -6,7 +6,7 @@
     "programs:test": "./configs/program-scripts/test.py",
     "generate": "pnpm generate:idls && pnpm generate:clients",
     "generate:idls": "node ./configs/shank.mjs",
-    "generate:clients": "node ./configs/kinobi.mjs",
+    "generate:clients": "node ./configs/codama.mjs",
     "validator": "amman start --config ./configs/validator.cjs",
     "lint:eslint": "eslint . --ext js,cjs,mjs,ts --cache --cache-location ./node_modules/.cache/eslint",
     "lint:eslint:fix": "pnpm lint:eslint --fix",

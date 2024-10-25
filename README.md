@@ -5,77 +5,33 @@
   A source of truth for on-chain data.
 </p>
 
+> [!NOTE]
+> This branch is for version 3 of the program. For the current version of the
+> program see version 2.
+
 > [!WARNING]
 > This project has not been formally audited – use in production at your own risk.
-
-## How it works
-
-1. A user creates a request, specifying:
-
-   - the question to be answered
-   - the assertion timestamp after which the question can be answered
-   - the amount of a currency that must be bonded in order to assert an answer
-     for the request
-   - the reward for answering the request
-
-2. After the assertion timestamp has been reached, another user can propose a
-   value to answer the request question.
-
-   The user must put up a bond in order to make an assertion.
-
-3. After an assertion is made, there is a window of time in which the value may
-   be disputed.
-
-   In order to dispute an assertion the disputer must put up a bond equal to
-   that the asserter bonded.
-
-   - If the dispute window elapses without a dispute being made, then the
-     assertion is treated as the truth and the request may be resolved.
-
-     The asserter can then reclaim their bond and claim the request reward.
-
-   - If the assertion is disputed, then there follows a voting period where
-     users with a stake in the governance token may vote to submit the what they
-     believe to be the correct answer.
-
-     After the voting period elapses, then the request will resolve with the
-     value that received the most votes.
-
-     The correct party amongst the asserter and disputer may claim both bonds.
-
-## Building
-
-From the root directory of the repository:
-
-- Install the required packages:
-
-```sh
-pnpm install
-```
-
-- Build the program:
-
-```sh
-pnpm programs:build
-```
-
-This will create program binaries in the `<ROOT>/.bin` directory.
 
 ## Programs
 
 This project contains the following programs:
 
-- [Optimistic Oracle](./programs/oracle) `DVM2j1a1AJ9hZuEXyMxA5vusKgMR2FcKJyCf3QE5R2ge`
+- [Optimistic Oracle](./programs/oracle) `DVM3hK9SDgXLmVoLng1KrTJCzTnhw31hAnqTYP7uGCot`
 
 You will need a Rust version compatible with BPF to compile the programs,
-currently we recommend using Rust 1.75.0.
+currently we recommend using Rust 1.79.0.
 
 ## Clients
 
 This project contains the following clients:
 
-- [JavaScript (UMI)](./clients/js)
+- [JavaScript (Umi)](./clients/js)
 - [Rust](./clients/rust)
+
+## Contributing
+
+Check out the [Contributing Guide](./CONTRIBUTING.md) to learn more about how to
+contribute to this project.
 
 ## License
 
