@@ -5,12 +5,12 @@
   A source of truth for on-chain data.
 </p>
 
-> [!NOTE]
-> This branch is for version 3 of the program. For the current version of the
-> program see version 2.
-
 > [!WARNING]
 > This project has not been formally audited – use in production at your own risk.
+
+> [!IMPORTANT]
+> This branch is for version 3 of the program. For the current version of the
+> program see the [v2 branch](https://github.com/BrightSightOO/oracle-be/tree/v2).
 
 ## Programs
 
@@ -27,6 +27,8 @@ This project contains the following clients:
 
 - [JavaScript (Umi)](./clients/js)
 - [Rust](./clients/rust)
+
+For more information check out the [wiki](https://github.com/BrightSightOO/oracle-be/wiki).
 
 ## Contributing
 
