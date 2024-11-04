@@ -61,7 +61,7 @@ Then to deploy using the buffer account, run the following command.
 solana program deploy --use-rpc \
     --url "${RPC_URL}" \
     --keypair /path/to/authority-keypair.json \
-    --program-id /path/to/program-keypair.json \
+    --program-id DVM3hK9SDgXLmVoLng1KrTJCzTnhw31hAnqTYP7uGCot \
     --buffer ./buffer.json \
     .bin/oracle_program.so
 ```
